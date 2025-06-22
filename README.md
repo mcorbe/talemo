@@ -20,7 +20,7 @@ Talemo is an AI-powered platform designed to create and explore audio stories fo
 - **Storage**: MinIO (S3-compatible object storage)
 - **Frontend**: HTMX, Bootstrap 5, Alpine.js, Workbox (PWA)
 - **DevOps**: Docker, Docker Compose, GitHub Actions
-- **Monitoring**: StatsD, ELK Stack (Elasticsearch, Logstash, Kibana), APM, Prometheus, Grafana
+- **Monitoring**: StatsD, ELK Stack (Elasticsearch, Logstash, Kibana), APM, Prometheus, Grafana, Langtrace (LLM observability)
 
 ## Project Structure
 
@@ -186,6 +186,7 @@ The project includes a complete monitoring stack with StatsD, ELK (Elasticsearch
 - **StatsD**: For collecting metrics
 - **Prometheus**: For storing metrics
 - **Grafana**: For visualizing metrics
+- **Langtrace**: For LLM observability and tracing
 
 ### Starting the Monitoring Stack
 
@@ -203,6 +204,7 @@ This will start all the monitoring services in detached mode.
 - **Kibana**: http://localhost:5601
 - **Prometheus**: http://localhost:9090
 - **APM**: http://localhost:8200 (via Kibana)
+- **Langtrace**: http://localhost:3001 (for LLM observability)
 
 ### Enabling Monitoring in Django
 
@@ -211,6 +213,24 @@ To enable monitoring in the Django application, set the `MONITORING_ENABLED` env
 ```
 MONITORING_ENABLED=true
 ```
+
+### Enabling Langtrace for LLM Observability
+
+To enable Langtrace for LLM observability, set the following environment variables in your `.env` file:
+
+```
+LANGTRACE_ENABLED=true
+LANGTRACE_HOST=http://langtrace:3000
+LANGFUSE_PUBLIC_KEY=your-public-key
+LANGFUSE_SECRET_KEY=your-secret-key
+```
+
+After setting up Langtrace, you can instrument your LLM calls in the agents module to track:
+- Token usage
+- Prompt templates
+- Model parameters
+- Response times
+- Completion content
 
 ### Monitoring Commands
 

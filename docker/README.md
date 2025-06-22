@@ -44,6 +44,8 @@ The monitoring stack consists of the following containers:
 - **statsd**: For collecting metrics
 - **prometheus**: For storing metrics
 - **grafana**: For visualizing metrics
+- **langtrace**: For LLM observability and tracing
+- **langtrace-db**: PostgreSQL database for Langtrace
 
 The monitoring stack is defined in `docker-compose.monitoring.yml` and can be started separately from the development environment.
 
@@ -177,6 +179,7 @@ make monitoring-down
 - Kibana: http://localhost:5601
 - Prometheus: http://localhost:9090
 - APM: http://localhost:8200 (via Kibana)
+- Langtrace: http://localhost:3001 (for LLM observability)
 
 #### Enabling Monitoring in Django
 
@@ -184,6 +187,57 @@ To enable monitoring in the Django application, set the `MONITORING_ENABLED` env
 
 ```
 MONITORING_ENABLED=true
+```
+
+#### Enabling Langtrace for LLM Observability
+
+To enable Langtrace for LLM observability, set the following environment variables in your `.env` file:
+
+```
+LANGTRACE_ENABLED=true
+LANGTRACE_HOST=http://langtrace:3000
+LANGTRACE_PUBLIC_KEY=your-public-key
+LANGTRACE_SECRET_KEY=your-secret-key
+```
+
+After setting up Langtrace, you can instrument your LLM calls in the agents module to track:
+- Token usage
+- Prompt templates
+- Model parameters
+- Response times
+- Completion content
+
+Example integration with the CrewAI framework:
+
+```python
+from langfuse.client import Langfuse
+
+# Initialize Langfuse client
+langfuse = Langfuse(
+    public_key=os.getenv("LANGTRACE_PUBLIC_KEY"),
+    secret_key=os.getenv("LANGTRACE_SECRET_KEY"),
+    host=os.getenv("LANGTRACE_HOST")
+)
+
+# Create a trace for a user session
+trace = langfuse.trace(
+    name="story_creation",
+    user_id="user-123",
+    metadata={"tenant_id": "tenant-456"}
+)
+
+# Log LLM generation
+generation = trace.generation(
+    name="story_draft",
+    model="gpt-4",
+    prompt="Create a story about...",
+    completion="Once upon a time...",
+    usage={
+        "prompt_tokens": 50,
+        "completion_tokens": 200,
+        "total_tokens": 250
+    }
+)
 ```
 
 #### Monitoring Commands
@@ -262,6 +316,7 @@ To add a new service:
 - [StatsD Exporter Documentation](https://github.com/prometheus/statsd_exporter)
 - [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
 - [Grafana Documentation](https://grafana.com/docs/)
+- [Langtrace (Langfuse) Documentation](https://langfuse.com/docs)
 
 ### Project Documentation
 

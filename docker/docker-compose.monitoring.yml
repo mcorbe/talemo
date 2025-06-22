@@ -105,7 +105,34 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
 
+  # Langtrace for LLM observability
+  langtrace:
+    image: langfuse/langfuse:latest
+    container_name: talemo-langtrace
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@langtrace-db:5432/postgres
+      - NEXTAUTH_SECRET=your-nextauth-secret
+      - SALT=your-salt
+      - NEXTAUTH_URL=http://localhost:3001
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=true
+    depends_on:
+      - langtrace-db
+
+  # Database for Langtrace
+  langtrace-db:
+    image: postgres:15
+    container_name: talemo-langtrace-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - langtrace_db_data:/var/lib/postgresql/data
+
 volumes:
   elasticsearch_data:
   prometheus_data:
   grafana_data:
+  langtrace_db_data:

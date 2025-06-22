@@ -508,6 +508,7 @@ The project includes a complete monitoring stack with StatsD, ELK (Elasticsearch
    - Kibana: http://localhost:5601
    - Prometheus: http://localhost:9090
    - APM: http://localhost:8200 (via Kibana)
+   - Langtrace: http://localhost:3001 (for LLM observability)
 
 4. **Enabling Monitoring in Django**:
    To enable monitoring in the Django application, set the `MONITORING_ENABLED` environment variable to `true` in your `.env` file:
@@ -515,7 +516,23 @@ The project includes a complete monitoring stack with StatsD, ELK (Elasticsearch
    MONITORING_ENABLED=true
    ```
 
-5. **Monitoring Commands**:
+5. **Enabling Langtrace for LLM Observability**:
+   To enable Langtrace for LLM observability, set the following environment variables in your `.env` file:
+   ```
+   LANGTRACE_ENABLED=true
+   LANGTRACE_HOST=http://langtrace:3000
+   LANGFUSE_PUBLIC_KEY=your-public-key
+   LANGFUSE_SECRET_KEY=your-secret-key
+   ```
+
+   After setting up Langtrace, you can instrument your LLM calls in the agents module to track:
+   - Token usage
+   - Prompt templates
+   - Model parameters
+   - Response times
+   - Completion content
+
+6. **Monitoring Commands**:
    The Makefile includes several commands for working with the monitoring stack:
    - `make monitoring-up` - Start the monitoring stack
    - `make monitoring-down` - Stop the monitoring stack
@@ -555,6 +572,39 @@ The project includes a complete monitoring stack with StatsD, ELK (Elasticsearch
          # Do something that might fail
      except Exception as e:
          client.capture_exception()
+     ```
+
+   - Langtrace (Langfuse) for LLM observability:
+     ```python
+     from langfuse.client import Langfuse
+     import os
+
+     # Initialize Langfuse client
+     langfuse = Langfuse(
+         public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
+         secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
+         host=os.getenv("LANGTRACE_HOST")
+     )
+
+     # Create a trace for a user session
+     trace = langfuse.trace(
+         name="story_creation",
+         user_id="user-123",
+         metadata={"tenant_id": "tenant-456"}
+     )
+
+     # Log LLM generation
+     generation = trace.generation(
+         name="story_draft",
+         model="gpt-4",
+         prompt="Create a story about...",
+         completion="Once upon a time...",
+         usage={
+             "prompt_tokens": 50,
+             "completion_tokens": 200,
+             "total_tokens": 250
+         }
+     )
      ```
 
 For more detailed information about the monitoring setup, see the [Monitoring Setup Guide](../docs/monitoring.md).
