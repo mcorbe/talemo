@@ -98,7 +98,7 @@ Talemo competes on two fronts:
 
 | Device | Strengths | Weaknesses Relative to Talemo |
 |--------|-----------|-------------------------------|
-| **Yoto, Toniebox, Storypod** | Tangible, screen-free listening experience; strong retail presence. | Closed content pipelines; adding new stories is slow and often paid per item. Talemo can syndicate or white-label its catalog instead of building hardware. |
+| **Lunii, Yoto, Toniebox, Storypod** | Tangible, screen-free listening experience; strong retail presence. | Closed content pipelines; adding new stories is slow and often paid per item. Talemo can syndicate or white-label its catalog instead of building hardware. |
 
 ### Classroom & Ed-Tech Creators
 
@@ -155,7 +155,7 @@ For our French launch, we will emphasize these five key angles in all press brie
    Spotify owns music; Audible owns audiobooks; Alexa owns smart-speaker moments. **Nobody owns interactive, kid-safe audio storytelling.**
 
 3. **Hardware Players Need Content**  
-   Rather than fight Yoto or Toniebox, Talemo can syndicate select stories to their NFC cards while upselling creation features in-app.
+   Rather than fight Lunii, Yoto, Toniebox, or Storypod, Talemo can syndicate select stories to their NFC cards while upselling creation features in-app.
 
 4. **Defensible Wedge**  
    By focusing on **“kids become creators” + “institutions stay compliant,”** Talemo builds a moat that pure streaming services and raw LLM tools haven’t addressed.
@@ -204,7 +204,7 @@ Talemo’s blend of *AI-assisted creation*, *governance-grade privacy*, and *cro
 | COR‑16 | **Data Residency Controls** | User-selectable data storage location with French hosting option; CNIL-compliant parental consent wizard |
 | COR‑17 | **Learning Analytics Dashboard** | School-focused dashboard showing usage, progress, and comprehension metrics for students |
 | COR‑18 | **Parental Controls UI** | Advanced time limits, quiet hours, and content filters with "couvre-feu" features for French families |
-| COR‑19 | **Hardware Export** | MP3 + metadata bundle export for Yoto, Lunii Store, and voice assistants like Alexa Kids |
+| COR‑19 | **Hardware Export** | MP3 + metadata bundle export for Lunii, Yoto, Toniebox, Storypod, and voice assistants like Alexa Kids |
 | COR‑20 | **Gamification System** | Badges, streaks, and XP for daily engagement, particularly effective for 6-12-year-olds |
 | COR‑21 | **Language Toggle** | On-the-fly language switching for bilingual French households and future EU expansion |
 | COR‑22 | **ENT/Pronote SSO** | CAS/SAML single sign-on integration with French school platforms (beyond Google/Apple SSO) |
@@ -227,7 +227,7 @@ The following table outlines capabilities that are critical for the French marke
 | 4  | Comprehension & vocabulary quizzes | Turns Talemo into an ELA resource; deepens classroom fit. | COR-09 | High-leverage differentiator |
 | 5  | Advanced parental controls UI (time limits, quiet hours) | French parent groups expect "couvre-feu" features. | COR-18 | Must-add for Day-1 France GA |
 | 6  | Accessibility pack (captions, dyslexia font, transcripts) | Required for loi Handicap compliance in public education. | COR-15 | Must-add for Day-1 France GA |
-| 7  | Hardware / voice-assistant export (MP3 + metadata bundle) | Enables partnerships with Yoto, Lunii Store, Alexa Kids. | COR-19 | High-leverage differentiator |
+| 7  | Hardware / voice-assistant export (MP3 + metadata bundle) | Enables partnerships with Lunii, Yoto, Toniebox, Storypod, and voice assistants like Alexa Kids. | COR-19 | High-leverage differentiator |
 | 8  | Multi-author / classroom collaboration mode | Supports group projects in écoles primaires & collèges. | COR-11 | High-leverage differentiator |
 | 9  | Gamified progress (badges, streaks, XP) | Proven driver of daily engagement for 6-12-year-olds. | COR-20 | Engagement & retention hook |
 | 10 | Localization & on-the-fly language toggle | Needed for bilingual French households and future EU roll-outs. | COR-21 | Engagement & retention hook |
@@ -497,7 +497,7 @@ Based on our French market competitive analysis, we will prioritize the followin
 4. **SecNumCloud & CNIL Compliance Highlighting** - Turns French regulation into a selling point in our marketing materials.
 5. **French Content Licensing** - Secure ~5 high-profile French licenses to counter Sybel's catalog breadth at launch.
 
-This France-first approach will allow Talemo to enter the market with a differentiated, regulation-ready proposition while laying groundwork to syndicate content to popular hardware platforms (Yoto, Lunii Store) rather than competing head-on.
+This France-first approach will allow Talemo to enter the market with a differentiated, regulation-ready proposition while laying groundwork to syndicate content to popular hardware platforms (Lunii, Yoto, Toniebox, Storypod) rather than competing head-on.
 
 ---
 
