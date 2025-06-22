@@ -28,22 +28,23 @@ This project uses Docker Compose to set up a development environment with all th
 
 3. Build and start the development containers:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml up -d
+   make up
    ```
+   This will start all the necessary containers for development.
 
 4. Apply migrations:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py migrate
+   make migrate
    ```
 
 5. Create a superuser:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py createsuperuser
+   make superuser
    ```
 
 6. Load initial data (if available):
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py loaddata initial_data
+   make loaddata
    ```
 
 ### Container Architecture
@@ -94,27 +95,27 @@ class Document(models.Model):
 To stop the development environment:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml down
+make down
 ```
 
 To stop and remove all data (volumes):
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml down -v
+make clean
 ```
 
 ### Troubleshooting
 
-- **Database connection issues**: Ensure the PostgreSQL container is running with `docker-compose -f docker/docker-compose.dev.yml ps`. If it's not running, check the logs with `docker-compose -f docker/docker-compose.dev.yml logs db`.
+- **Database connection issues**: Ensure the PostgreSQL container is running with `make up` and then check the status with `make ps`. If it's not running, check the logs with `make logs`.
 
 - **pgvector extension not available**: The extension should be automatically installed during container initialization. If you encounter issues, you can manually install it by running:
   ```bash
-  docker-compose -f docker/docker-compose.dev.yml exec db psql -U postgres -d talemo -c "CREATE EXTENSION IF NOT EXISTS vector;"
+  make pgvector
   ```
 
 - **Container build failures**: If you encounter issues building the containers, try rebuilding with:
   ```bash
-  docker-compose -f docker/docker-compose.dev.yml build --no-cache
+  make build
   ```
 
 ### Customizing the Docker Setup
