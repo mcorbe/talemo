@@ -22,11 +22,14 @@ It is a mobile-first platform where families, schools, and libraries can **disco
 - **Instant joy** — three taps from home-screen to playback keep “time-to-first-play” under 30 seconds, so parents can calm a restless child fast.  
 - **Kids become storytellers** — an intuitive composer plus AI agents (voice, illustration, story coaching) lets children craft narrated tales in minutes, turning them from passive consumers into creators.  
 - **Free to start, easy to grow** — a generous freemium tier removes barriers; households upgrade for unlimited creation, while institutions license per seat or flat-fee.
+- **« Mode Conte »** — our screen-free listening mode supports the « moins d'écrans » movement, giving parents audio-only benefits without extra hardware.
 
 #### How it wins
 - **Multi-tenant privacy by design** — every household or institution is its own secure silo, enforced down to row-level security and tenant-scoped storage.  
 - **Compliance baked-in** — governance, audit trails, and control mapping align with GDPR, COPPA, and France’s SECNUMCLOUD, giving schools enterprise-grade assurance with zero IT effort.  
 - **Agent-centric architecture** — modular AI services run on a lean Django + PostgreSQL stack, keeping the product fast today and future-proof for new creative workflows.
+- **100% données hébergées en France** — all user data exclusively hosted in France with SecNumCloud certification, exceeding CNIL requirements for children's privacy.
+- **Authentic French content** — native French voice packs with regional accents and partnerships with premier French publishers for culturally relevant stories.
 
 **The outcome:** Talemo delivers wholesome, interactive audio experiences that strengthen family bonds, empower young voices, and give educators a safe, ready-made storytelling lab—while meeting the strict governance and compliance standards that modern digital learning demands.
 
@@ -101,6 +104,46 @@ Talemo competes on two fronts:
 
 Platforms like **Book Creator**, **Epic!**, and **Storytime AI** let teachers build multimedia books or students auto-generate tales, but they are print- or video-first and lack Talemo’s **audio-native**, **governance-by-tenant** approach.
 
+### French Market Competitive Analysis
+
+As France will be our first market, we've conducted a detailed competitive analysis of the French audio storytelling landscape:
+
+#### 1. Home-turf Frontrunners to Study—and Out-flank
+
+| Player | Core Offer (FR market) | Why It's a Real Threat | Counters & Gaps Talemo Can Exploit |
+| ------ | ---------------------- | ---------------------- | ---------------------------------- |
+| **Lunii – Ma Fabrique à Histoires** | - 1.5 M+ devices sold, big retail footprint in FNAC, Boulanger.<br>- Kids "mix & match" story elements on a screen-free box; 450+ French audiobooks; includes a family-voice recording studio. | • Brand already shorthand for "conteuse" in France.<br>• Interactive choice mechanic overlaps with Talemo's creative USP. | • Lunii is hardware-bound (59–79 € entry price) and single-profile; no cloud collaboration or AI illustrator.<br>• Pitch Talemo as "tout-en-un app"—create, share, listen anywhere, no extra gadget. |
+| **Sybel Kids** | Mobile app & web with hundreds of kids podcasts and audiobooks in French; strong licensing ties with Bayard, Radio France. | • Pure-software, freemium, already sits on parents' phones. | • Sybel is listen-only: zero story-creation or classroom tenancy.<br>• Lean on Talemo's AI composer + institution dashboards. |
+| **Bookinou** | €69 NFC "badge" reader that lets families record their own voice per physical book; endorsed by Éducation Nationale pilots. | • Deep emotional appeal ("Papa lit l'histoire").<br>• School partnerships give them early-childhood mind-share. | • Requires the printed book + tag; no original stories, no streaming catalogue.<br>• Talemo can match the "record-your-own" angle without extra hardware. |
+| **Yoto (Player & Mini)** | 1 M+ families worldwide; widely stocked in France; sells French cards (Harry Potter, Gurty, Mandarin flash cards). | • Screen-free and portable; parents like the "moins d'écrans" message. | • Closed content pipeline; cards cost ±10 €.<br>• Talemo can syndicate its best stories to Yoto cards later (API-05 export). |
+
+#### 2. Global Audio Giants Already Present in France
+
+| Platform | FR Kids Angle | Strategic Risk | Talemo Edge |
+| -------- | ------------- | -------------- | ----------- |
+| **Spotify Kids** | Stand-alone, ad-free kids app bundled with Premium Family; >60 h of Disney stories, 125+ playlists. | Could surface generative stories in the "audiobooks" rail as Spotify expands book catalog in France. | No creation tools, no teacher admin, locked to Spotify subscription. |
+| **Audible FR / Amazon** | Thousands of French children's audiobooks; Fire Kids tablets push them hard. | Amazon could bundle an AI story generator via Alexa Kids+ voice. | Talemo = creation + strict data siloing; Audible = consumption. |
+
+#### 3. Regulatory & Perception Checkpoints Specific to France
+
+| Concern | Why It Matters |
+| ------- | -------------- |
+| **CNIL & RGPD for minors** | French watchdog CNIL applies a higher bar on transparency and parental consent for <15 y.o. users. You already plan SECNUMCLOUD hosting; make sure onboarding collects explicit parental consent and offers a closed local-processing option for voice recordings. |
+| **"Zéro écran" narrative** | French parent groups and mainstream press often praise screen-free devices like Lunii, Bookinou, Mon Petit Morphée. Talemo's PWA needs a clear "audio-first, minimal-screen" story (e.g., dark screen mode, lock-screen playback). |
+| **Education procurement** | Many primary schools buy via UGAP and look for tools déjà labellisés by Éduthèque or La Maison de la Pédagogie Numérique. Early pilots with two or three académies will help. |
+
+### French Market Value Proposition
+
+For our French launch, we will emphasize these five key angles in all press briefings, app-store copy, and sales decks:
+
+| Missing/Thin Angle | Why It Resonates in France | How We'll Integrate It |
+| ------------------ | -------------------------- | ---------------------- |
+| **1. « Moins d'écrans » pledge** | Screen-free devices like Lunii dominate retail because French parent groups and media push zéro écran for < 6-year-olds. | **« Mode Conte »** - A dark-screen/lock-mode that blanks the display after one tap and keeps audio controls on the lock-screen, allowing parents to enjoy audio-only benefits without buying hardware. |
+| **2. 100% données hébergées en France** | Sovereign-cloud and data-localization concerns are louder in France; CNIL insists on explicit consent for < 15 y.o. users. | Make French hosting & SecNumCloud compliance a headline: **"Vos histoires, vos données, hébergées exclusivement en France."** Include a parental-consent wizard that explicitly references CNIL guidelines. |
+| **3. Catalogue « made in FR » + accents locaux** | Parents expect classic tales (Perrault, La Fontaine); publishers want local IP royalties; children spot non-native TTS instantly. | Lead with **"bibliothèque 100% francophone, voix naturelles Paris & accents régionaux."** Secure partnerships with Bayard, Gallimard Jeunesse, and Radio France for authentic French content. |
+| **4. Pass Culture & bibliothèque publique hooks** | Teens (15-18) receive subsidized Pass Culture (even after 2025 budget cut); municipal libraries seek turnkey digital content. | Add **Pass Culture voucher** in the paywall flow and a Library plan priced per municipal cardholder. Position Talemo as a budget-neutral way for towns to modernize storytime. |
+| **5. Accessibilité & inclusion** | French schools must meet loi Handicap standards; dyslexia overlays and transcripts are increasingly mandatory. | Highlight **"Mode Inclusif"** in marketing: open captions, dyslexia-friendly font switch, downloadable transcripts—showing we exceed legal minimums. |
+
 ---
 
 ### Positioning Take-aways
@@ -154,6 +197,11 @@ Talemo’s blend of *AI-assisted creation*, *governance-grade privacy*, and *cro
 | COR‑09 | **Quiz Module**        | After playback, serve 3-5 auto-generated questions & word-lists; results feed Analytics dashboard |
 | COR‑10 | **Accessibility Layer**| Auto-generate text transcript, toggle dyslexia-friendly typeface, WCAG AA colour palette |
 | COR‑11 | **Multi-Author Drafts**| Shared edit rights inside a tenant, comments sidebar, version history              |
+| COR‑12 | **« Mode Conte »**     | Dark-screen/lock-mode that blanks display after one tap, keeps audio controls on lock-screen for screen-free listening experience |
+| COR‑13 | **French Voices**      | Native French voice packs with Parisian and regional accents; authentic pronunciation for French classics |
+| COR‑14 | **Pass Culture Integration** | Support for Pass Culture vouchers in payment flow; special pricing for municipal libraries |
+| COR‑15 | **Mode Inclusif**      | Enhanced accessibility features including open captions, dyslexia-friendly font options, and downloadable transcripts |
+| COR‑16 | **Data Residency Controls** | User-selectable data storage location with French hosting option; CNIL-compliant parental consent wizard |
 
 ### 7.2 Governance & Multi‑Tenancy
 
@@ -375,12 +423,28 @@ All observability solutions will be implemented with privacy-first design, ensur
 
 ## 16. Go-To-Market Plan
 
+### 16.1 France-First Strategy
+
+Talemo will launch first in the French market, leveraging our competitive analysis and addressing the specific needs of French families and educational institutions.
+
 | Ref    | Stage     | Tactics                                                                                                                 |
 | ------ | --------- | ----------------------------------------------------------------------------------------------------------------------- |
-| GTM‑01 | Beta      | 500 families via parenting newsletters, teachers, Facebook groups. Referral loop: 1 free premium story for each signup. |
-| GTM‑02 | Launch    | App Store + Google Play + PWA, influencer storytelling packs, launch campaign with free 7-day premium.                  |
-| GTM‑03 | B2B       | Outreach to daycare networks, family apps, and educational resellers. Embed IP licensing into discovery stories.        |
-| GTM‑04 | Expansion | Localized editions (FR, ES, DE). Stories generated or curated per language.                                             |
+| GTM‑01 | Beta      | 500 French families via parenting newsletters, teachers, Facebook groups. Referral loop: 1 free premium story for each signup. Focus on FNAC and Boulanger retail partnerships for in-store demos. |
+| GTM‑02 | Launch    | App Store + Google Play + PWA with French-first UI/UX, French influencer storytelling packs, launch campaign with free 7-day premium. Highlight "audio-first, minimal-screen" messaging to address "Zéro écran" concerns. |
+| GTM‑03 | B2B       | Outreach to French daycare networks, family apps, and educational resellers. Target early pilots with 2-3 académies. Pursue licensing with Bayard, Radio France, Éditions Gallimard Jeunesse to counter Sybel's catalog breadth. |
+| GTM‑04 | Expansion | Expand to other European markets (ES, DE) after establishing French market presence. Stories generated or curated per language. |
+
+### 16.2 Day-1 Roadmap Implications for French Market
+
+Based on our French market competitive analysis, we will prioritize the following features for our Day-1 roadmap:
+
+1. **Record-Your-Own Narration** - Neutralizes Bookinou's signature hook while addressing the emotional appeal of parent-narrated stories.
+2. **Branching/Choice Stories** - Maintains competitive parity with Lunii's interactive story mechanics.
+3. **Dark-Screen/Lock-Mode Toggle** - Addresses the "moins d'écrans" sentiment prevalent in French parenting circles.
+4. **SecNumCloud & CNIL Compliance Highlighting** - Turns French regulation into a selling point in our marketing materials.
+5. **French Content Licensing** - Secure ~5 high-profile French licenses to counter Sybel's catalog breadth at launch.
+
+This France-first approach will allow Talemo to enter the market with a differentiated, regulation-ready proposition while laying groundwork to syndicate content to popular hardware platforms (Yoto, Lunii Store) rather than competing head-on.
 
 ---
 
@@ -397,6 +461,8 @@ All observability solutions will be implemented with privacy-first design, ensur
 
 ## 18. Compliance & Safety
 
+### 18.1 General Compliance Requirements
+
 | Ref    | Area                    | Implementation                                                                      |
 | ------ | ----------------------- | ----------------------------------------------------------------------------------- |
 | CMP‑01 | **Certifications**      | Target GDPR, COPPA, and SECNUMCLOUD (ANSSI) certification                           |
@@ -405,6 +471,17 @@ All observability solutions will be implemented with privacy-first design, ensur
 | CMP‑04 | **Privacy & Safety**    | Full compliance with GDPR and COPPA. Parental consent flows. No child data stored   |
 | CMP‑05 | **Content moderation**  | AI moderation agent + manual review fallback. Age-appropriate filters               |
 | CMP‑06 | **Usage analytics**     | Anonymized tracking only. Explicit opt-in for suggestions                           |
+
+### 18.2 French-Specific Regulatory Considerations
+
+| Ref    | Area                    | Implementation                                                                      |
+| ------ | ----------------------- | ----------------------------------------------------------------------------------- |
+| CMP‑07 | **CNIL & RGPD for minors** | Enhanced transparency and explicit parental consent for users under 15 years old. Provide closed local-processing option for voice recordings to meet CNIL requirements. Include a CNIL-compliant parental consent wizard with clear explanations of data usage. |
+| CMP‑08 | **"Zéro écran" compliance** | Implement « Mode Conte » (dark screen mode and lock-screen playback) to support the "audio-first, minimal-screen" approach preferred by French parents and educators. Market this as a key feature for parents concerned about screen time. |
+| CMP‑09 | **Education procurement** | Pursue certification with Éduthèque and La Maison de la Pédagogie Numérique to facilitate adoption by French schools purchasing through UGAP. Develop specific documentation for French education procurement processes. |
+| CMP‑10 | **SECNUMCLOUD hosting** | Prioritize French cloud providers with SECNUMCLOUD certification for data hosting to meet stringent French security requirements. Prominently feature "100% données hébergées en France" in marketing materials. |
+| CMP‑11 | **Pass Culture integration** | Implement support for Pass Culture vouchers in the payment flow to enable teens (15-18) to access premium content using their government-provided cultural allowance. Develop a specific Library plan priced per municipal cardholder. |
+| CMP‑12 | **Loi Handicap compliance** | Exceed minimum requirements of French accessibility laws with Mode Inclusif featuring open captions, dyslexia-friendly font options, downloadable transcripts, and high-contrast UI options. Document compliance with loi Handicap standards for school procurement. |
 
 ---
 
@@ -423,12 +500,14 @@ All observability solutions will be implemented with privacy-first design, ensur
 
 ## 20. Open Strategic Questions
 
-1. Which regional launch first: France‑only vs multilingual?
+1. ~~Which regional launch first: France‑only vs multilingual?~~ **RESOLVED: France-first launch strategy adopted.**
 2. Minimum licensing required for branded IP?
 3. **Should we open a profile marketplace for shared templates?**
 4. **Do institutional tenants need data residency beyond EU‑wide hosting?**
 5. Should we prioritise mobile app downloads over PWA adoption?
 6. Should we enable public sharing of user-created stories in Phase 1?
+7. How should we position against Lunii's hardware-based approach in French retail channels?
+8. What specific French content partnerships should we prioritize beyond Bayard, Radio France, and Éditions Gallimard Jeunesse?
 
 ---
 
@@ -436,10 +515,13 @@ All observability solutions will be implemented with privacy-first design, ensur
 
 | Area                       | Action Item                                                                         | Owner             |
 | -------------------------- |-------------------------------------------------------------------------------------|-------------------|
-| 🎯 **Market Sizing**       | TAM/SAM/SOM validation (family audio market)                                        | Strategy Lead     |
-| 💸 **Pricing Simulation**  | Model CAC, conversion, LTV; test premium tiers                                      | Product + Finance |
-| 📢 **GTM Assets**          | Prepare launch website, teaser video, social ads                                    | Marketing         |
-| 🔐 **Compliance Audit**    | External review for GDPR/COPPA adherence; map PRD v0.4 controls to SECNUMCLOUD checklist; schedule external gap assessment | Legal + SecOps    |
-| 🎨 **Voice Licensing**     | Secure license or verify open use for voice/music assets                            | BizDev            |
+| 🎯 **Market Sizing**       | TAM/SAM/SOM validation for French family audio market; analyze Lunii and Sybel market share | Strategy Lead     |
+| 💸 **Pricing Simulation**  | Model CAC, conversion, LTV; test premium tiers with French focus groups; benchmark against Lunii's €59-79 hardware price point | Product + Finance |
+| 📢 **GTM Assets**          | Prepare French-first launch website, teaser video, social ads; emphasize "audio-first, minimal-screen" messaging | Marketing         |
+| 🔐 **Compliance Audit**    | External review for CNIL/RGPD adherence for <15 y.o. users; map PRD v0.4 controls to SECNUMCLOUD checklist; schedule external gap assessment | Legal + SecOps    |
+| 🎨 **Content Licensing**   | Initiate discussions with Bayard, Radio France, Éditions Gallimard Jeunesse for French content licensing | BizDev            |
+| 🎙️ **Voice-Over Feature**  | Prototype "Record-Your-Own" narration feature to counter Bookinou's offering | Engineering       |
+| 🌙 **Dark Mode**           | Implement dark-screen/lock-mode toggle to address "Zéro écran" sentiment | Engineering       |
 | 📦 **MVP Tech Stack POC**  | Validate Celery + CrewAI orchestration + fallback; validate Profile & RLS scaffold with sample load test | Engineering       |
-| 📱 **Mobile UX Prototype** | Test story discovery + generation with real families                                | Engineering       |
+| 📱 **Mobile UX Prototype** | Test story discovery + generation with French families; conduct user testing at FNAC/Boulanger locations | UX Research       |
+| 🏫 **Education Outreach**  | Identify 2-3 French académies for early pilots; prepare materials for Éduthèque and La Maison de la Pédagogie Numérique certification | Education Lead    |
