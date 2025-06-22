@@ -1,6 +1,46 @@
 # Talemo
 
-Talemo is a mobile-first, AI-powered platform to create and explore audio stories for families. Built with Django, Celery, CrewAI & MinIO. Discover, generate, and listen to magical tales anytime. Cloud-agnostic, open-source, and agent-driven.
+Talemo is a mobile-first platform where families can discover, listen to, and co-create short audio stories—all inside a lightning-fast Progressive Web App that works on any phone or tablet. The platform is built with Django, Celery, CrewAI, and MinIO, and follows a multi-tenant architecture with strict data isolation.
+
+## Project Overview
+
+Talemo is an AI-powered platform designed to create and explore audio stories for families. Key features include:
+
+- **Story Generation**: AI-powered creation of age-appropriate stories
+- **Audio Narration**: High-quality voice narration of stories
+- **Illustration Generation**: AI-generated illustrations for stories
+- **Mobile-First Design**: Optimized for phones and tablets
+- **Multi-Tenant Architecture**: Strict data isolation between tenants
+- **Progressive Web App**: Works offline and can be installed on devices
+
+## Key Technologies
+
+- **Backend**: Django, Django REST Framework, Celery, PostgreSQL with pgvector
+- **AI & Agents**: CrewAI, LlamaIndex for RAG pipeline
+- **Storage**: MinIO (S3-compatible object storage)
+- **Frontend**: HTMX, Bootstrap 5, Alpine.js, Workbox (PWA)
+- **DevOps**: Docker, Docker Compose, GitHub Actions
+
+## Project Structure
+
+The project follows a modular structure organized by domain:
+
+```
+talemo/
+├── config/                   # Project configuration
+├── talemo/                   # Main application package
+│   ├── core/                 # Core functionality (multi-tenant, users)
+│   ├── stories/              # Story management
+│   ├── agents/               # Agent framework and CrewAI integration
+│   ├── assets/               # Asset management (audio, images)
+│   ├── governance/           # Governance and compliance
+│   └── subscriptions/        # Subscription management
+├── frontend/                 # Frontend assets
+├── docker/                   # Docker configuration files
+├── scripts/                  # Utility scripts
+├── tests/                    # Test suite
+└── docs/                     # Documentation
+```
 
 ## Development Setup with Docker Compose
 
@@ -131,6 +171,129 @@ All Docker-related files are organized in the `docker` directory:
 If you need to customize a specific service, you can modify its Dockerfile in the `docker` directory. For example, if you need to add a new system dependency to the web service, you would modify `docker/Dockerfile.web`.
 
 You can also customize the Docker Compose setup by modifying the `docker/docker-compose.dev.yml` file. For example, you might want to add a new service or change the port mappings.
+
+## Development Workflow
+
+### Code Changes
+
+- Make changes to the codebase
+- Django's auto-reload will detect changes and restart the server
+- For frontend changes, run `npm run watch` to compile assets automatically
+
+### Database Changes
+
+- Create migrations: `make migrations`
+- Apply migrations: `make migrate`
+
+### Testing
+
+- Run all tests: `make test`
+- Run unit tests: `make test-unit`
+- Run integration tests: `make test-integration`
+- Generate coverage report: `make coverage`
+
+### Debugging
+
+- Django Debug Toolbar is enabled in development
+- Use `print()` or `import pdb; pdb.set_trace()` for Python debugging
+- Use browser developer tools for frontend debugging
+- Check Flower dashboard for Celery task monitoring
+
+## Working with Agents
+
+Talemo uses CrewAI for agent-based workflows:
+
+### Agent Development
+
+- Agents run in the Celery worker container
+- Monitor agent tasks in the Flower dashboard
+- Use the agent playground at `/agents/playground/`
+
+### Agent Testing
+
+- Create mock agent responses for testing
+- Use the agent test harness in `tests/agents/`
+- Monitor token usage with the built-in tracking
+
+## Multi-Tenant Development
+
+Talemo follows a multi-tenant architecture with strict data isolation:
+
+1. Create test tenants: `make create-tenant`
+2. Switch tenants:
+   - Use the tenant switcher in the development UI
+   - Or set the `X-Tenant-ID` header in API requests
+3. Test tenant isolation:
+   - Create test data in multiple tenants
+   - Verify data isolation using the tenant switcher
+   - Run tenant isolation tests
+
+## Testing Strategy
+
+### Test Types
+
+1. **Unit Tests**: Test individual components in isolation
+2. **Integration Tests**: Test interactions between components
+3. **End-to-End Tests**: Test complete user journeys with Cypress
+4. **Performance Tests**: Load testing with Locust
+
+### Test Organization
+
+Tests are organized by domain and test type:
+
+```
+tests/
+├── unit/              # Unit tests for individual components
+├── integration/       # Integration tests for component interactions
+├── e2e/               # End-to-end tests for user journeys
+└── performance/       # Performance and load tests
+```
+
+## Version Control Strategy
+
+We follow a GitHub Flow branching strategy:
+
+1. **Main Branch**: Always deployable, protected branch
+2. **Feature Branches**: Created from main, named `feature/short-description`
+3. **Bugfix Branches**: Created from main, named `bugfix/short-description`
+4. **Hotfix Branches**: Created from main, named `hotfix/short-description`
+
+### Pull Request Process
+
+1. Create a feature/bugfix branch from main
+2. Make changes and commit to the branch
+3. Push the branch to GitHub
+4. Create a pull request with a description of the changes
+5. Ensure CI checks pass
+6. Request review from at least one team member
+7. Address review comments
+8. Merge the pull request when approved
+
+## Development Best Practices
+
+### Code Quality
+
+- Follow PEP 8 style guide for Python code
+- Use Black for code formatting
+- Use Flake8 for linting
+- Use MyPy for type checking
+- Use pre-commit hooks to enforce standards
+
+### Security Practices
+
+- Follow OWASP Top 10 guidelines
+- Use Django's security features (CSRF, XSS protection, etc.)
+- Implement proper input validation
+- Use parameterized queries to prevent SQL injection
+- Regularly update dependencies for security patches
+
+### Performance Considerations
+
+- Optimize database queries (use select_related, prefetch_related)
+- Use caching appropriately
+- Minimize HTTP requests
+- Optimize asset loading (lazy loading, compression)
+- Monitor and optimize API response times
 
 ## Additional Documentation
 
