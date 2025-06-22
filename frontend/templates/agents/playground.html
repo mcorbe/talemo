@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Agent Playground - Talemo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Agent Playground</h1>
+    <p>Test and experiment with our AI agents in a sandbox environment.</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Input</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="agentSelect" class="form-label">Select Agent</label>
+                            <select class="form-select" id="agentSelect">
+                                <option selected>Choose an agent...</option>
+                                <option value="storyteller">Storyteller</option>
+                                <option value="illustrator">Illustrator</option>
+                                <option value="narrator">Narrator</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="promptInput" class="form-label">Prompt</label>
+                            <textarea class="form-control" id="promptInput" rows="5" placeholder="Enter your prompt here..."></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary">Run Agent</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Output</h5>
+                </div>
+                <div class="card-body">
+                    <div id="agentOutput" class="p-3 bg-light rounded">
+                        <p class="text-muted">Agent output will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{% url 'agents:index' %}" class="btn btn-secondary">Back to Agents</a>
+    </div>
+</div>
+{% endblock %}

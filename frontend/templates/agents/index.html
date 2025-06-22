@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Agents - Talemo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Agents</h1>
+    <p>Welcome to the Talemo agents page. Here you can manage and interact with AI agents that help create and enhance stories.</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Available Agents</h5>
+                </div>
+                <div class="card-body">
+                    <p>No agents available yet. Check back soon!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Agent Playground</h5>
+                </div>
+                <div class="card-body">
+                    <p>Test and experiment with our AI agents in a sandbox environment.</p>
+                    <a href="{% url 'agents:playground' %}" class="btn btn-primary">Go to Playground</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
