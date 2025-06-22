@@ -54,13 +54,16 @@ A **mobile‑first** platform for families and institutions to **discover, liste
 
 ## 5. Personas & Use Cases
 
-- **Family Administrator** – creates a household tenant, invites parents & children, manages profiles.
-- **Institution Admin** – librarian/teacher controlling an organisation tenant.
-- **Parent (Amélie, 38)** – browses bedtime stories on phone, filters by length/theme.
-- **Child (Léo, 8)** – taps colourful card, plays story.
-- **Story Creator (Lucas, 30)** – writes text, triggers AI asset generation.
-- **Admin** – moderates flagged content, manages quotas.
-- **School/Day‑care Buyer** – explores institutional subscription with curriculum filters.
+| Persona                   | Description                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| **Family Administrator**  | Creates a household tenant, invites parents & children, manages profiles.        |
+| **Institution Admin**     | Librarian/teacher controlling an organisation tenant.                            |
+| **Parent (Amélie, 38)**   | Browses bedtime stories on phone, filters by length/theme.                       |
+| **Child (Léo, 8)**        | Taps colourful card, plays story.                                                |
+| **Story Creator (Lucas)** | Writes text, triggers AI asset generation.                                       |
+| **Admin**                 | Moderates flagged content, manages quotas.                                       |
+| **Story Assistant User**  | Chats with a story-building AI to co-create new adventures.                      |
+| **School/Day‑care Buyer** | Explores institutional subscription with curriculum filters.                     |
 
 ---
 
@@ -68,7 +71,14 @@ A **mobile‑first** platform for families and institutions to **discover, liste
 
 ### 6.1 Core Experience
 
-- Story List, Story Detail, Story Creation, Agentic Assistant, Admin Dashboard, SSO.
+| Ref    | Feature            | Description                                                |
+| ------ | ------------------ | ---------------------------------------------------------- |
+| COR‑01 | **Story List**     | Browsable, filterable list of available stories            |
+| COR‑02 | **Story Detail**   | Individual story view with metadata and playback controls  |
+| COR‑03 | **Story Creation** | Interface for creating and editing stories                 |
+| COR‑04 | **Agentic Assistant** | AI-powered assistant for story creation and discovery   |
+| COR‑05 | **Admin Dashboard**| Management interface for content and users                 |
+| COR‑06 | **SSO**            | Single sign-on integration with Google and Apple           |
 
 ### 6.2 Governance & Multi‑Tenancy
 
@@ -89,17 +99,24 @@ A **mobile‑first** platform for families and institutions to **discover, liste
 
 The platform runs a suite of stateless **CrewAI** agents orchestrated by Celery. Each agent receives a tenant‑scoped message, performs one atomic task, emits an event for the next stage, and writes an audit trace for SECNUMCLOUD.
 
-| Agent                    | Purpose                                                                          | Consumes → Produces                                |
-| ------------------------ | -------------------------------------------------------------------------------- | -------------------------------------------------- |
-| **SearchAgent**          | Hybrid semantic + keyword search on `pgvector`; returns ordered `story_id` list. | `search.query` → `search.results`                  |
-| **ModerationAgent**      | Runs GPT‑4 based moderation & keyword heuristics; flags disallowed content.      | `story.draft` → `story.approved` / `story.flagged` |
-| **TTSAgent**             | Synthesises speech via tenant‑selected voice pack; stores `.mp3` in MinIO.       | `story.approved` → `asset.audio.ready`             |
-| **IllustratorAgent**     | Generates cover art (Stable Diffusion XL); stores `.png` under tenant prefix.    | `story.approved` → `asset.image.ready`             |
-| **MetadataAgent**        | Extracts language, tags, reading‑level; updates `story` row.                     | `story.draft`                                      |
-| **QuotaAgent**           | Enforces `TenantPolicy.story_quota`; blocks over‑limit creations.                | `story.request`                                    |
-| **PersonalizationAgent** | Updates per‑user embeddings for recommendations.                                 | `play.event`                                       |
+| Ref    | Agent                    | Purpose                                                                          | Consumes → Produces                                |
+| ------ | ------------------------ | -------------------------------------------------------------------------------- | -------------------------------------------------- |
+| AGT‑01 | **SearchAgent**          | Hybrid semantic + keyword search on `pgvector`; returns ordered `story_id` list. | `search.query` → `search.results`                  |
+| AGT‑02 | **ModerationAgent**      | Runs GPT‑4 based moderation & keyword heuristics; flags disallowed content.      | `story.draft` → `story.approved` / `story.flagged` |
+| AGT‑03 | **TTSAgent**             | Synthesises speech via tenant‑selected voice pack; stores `.mp3` in MinIO.       | `story.approved` → `asset.audio.ready`             |
+| AGT‑04 | **IllustratorAgent**     | Generates cover art (Stable Diffusion XL); stores `.png` under tenant prefix.    | `story.approved` → `asset.image.ready`             |
+| AGT‑05 | **MetadataAgent**        | Extracts language, tags, reading‑level; updates `story` row.                     | `story.draft`                                      |
+| AGT‑06 | **QuotaAgent**           | Enforces `TenantPolicy.story_quota`; blocks over‑limit creations.                | `story.request`                                    |
+| AGT‑07 | **PersonalizationAgent** | Updates per‑user embeddings for recommendations.                                 | `play.event`                                       |
 
 > All agent logs stream to an immutable WORM bucket to satisfy traceability (IS‑5).
+
+### User-facing Agents
+
+| Ref      | Agent               | Purpose                                                |
+| -------- | ------------------- | ------------------------------------------------------ |
+| AGT‑UF‑01 | **StoryCompanion**  | Co-creation chat assistant for families                |
+| AGT‑UF‑02 | **SearchAssistant** | Conversational assistant to surface content            |
 
 ---
 
@@ -124,45 +141,64 @@ AgentTask     id · agent_type · input · output · status · …
 
 ### 9.1 Invite & Onboarding (Admin → User)
 
-1. Admin opens **Invite** screen, picks profile (e.g., *Kids Listen‑Only*), enters email.
-2. System generates a single‑use link containing `tenant_id` + `invite_token`.
-3. Recipient clicks link → SSO (Google / Apple).
-4. Back‑end validates `(issuer, subject)` uniqueness; creates `User`, links `UserIdentity`.
-5. New user lands on **Welcome** and completes a 3‑step tutorial.
+| Ref      | Step | Description                                                                                      |
+| -------- | ---- | ------------------------------------------------------------------------------------------------ |
+| UXF‑01‑01 | 1    | Admin opens **Invite** screen, picks profile (e.g., *Kids Listen‑Only*), enters email.           |
+| UXF‑01‑02 | 2    | System generates a single‑use link containing `tenant_id` + `invite_token`.                      |
+| UXF‑01‑03 | 3    | Recipient clicks link → SSO (Google / Apple).                                                    |
+| UXF‑01‑04 | 4    | Back‑end validates `(issuer, subject)` uniqueness; creates `User`, links `UserIdentity`.         |
+| UXF‑01‑05 | 5    | New user lands on **Welcome** and completes a 3‑step tutorial.                                   |
 
 ### 9.2 Story Discovery & Playback
 
-1. Home shows **Categories**, **Continue Listening**, **For You**.
-2. User taps a card → Story Detail (cover, tags, length).
-3. Taps **Play** → signed URL fetched, native `<audio>` element streams.
-4. `play.event` posted; PersonalizationAgent updates embeddings.
+| Ref      | Step | Description                                                                                      |
+| -------- | ---- | ------------------------------------------------------------------------------------------------ |
+| UXF‑02‑01 | 1    | Home shows **Categories**, **Continue Listening**, **For You**.                                  |
+| UXF‑02‑02 | 2    | User taps a card → Story Detail (cover, tags, length).                                           |
+| UXF‑02‑03 | 3    | Taps **Play** → signed URL fetched, native `<audio>` element streams.                            |
+| UXF‑02‑04 | 4    | `play.event` posted; PersonalizationAgent updates embeddings.                                    |
 
 ### 9.3 Story Creation (Parent / Creator)
 
-1. Tap **Create** → Composer opens.
-2. Enter title + story text; optional prompt for illustration.
-3. Draft saved; QuotaAgent checks `story_quota`.
-4. Tap **Publish** → ModerationAgent; if approved, TTSAgent & IllustratorAgent run.
-5. Assets ready → push notification; story visible in My Stories.
+| Ref      | Step | Description                                                                                      |
+| -------- | ---- | ------------------------------------------------------------------------------------------------ |
+| UXF‑03‑01 | 1    | Tap **Create** → Composer opens.                                                                 |
+| UXF‑03‑02 | 2    | Enter title + story text; optional prompt for illustration.                                      |
+| UXF‑03‑03 | 3    | Draft saved; QuotaAgent checks `story_quota`.                                                    |
+| UXF‑03‑04 | 4    | Tap **Publish** → ModerationAgent; if approved, TTSAgent & IllustratorAgent run.                 |
+| UXF‑03‑05 | 5    | Assets ready → push notification; story visible in My Stories.                                   |
 
 ### 9.4 Profile Management (Admin)
 
-1. Admin opens **Profiles** tab.
-2. Tap **New Profile** → clone or blank.
-3. Toggle permissions & quotas via JSON‑backed UI.
-4. Save emits audit event; changes propagate instantly.
-5. Drag‑select users → **Assign to profile** for bulk update.
+| Ref      | Step | Description                                                                                      |
+| -------- | ---- | ------------------------------------------------------------------------------------------------ |
+| UXF‑04‑01 | 1    | Admin opens **Profiles** tab.                                                                    |
+| UXF‑04‑02 | 2    | Tap **New Profile** → clone or blank.                                                            |
+| UXF‑04‑03 | 3    | Toggle permissions & quotas via JSON‑backed UI.                                                  |
+| UXF‑04‑04 | 4    | Save emits audit event; changes propagate instantly.                                             |
+| UXF‑04‑05 | 5    | Drag‑select users → **Assign to profile** for bulk update.                                       |
 
-> Detailed wireframes live in Figma (*UX‑Flows‑v4*).
+
+### 9.5 Story Assistant Flow
+
+| Ref      | Step | Description                                                                                      |
+| -------- | ---- | ------------------------------------------------------------------------------------------------ |
+| UXF‑05‑01 | 1    | User taps **Story Assistant** → StoryCompanion chat interface opens.                             |
+| UXF‑05‑02 | 2    | User chats with AI about story ideas; StoryCompanion suggests themes and characters.             |
+| UXF‑05‑03 | 3    | Tap **Fill Details** → AI populates a structured form with title, plot, characters from chat.    |
+| UXF‑05‑04 | 4    | Tap **Generate** → QuotaAgent checks limits; if approved, ModerationAgent, TTSAgent & IllustratorAgent run. |
+| UXF‑05‑05 | 5    | Preview screen shows story with audio and images; user can **Edit** or **Save to Library**.      |
 
 ---
 
 ## 10. Technical Architecture
 
-- Backend: Django + Django REST + PostgreSQL **(RLS enabled)**
-- Auth: `django‑allauth` SSO + IDP linking via `UserIdentity`.
-- Permission evaluation: request loads `Profile.permissions` JSON once; quotas from `TenantPolicy`.
-- Storage: MinIO/S3 prefixes per tenant.
+| Ref    | Component               | Implementation                                                                      |
+| ------ | ----------------------- | ----------------------------------------------------------------------------------- |
+| TEC‑01 | **Backend**             | Django + Django REST + PostgreSQL **(RLS enabled)**                                 |
+| TEC‑02 | **Authentication**      | `django‑allauth` SSO + IDP linking via `UserIdentity`                              |
+| TEC‑03 | **Permission System**   | Request loads `Profile.permissions` JSON once; quotas from `TenantPolicy`           |
+| TEC‑04 | **Storage**             | MinIO/S3 prefixes per tenant                                                        |
 
 ## 10.1 Mobile App Architecture & Strategy
 
@@ -193,75 +229,86 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ## 11. APIs & Interfaces
 
-* REST APIs:
-
-  * `/api/stories/`, `/api/stories/<id>/`
-  * `/api/assets/`, `/api/agents/trigger/`
-* Webhooks:
-
-  * For Celery job completion (story ready)
-* Agent Bridge:
-
-  * Internal API between Django + CrewAI layer
+| Ref    | Interface Type | Endpoints/Description                                      |
+| ------ | -------------- | ---------------------------------------------------------- |
+| API‑01 | **REST APIs**  | `/api/stories/`, `/api/stories/<id>/`                      |
+| API‑02 |                | `/api/assets/`, `/api/agents/trigger/`                     |
+| API‑03 | **Webhooks**   | For Celery job completion (story ready)                    |
+| API‑04 | **Agent Bridge**| Internal API between Django + CrewAI layer                |
 
 ---
 
 ## 12. Security & Access Control
 
-- **Authorization**: permissions flow strictly via Profiles; no per‑user toggles.
-- **Identity binding**: `(issuer, subject)` uniqueness rule blocks cross‑tenant login.
-- **Row‑level security**: single‑column predicate keeps queries cheap & auditable.
-- **Audit**: profile/policy changes and break‑glass actions streamed to immutable log bucket.
+| Ref    | Category               | Implementation                                                                      |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------- |
+| SEC‑01 | **RBAC**               | Roles: Guest, Registered, Creator, Admin                                            |
+| SEC‑02 | **Authentication**     | SSO via Google / Apple + token fallback                                             |
+| SEC‑03 | **File Access**        | Signed URL for asset delivery                                                       |
+| SEC‑04 | **Compliance**         | GDPR, COPPA; opt-in for data collection                                             |
+| SEC‑05 | **Authorization**      | Permissions flow strictly via Profiles; no per‑user toggles                         |
+| SEC‑06 | **Identity binding**   | `(issuer, subject)` uniqueness rule blocks cross‑tenant login                       |
+| SEC‑07 | **Row‑level security** | Single‑column predicate keeps queries cheap & auditable                             |
+| SEC‑08 | **Audit**              | Profile/policy changes and break‑glass actions streamed to immutable log bucket     |
 
 ---
 
 ## 13. Admin Features
 
-* Admin CRUD on stories, users, tags, assets
-* Status dashboard for Celery tasks + agent jobs
-* Manual moderation & content flagging tools
-* Content preview & scheduling
+| Ref    | Feature                   | Description                                                |
+| ------ | ------------------------- | ---------------------------------------------------------- |
+| ADM‑01 | **Content Management**    | Admin CRUD on stories, users, tags, assets                 |
+| ADM‑02 | **Task Monitoring**       | Status dashboard for Celery tasks + agent jobs             |
+| ADM‑03 | **Moderation Tools**      | Manual moderation & content flagging tools                 |
+| ADM‑04 | **Publishing Controls**   | Content preview & scheduling                               |
 
 ---
 
 ## 14. Go-To-Market Plan
 
-| Stage     | Tactics                                                                                                                 |
-| --------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Beta      | 500 families via parenting newsletters, teachers, Facebook groups. Referral loop: 1 free premium story for each signup. |
-| Launch    | App Store + Google Play + PWA, influencer storytelling packs, launch campaign with free 7-day premium.                  |
-| B2B       | Outreach to daycare networks, family apps, and educational resellers. Embed IP licensing into discovery stories.        |
-| Expansion | Localized editions (FR, ES, DE). Stories generated or curated per language.                                             |
+| Ref    | Stage     | Tactics                                                                                                                 |
+| ------ | --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| GTM‑01 | Beta      | 500 families via parenting newsletters, teachers, Facebook groups. Referral loop: 1 free premium story for each signup. |
+| GTM‑02 | Launch    | App Store + Google Play + PWA, influencer storytelling packs, launch campaign with free 7-day premium.                  |
+| GTM‑03 | B2B       | Outreach to daycare networks, family apps, and educational resellers. Embed IP licensing into discovery stories.        |
+| GTM‑04 | Expansion | Localized editions (FR, ES, DE). Stories generated or curated per language.                                             |
 
 ---
 
 ## 15. Monetization & Business Model
 
-* **Freemium** model: free tier (access to 5 rotating stories/week), Premium (€4.99/month) unlocks full access + unlimited creation.
-* **À-la-carte** purchase option for special packs (e.g., bedtime, adventure, licensed IP).
-* **B2B licensing**: institutions pay per seat (€1–2/student/month) or flat fee.
-* Future: voice merchandising, branded stories, parental gifting.
+| Ref    | Model                | Description                                                                           |
+| ------ | -------------------- | ------------------------------------------------------------------------------------- |
+| MON‑01 | **Freemium**         | Free tier (access to 5 rotating stories/week), Premium (€4.99/month) unlocks full access + unlimited creation |
+| MON‑02 | **À-la-carte**       | Purchase option for special packs (e.g., bedtime, adventure, licensed IP)             |
+| MON‑03 | **B2B licensing**    | Institutions pay per seat (€1–2/student/month) or flat fee                            |
+| MON‑04 | **Future Revenue**   | Voice merchandising, branded stories, parental gifting                                |
 
 ---
 
 ## 16. Compliance & Safety
 
-- Target **GDPR, COPPA, and SECNUMCLOUD (ANSSI)** certification.
-- Explicit mapping of IS‑1 → IS‑5 controls to backlog epics (see Engineering doc).
-- Isolation + traceability proofs via identity uniqueness & RLS.
+| Ref    | Area                    | Implementation                                                                      |
+| ------ | ----------------------- | ----------------------------------------------------------------------------------- |
+| CMP‑01 | **Certifications**      | Target GDPR, COPPA, and SECNUMCLOUD (ANSSI) certification                           |
+| CMP‑02 | **Control Mapping**     | Explicit mapping of IS‑1 → IS‑5 controls to backlog epics (see Engineering doc)     |
+| CMP‑03 | **Data Isolation**      | Isolation + traceability proofs via identity uniqueness & RLS                       |
+| CMP‑04 | **Privacy & Safety**    | Full compliance with GDPR and COPPA. Parental consent flows. No child data stored   |
+| CMP‑05 | **Content moderation**  | AI moderation agent + manual review fallback. Age-appropriate filters               |
+| CMP‑06 | **Usage analytics**     | Anonymized tracking only. Explicit opt-in for suggestions                           |
 
 ---
 
 ## 17. App Store Compliance Strategy
 
-* The mobile app (PWA or Capacitor-wrapped) will meet Apple and Google guidelines:
-
-  * Offline support (service worker)
-  * Touch-optimized, responsive Bootstrap 5 UI
-  * Native-like navigation with HTMX
-  * Optional use of Capacitor plugins for notifications and media
-  * No redirection to external browser
-  * GDPR/COPPA consent and privacy policies embedded
+| Ref    | Requirement                | Implementation                                                |
+| ------ | -------------------------- | ------------------------------------------------------------ |
+| ASC‑01 | **Offline Support**        | Service worker implementation for offline functionality       |
+| ASC‑02 | **Mobile UI**              | Touch-optimized, responsive Bootstrap 5 UI                    |
+| ASC‑03 | **Navigation**             | Native-like navigation with HTMX                              |
+| ASC‑04 | **Native Features**        | Optional use of Capacitor plugins for notifications and media |
+| ASC‑05 | **Browser Handling**       | No redirection to external browser                            |
+| ASC‑06 | **Privacy Compliance**     | GDPR/COPPA consent and privacy policies embedded              |
 
 ---
 
@@ -272,17 +319,20 @@ All frontends will follow a **single source of truth** using Django’s templati
 3. **Should we open a profile marketplace for shared templates?**
 4. **Do institutional tenants need data residency beyond EU‑wide hosting?**
 5. Should we prioritise mobile app downloads over PWA adoption?
+6. Should we enable public sharing of user-created stories in Phase 1?
 
 ---
 
 ## 19. Next Steps (Pre‑Implementation)
 
-| Area                      | Action Item                                                                   | Owner          |
-| ------------------------- | ----------------------------------------------------------------------------- | -------------- |
-| 🔐 **Compliance Audit**   | Map PRD controls to SECNUMCLOUD checklist; schedule external gap assessment. | SecOps + Legal |
-| 📦 **MVP Tech Stack POC** | Validate Profile & RLS scaffold with sample load test.                            | Engineering    |
-| … (other rows unchanged)  |                                                                                   |                |
-
----
-
-*End of Document*
+| Area                       | Action Item                                                                         | Owner             |
+| -------------------------- |-------------------------------------------------------------------------------------|-------------------|
+| 🎯 **Market Sizing**       | TAM/SAM/SOM validation (family audio market)                                        | Strategy Lead     |
+| 💸 **Pricing Simulation**  | Model CAC, conversion, LTV; test premium tiers                                      | Product + Finance |
+| 📢 **GTM Assets**          | Prepare launch website, teaser video, social ads                                    | Marketing         |
+| 🔐 **Compliance Audit**    | External review for GDPR/COPPA adherence                                            | Legal             |
+| 🎨 **Voice Licensing**     | Secure license or verify open use for voice/music assets                            | BizDev            |
+| 📦 **MVP Tech Stack POC**  | Validate Celery + CrewAI orchestration + fallback                                   | Engineering       |
+| 📱 **Mobile UX Prototype** | Test story discovery + generation with real families                                | Engineering       |
+| 🔐 **Compliance Audit**   | Map PRD v0.4 controls to SECNUMCLOUD checklist; schedule external gap assessment.    | SecOps + Legal    |
+| 📦 **MVP Tech Stack POC** | Validate Profile & RLS scaffold with sample load test.                               | Engineering       |
