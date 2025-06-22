@@ -4,7 +4,7 @@ Talemo is a mobile-first, AI-powered platform to create and explore audio storie
 
 ## Development Setup with Docker Compose
 
-This project uses Docker Compose to set up a development environment with all the necessary services, including PostgreSQL with pgvector extension for vector similarity search.
+This project uses Docker Compose to set up a development environment with all the necessary services, including PostgreSQL with pgvector extension for vector similarity search. Each service runs in its own container for better isolation and scalability.
 
 ### Prerequisites
 
@@ -20,31 +20,46 @@ This project uses Docker Compose to set up a development environment with all th
    cd talemo
    ```
 
-2. Create a `.env` file in the project root (optional, for custom configuration):
+2. Create a `.env` file in the project root:
    ```bash
    cp .env.example .env
    ```
-   Edit the `.env` file to customize environment variables if needed.
+   Edit the `.env` file to customize environment variables if needed. This file is used by all containers to ensure consistent configuration across services.
 
 3. Build and start the development containers:
    ```bash
-   docker-compose -f docker-compose.dev.yml up -d
+   docker-compose -f docker/docker-compose.dev.yml up -d
    ```
 
 4. Apply migrations:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web python manage.py migrate
+   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py migrate
    ```
 
 5. Create a superuser:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
+   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py createsuperuser
    ```
 
 6. Load initial data (if available):
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web python manage.py loaddata initial_data
+   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py loaddata initial_data
    ```
+
+### Container Architecture
+
+The development environment consists of the following containers:
+
+- **db**: PostgreSQL database with pgvector extension for vector similarity search
+- **web**: Django web server for the main application
+- **redis**: Redis for caching and as a message broker for Celery
+- **minio**: MinIO for object storage (S3-compatible)
+- **celery**: Celery worker for asynchronous task processing
+- **celery-beat**: Celery Beat for scheduled tasks
+- **flower**: Flower for monitoring Celery tasks
+- **mailhog**: Mailhog for email testing
+
+Each service has its own Dockerfile to ensure proper isolation and to make it easier to scale individual components as needed.
 
 ### Accessing Services
 
@@ -79,28 +94,42 @@ class Document(models.Model):
 To stop the development environment:
 
 ```bash
-docker-compose -f docker-compose.dev.yml down
+docker-compose -f docker/docker-compose.dev.yml down
 ```
 
 To stop and remove all data (volumes):
 
 ```bash
-docker-compose -f docker-compose.dev.yml down -v
+docker-compose -f docker/docker-compose.dev.yml down -v
 ```
 
 ### Troubleshooting
 
-- **Database connection issues**: Ensure the PostgreSQL container is running with `docker-compose -f docker-compose.dev.yml ps`. If it's not running, check the logs with `docker-compose -f docker-compose.dev.yml logs db`.
+- **Database connection issues**: Ensure the PostgreSQL container is running with `docker-compose -f docker/docker-compose.dev.yml ps`. If it's not running, check the logs with `docker-compose -f docker/docker-compose.dev.yml logs db`.
 
 - **pgvector extension not available**: The extension should be automatically installed during container initialization. If you encounter issues, you can manually install it by running:
   ```bash
-  docker-compose -f docker-compose.dev.yml exec db psql -U postgres -d talemo -c "CREATE EXTENSION IF NOT EXISTS vector;"
+  docker-compose -f docker/docker-compose.dev.yml exec db psql -U postgres -d talemo -c "CREATE EXTENSION IF NOT EXISTS vector;"
   ```
 
 - **Container build failures**: If you encounter issues building the containers, try rebuilding with:
   ```bash
-  docker-compose -f docker-compose.dev.yml build --no-cache
+  docker-compose -f docker/docker-compose.dev.yml build --no-cache
   ```
+
+### Customizing the Docker Setup
+
+All Docker-related files are organized in the `docker` directory:
+
+- `docker/Dockerfile.web`: Django web server
+- `docker/Dockerfile.celery`: Celery worker
+- `docker/Dockerfile.celery-beat`: Celery Beat scheduler
+- `docker/Dockerfile.flower`: Flower monitoring tool
+- `docker/docker-compose.dev.yml`: Docker Compose configuration for development
+
+If you need to customize a specific service, you can modify its Dockerfile in the `docker` directory. For example, if you need to add a new system dependency to the web service, you would modify `docker/Dockerfile.web`.
+
+You can also customize the Docker Compose setup by modifying the `docker/docker-compose.dev.yml` file. For example, you might want to add a new service or change the port mappings.
 
 ## Additional Documentation
 

@@ -53,7 +53,7 @@ The development environment is containerized using Docker to ensure consistency 
 
 1. Build and start the development containers:
    ```bash
-   docker-compose -f docker-compose.dev.yml up -d
+   docker-compose -f docker/docker-compose.dev.yml up -d
    ```
 
 2. The development environment includes the following services:
@@ -81,35 +81,35 @@ The development environment is containerized using Docker to ensure consistency 
    DEBUG=True
    SECRET_KEY=your-secret-key
    ALLOWED_HOSTS=localhost,127.0.0.1
-   
+
    # Database
    DB_NAME=talemo
    DB_USER=postgres
    DB_PASSWORD=postgres
    DB_HOST=db
    DB_PORT=5432
-   
+
    # MinIO
    MINIO_ROOT_USER=minioadmin
    MINIO_ROOT_PASSWORD=minioadmin
    MINIO_ENDPOINT=minio:9000
    MINIO_SECURE=False
    MINIO_BUCKET=talemo
-   
+
    # Redis
    REDIS_HOST=redis
    REDIS_PORT=6379
-   
+
    # OAuth (for development)
    GOOGLE_CLIENT_ID=your-google-client-id
    GOOGLE_CLIENT_SECRET=your-google-client-secret
    APPLE_CLIENT_ID=your-apple-client-id
    APPLE_CLIENT_SECRET=your-apple-client-secret
-   
+
    # AI Services (for development)
    OPENAI_API_KEY=your-openai-api-key
    STABILITY_API_KEY=your-stability-api-key
-   
+
    # Observability
    LANGFUSE_PUBLIC_KEY=your-langfuse-public-key
    LANGFUSE_SECRET_KEY=your-langfuse-secret-key
@@ -163,8 +163,12 @@ talemo/
 ├── scripts/                  # Utility scripts
 ├── tests/                    # Test suite
 ├── .env.example              # Example environment variables
-├── docker-compose.dev.yml    # Development Docker Compose
-├── docker-compose.yml        # Production Docker Compose
+├── docker/                  # Docker configuration files
+│   ├── docker-compose.dev.yml    # Development Docker Compose
+│   ├── Dockerfile.web            # Web service Dockerfile
+│   ├── Dockerfile.celery         # Celery worker Dockerfile
+│   ├── Dockerfile.celery-beat    # Celery Beat Dockerfile
+│   └── Dockerfile.flower         # Flower monitoring Dockerfile
 ├── Dockerfile                # Main Dockerfile
 ├── Dockerfile.dev            # Development Dockerfile
 ├── manage.py                 # Django management script
@@ -235,12 +239,12 @@ talemo/
 
 1. Start the development environment:
    ```bash
-   docker-compose -f docker-compose.dev.yml up -d
+   docker-compose -f docker/docker-compose.dev.yml up -d
    ```
 
 2. Apply migrations:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web python manage.py migrate
+   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py migrate
    ```
 
 3. Create a superuser:
