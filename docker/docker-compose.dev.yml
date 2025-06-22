@@ -24,8 +24,13 @@ services:
   # Django Web Server
   web:
     build:
+<<<<<<<< HEAD:docker/docker-compose.dev.yml
       context: ..
       dockerfile: docker/Dockerfile.web
+========
+      context: .
+      dockerfile: Dockerfile.web
+>>>>>>>> origin/main:docker-compose.dev.yml
     container_name: talemo-web
     restart: unless-stopped
     depends_on:
@@ -34,7 +39,11 @@ services:
       - minio
       - mailhog
     env_file:
+<<<<<<<< HEAD:docker/docker-compose.dev.yml
       - ../.env
+========
+      - .env
+>>>>>>>> origin/main:docker-compose.dev.yml
     ports:
       - "8000:8000"
     volumes:
@@ -76,8 +85,13 @@ services:
   # Celery worker for asynchronous tasks
   celery:
     build:
+<<<<<<<< HEAD:docker/docker-compose.dev.yml
       context: ..
       dockerfile: docker/Dockerfile.celery
+========
+      context: .
+      dockerfile: Dockerfile.celery
+>>>>>>>> origin/main:docker-compose.dev.yml
     container_name: talemo-celery
     restart: unless-stopped
     depends_on:
@@ -85,15 +99,26 @@ services:
       - db
       - mailhog
     env_file:
+<<<<<<<< HEAD:docker/docker-compose.dev.yml
       - ../.env
     volumes:
       - ../:/app
+========
+      - .env
+    volumes:
+      - .:/app
+>>>>>>>> origin/main:docker-compose.dev.yml
 
   # Celery Beat for scheduled tasks
   celery-beat:
     build:
+<<<<<<<< HEAD:docker/docker-compose.dev.yml
       context: ..
       dockerfile: docker/Dockerfile.celery-beat
+========
+      context: .
+      dockerfile: Dockerfile.celery-beat
+>>>>>>>> origin/main:docker-compose.dev.yml
     container_name: talemo-celery-beat
     restart: unless-stopped
     depends_on:
@@ -102,15 +127,26 @@ services:
       - celery
       - mailhog
     env_file:
+<<<<<<<< HEAD:docker/docker-compose.dev.yml
       - ../.env
     volumes:
       - ../:/app
+========
+      - .env
+    volumes:
+      - .:/app
+>>>>>>>> origin/main:docker-compose.dev.yml
 
   # Flower for Celery monitoring
   flower:
     build:
+<<<<<<<< HEAD:docker/docker-compose.dev.yml
       context: ..
       dockerfile: docker/Dockerfile.flower
+========
+      context: .
+      dockerfile: Dockerfile.flower
+>>>>>>>> origin/main:docker-compose.dev.yml
     container_name: talemo-flower
     restart: unless-stopped
     depends_on:
@@ -118,11 +154,19 @@ services:
       - celery
       - mailhog
     env_file:
+<<<<<<<< HEAD:docker/docker-compose.dev.yml
       - ../.env
     ports:
       - "5555:5555"
     volumes:
       - ../:/app
+========
+      - .env
+    ports:
+      - "5555:5555"
+    volumes:
+      - .:/app
+>>>>>>>> origin/main:docker-compose.dev.yml
 
   # Mailhog for email testing
   mailhog:
