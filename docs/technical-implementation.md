@@ -7,7 +7,7 @@
 | **Product**   | Talemo - Family Audio-Stories Platform          |
 | **Version**   | 1.0                                             |
 | **Author**    | Engineering Team                                |
-| **Date**      | Based on PRD v0.3 (22 Jun 2025)                 |
+| **Date**      | Based on PRD (22 Jun 2025)                 |
 | **Reviewers** | CTO, Product Team, DevOps, Security             |
 
 ---
@@ -18,15 +18,17 @@
 
 Talemo follows a modern, scalable architecture with these key components:
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Client Layer   │     │  Service Layer  │     │   Data Layer    │
-├─────────────────┤     ├─────────────────┤     ├─────────────────┤
-│ - PWA           │     │ - Django MVT    │     │ - PostgreSQL    │
-│ - Capacitor App │     │ - Django REST   │     │ - MinIO/S3      │
-│ - HTMX + BS5    │◄───►│ - Celery        │◄───►│ - Redis         │
-│                 │     │ - CrewAI        │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
+``` 
+┌─────────────────┐     ┌─────────────────────────────┐     ┌────────────────────────────┐
+│  Client Layer   │     │      Service Layer          │     │      Data Layer            │
+├─────────────────┤     ├─────────────────────────────┤     ├────────────────────────────┤
+│ - PWA           │     │ - Django MVT                │     │ - PostgreSQL (RLS)         │
+│ - Capacitor App │     │ - Django REST               │     │ - MinIO/S3 (tenant-prefix) │
+│ - HTMX + BS5    │◄───►│ - Multi-Tenant Middleware   │◄───►│ - Redis                    │
+│                 │     │ - Profile-Based Permissions │     │ - WORM Audit Storage       │
+│                 │     │ - Celery                    │     │                            │
+│                 │     │ - CrewAI Agents             │     │                            │
+└─────────────────┘     └─────────────────────────────┘     └────────────────────────────┘
 ```
 
 ### 2.2 Component Details
@@ -36,27 +38,40 @@ Talemo follows a modern, scalable architecture with these key components:
    - HTMX for dynamic interactions without full page reloads
    - Bootstrap 5 for responsive, mobile-first design
    - CapacitorJS for native app wrappers (iOS/Android)
+   - Tenant-aware UI with profile-based feature visibility
 
 2. **Backend**:
    - Django (MVT) for server-side rendering and admin interface
    - Django REST Framework for API endpoints
+   - Multi-tenant middleware for tenant context management
+   - Profile-based permission system
    - Celery for asynchronous task processing
    - CrewAI for agent-based content generation and workflows
 
 3. **Data Storage**:
-   - PostgreSQL for relational data
-   - MinIO for local development/on-prem storage of media assets
+   - PostgreSQL with Row-Level Security (RLS) for tenant isolation
+   - Tenant-prefixed MinIO/S3 paths for media asset isolation
+   - WORM (Write Once Read Many) storage for immutable audit logs
    - Redis for caching and Celery message broker
 
-4. **Authentication**:
+4. **Authentication & Identity**:
    - Django-allauth for SSO integration (Google & Apple)
-   - JWT for API authentication
-   - Role-based access control (RBAC)
+   - UserIdentity model for IDP linking with tenant binding
+   - JWT for API authentication with tenant context
+   - Profile-based permission system (replacing RBAC)
+   - Tenant invitation flow with secure token generation
 
-5. **Deployment**:
+5. **Governance & Compliance**:
+   - TenantPolicy key-value store for tenant-wide settings
+   - Profile catalogue for permission templates
+   - Audit logging for all governance actions
+   - SECNUMCLOUD (ANSSI) compliance controls
+
+6. **Deployment**:
    - Docker containers for all components
    - Kubernetes-ready for cloud deployment
    - Cloud-agnostic design (AWS/GCP/Azure compatible)
+   - Tenant-aware scaling and resource allocation
 
 ---
 
@@ -64,23 +79,67 @@ Talemo follows a modern, scalable architecture with these key components:
 
 ### 3.1 Core Entities
 
+#### Tenant
+```
+Tenant
+├── id: UUID (PK)
+├── name: CharField
+├── type: CharField [family, institution]
+├── created_at: DateTimeField
+└── updated_at: DateTimeField
+```
+
+#### Profile
+```
+Profile
+├── id: UUID (PK)
+├── tenant_id: ForeignKey(Tenant)
+├── name: CharField (unique within tenant)
+├── permissions: JSONField
+├── created_at: DateTimeField
+└── updated_at: DateTimeField
+```
+
 #### User
 ```
 User
 ├── id: UUID (PK)
-├── email: EmailField (unique)
+├── tenant_id: ForeignKey(Tenant)
+├── profile_id: ForeignKey(Profile)
+├── email: EmailField
 ├── name: CharField
-├── role: CharField [Guest, Registered, Creator, Admin]
-├── auth_provider: CharField [Google, Apple, Email]
 ├── is_active: BooleanField
 ├── created_at: DateTimeField
 └── last_login: DateTimeField
+```
+
+#### UserIdentity
+```
+UserIdentity
+├── id: UUID (PK)
+├── user_id: ForeignKey(User)
+├── idp_issuer: CharField
+├── idp_subject: CharField
+├── created_at: DateTimeField
+└── metadata: JSONField
+```
+
+#### TenantPolicy
+```
+TenantPolicy
+├── id: UUID (PK)
+├── tenant_id: ForeignKey(Tenant)
+├── key: CharField (unique within tenant)
+├── value: JSONField
+├── created_at: DateTimeField
+└── updated_at: DateTimeField
 ```
 
 #### Story
 ```
 Story
 ├── id: UUID (PK)
+├── tenant_id: ForeignKey(Tenant)
 ├── title: CharField
 ├── description: TextField
 ├── content: TextField (story text)
@@ -91,6 +150,7 @@ Story
 ├── duration: IntegerField (seconds)
 ├── tags: ManyToManyField(Tag)
 ├── created_by: ForeignKey(User)
+├── visibility: CharField [public, tenant_only, private]
 ├── is_published: BooleanField
 ├── created_at: DateTimeField
 └── updated_at: DateTimeField
@@ -100,6 +160,7 @@ Story
 ```
 Asset
 ├── id: UUID (PK)
+├── tenant_id: ForeignKey(Tenant)
 ├── type: CharField [image, audio]
 ├── file_path: CharField
 ├── file_size: IntegerField
@@ -122,7 +183,8 @@ Tag
 ```
 AgentTask
 ├── id: UUID (PK)
-├── agent_type: CharField [StoryBuilder, TTS, ImageGen, Metadata, Moderation]
+├── tenant_id: ForeignKey(Tenant)
+├── agent_type: CharField [SearchAgent, ModerationAgent, TTSAgent, IllustratorAgent, MetadataAgent, QuotaAgent, PersonalizationAgent, StoryCompanion, SearchAssistant]
 ├── status: CharField [pending, processing, completed, failed]
 ├── input: JSONField
 ├── output: JSONField
@@ -136,6 +198,7 @@ AgentTask
 ```
 Subscription
 ├── id: UUID (PK)
+├── tenant_id: ForeignKey(Tenant)
 ├── user: ForeignKey(User)
 ├── plan: CharField [free, premium, institution]
 ├── status: CharField [active, canceled, expired]
@@ -146,11 +209,20 @@ Subscription
 
 ### 3.2 Relationships
 
+- Tenant 1:N Profile (one tenant can have many profiles)
+- Tenant 1:N User (one tenant can have many users)
+- Tenant 1:N Story (one tenant can have many stories)
+- Tenant 1:N Asset (one tenant can have many assets)
+- Tenant 1:N TenantPolicy (one tenant can have many policies)
+- Profile N:M User (users can be assigned to profiles)
+- User 1:N UserIdentity (one user can have multiple identity providers)
 - User 1:N Story (one user can create many stories)
 - Story N:1 Image Asset (one story has one main image)
 - Story N:1 Audio Asset (one story has one audio file)
 - Story N:M Tag (stories can have multiple tags)
 - AgentTask 1:N Asset (one agent task can generate multiple assets)
+
+All tenant-bound tables share the same Row-Level Security (RLS) predicate: `USING (tenant_id = current_setting('app.tenant')::uuid)`
 
 ---
 
@@ -165,28 +237,45 @@ Subscription
 - `POST /api/auth/token/refresh/` - Refresh JWT token
 
 #### Stories
-- `GET /api/stories/` - List stories (with filtering)
+- `GET /api/stories/` - List stories (with filtering by tags, age_range, language, visibility)
 - `GET /api/stories/<id>/` - Get story details
-- `POST /api/stories/` - Create story (Creator/Admin)
-- `PUT /api/stories/<id>/` - Update story (Creator/Admin)
-- `DELETE /api/stories/<id>/` - Delete story (Admin)
-- `GET /api/stories/search/` - Search stories
+- `POST /api/stories/` - Create story (requires appropriate profile permissions)
+- `PUT /api/stories/<id>/` - Update story (creator or admin)
+- `PATCH /api/stories/<id>/visibility/` - Update story visibility [public, tenant_only, private]
+- `DELETE /api/stories/<id>/` - Delete story (admin)
+- `GET /api/stories/search/` - Search stories (uses SearchAgent)
 
 #### Assets
-- `GET /api/assets/<id>/` - Get asset details
-- `GET /api/assets/<id>/download/` - Get signed URL for asset download
-- `POST /api/assets/` - Upload asset (Creator/Admin)
-- `DELETE /api/assets/<id>/` - Delete asset (Admin)
+- `GET /api/assets/<id>/` - Get asset details (tenant-scoped)
+- `GET /api/assets/<id>/download/` - Get signed URL for asset download (tenant-scoped)
+- `POST /api/assets/` - Upload asset (requires appropriate profile permissions)
+- `DELETE /api/assets/<id>/` - Delete asset (admin)
+- `GET /api/assets/tenant-usage/` - Get storage usage statistics for current tenant
 
 #### Agent Tasks
-- `POST /api/agents/trigger/` - Trigger agent task
-- `GET /api/agents/tasks/<id>/` - Get task status
-- `GET /api/agents/tasks/` - List tasks (Admin)
+- `POST /api/agents/trigger/` - Trigger agent task (tenant-scoped, requires appropriate profile permissions)
+- `GET /api/agents/tasks/<id>/` - Get task status (tenant-scoped)
+- `GET /api/agents/tasks/` - List tasks for current tenant (admin)
+- `GET /api/agents/quota/` - Get agent usage quota information for current tenant
+
+#### Tenant Management
+- `GET /api/tenants/` - Get current tenant details
+- `GET /api/tenants/policies/` - Get tenant policies
+- `PUT /api/tenants/policies/<key>/` - Update tenant policy (Admin)
+
+#### Profile Management
+- `GET /api/profiles/` - List profiles in current tenant
+- `POST /api/profiles/` - Create new profile (Admin)
+- `GET /api/profiles/<id>/` - Get profile details
+- `PUT /api/profiles/<id>/` - Update profile (Admin)
+- `DELETE /api/profiles/<id>/` - Delete profile (Admin)
+- `POST /api/profiles/<id>/assign/` - Assign users to profile (Admin)
 
 #### Admin
 - `GET /api/admin/stats/` - Get platform statistics
 - `GET /api/admin/users/` - List users (Admin)
 - `PUT /api/admin/users/<id>/` - Update user (Admin)
+- `GET /api/admin/audit-logs/` - Get audit logs (Admin)
 
 ### 4.2 API Response Format
 
@@ -205,6 +294,9 @@ Standard JSON response format:
 
 - `/webhooks/agent-task-complete/` - Notifies when an agent task completes
 - `/webhooks/subscription-status/` - Subscription status changes
+- `/webhooks/audit-event/` - Streams governance and security audit events
+- `/webhooks/profile-change/` - Notifies when profile permissions change
+- `/webhooks/tenant-policy-update/` - Notifies when tenant policies are updated
 
 ---
 
@@ -216,31 +308,59 @@ Standard JSON response format:
    - Implement Google and Apple Sign-In using django-allauth
    - Configure OAuth2 client IDs and secrets
    - Set up callback URLs and handle token exchange
+   - Store identity provider information in UserIdentity model
 
 2. **JWT for API Access**:
    - Issue JWT tokens upon successful authentication
-   - Include user role and permissions in token payload
+   - Include tenant_id and profile permissions in token payload
    - Implement token refresh mechanism
+   - Enforce tenant context in all API requests
 
 3. **Mobile Authentication**:
    - Web: Standard OAuth2 flow
    - Native apps: Use Capacitor plugins for native auth dialogs
+   - Maintain consistent identity across platforms
 
-### 5.2 Role-Based Access Control (RBAC)
+4. **Identity Uniqueness**:
+   - Enforce global uniqueness of (idp_issuer, idp_subject) pairs
+   - Allow multiple IDPs per user if they map to the same tenant
+   - Prevent cross-tenant identity conflicts
 
-| Role        | Permissions                                                   |
-|-------------|---------------------------------------------------------------|
-| Guest       | Browse public stories, play limited number of stories         |
-| Registered  | Access all stories based on subscription, save favorites      |
-| Creator     | Create and edit own stories, trigger agent workflows          |
-| Admin       | Full CRUD access to all resources, user management            |
+### 5.2 Profile-Based Access Control
 
-### 5.3 Implementation Details
+The system uses a profile-based permission system instead of per-user role assignments:
 
-- Use Django's permission system extended with custom permissions
-- Implement middleware for role-based access checks
-- Create decorators for view-level permission checks
-- Set up row-level permissions for story ownership
+1. **Profile Management**:
+   - Tenant admins create and manage permission profiles (e.g., "Kids Listen-Only", "Parent Creator")
+   - Profiles contain a JSON structure of permissions and quotas
+   - Users are assigned to profiles, not individual permissions
+
+2. **Permission Enforcement**:
+   - Permissions are loaded from Profile.permissions JSON once per request
+   - All access checks reference the profile permissions
+   - No per-user permission tweaking allowed
+
+3. **Tenant Policies**:
+   - Global tenant settings stored in TenantPolicy KV store
+   - Examples: story_quota, max_users, feature_flags
+   - Applied uniformly to all users within a tenant
+
+### 5.3 Multi-Tenant Implementation
+
+1. **Row-Level Security**:
+   - PostgreSQL RLS policies on all tenant-bound tables
+   - Predicate: `USING (tenant_id = current_setting('app.tenant')::uuid)`
+   - Set tenant context at the beginning of each request
+
+2. **Tenant Isolation**:
+   - Middleware sets app.tenant based on authenticated user
+   - Database queries automatically filtered by tenant_id
+   - Storage paths prefixed with tenant_id
+
+3. **Audit Trail**:
+   - All profile/policy changes logged to immutable storage
+   - Audit records include tenant_id, user_id, action, timestamp
+   - Retention period of at least 1 year for compliance
 
 ---
 
@@ -252,7 +372,7 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                      Django Application                  │
+│                      Django Application                 │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
@@ -262,7 +382,7 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
 └───────────────────────────────────────────────┼─────────┘
                                                 ▼
 ┌─────────────────────────────────────────────────────────┐
-│                     CrewAI Framework                     │
+│                     CrewAI Framework                    │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
@@ -278,47 +398,69 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
 
 ### 6.2 Agent Implementation
 
-#### StoryBuilderAgent
-- **Purpose**: Orchestrates the story creation workflow
-- **Input**: Story text, target age range, theme
-- **Process**: Coordinates other agents, manages workflow
-- **Output**: Complete story package (text, audio, image, metadata)
+#### SearchAgent
+- **Purpose**: Hybrid semantic + keyword search
+- **Input**: Search query, tenant context
+- **Process**: Queries pgvector database with semantic and keyword matching
+- **Output**: Ordered list of story_ids
+- **Event Flow**: Consumes `search.query` → Produces `search.results`
+
+#### ModerationAgent
+- **Purpose**: Ensures content safety and appropriateness
+- **Input**: Story draft, tenant context
+- **Process**: Runs GPT-4 based moderation & keyword heuristics
+- **Output**: Approval status or flagged content
+- **Event Flow**: Consumes `story.draft` → Produces `story.approved` or `story.flagged`
 
 #### TTSAgent
 - **Purpose**: Converts text to speech
-- **Input**: Story text, voice parameters
-- **Process**: Uses TTS service (local or third-party)
-- **Output**: Audio file in MP3 format
+- **Input**: Approved story text, voice parameters
+- **Process**: Synthesizes speech via tenant-selected voice pack
+- **Output**: Audio file in MP3 format stored in MinIO
+- **Event Flow**: Consumes `story.approved` → Produces `asset.audio.ready`
 
-#### ImageGenAgent
+#### IllustratorAgent
 - **Purpose**: Generates illustrations for stories
-- **Input**: Story text, scene description
-- **Process**: Uses image generation model
-- **Output**: Illustration image in appropriate format
+- **Input**: Approved story text, style parameters
+- **Process**: Generates cover art using Stable Diffusion XL
+- **Output**: Image file in PNG format stored under tenant prefix
+- **Event Flow**: Consumes `story.approved` → Produces `asset.image.ready`
 
 #### MetadataAgent
 - **Purpose**: Auto-tags and categorizes stories
-- **Input**: Story text, audio duration
-- **Process**: Analyzes content for themes, characters, mood
-- **Output**: Tags, age recommendations, categories
+- **Input**: Story draft
+- **Process**: Extracts language, tags, reading-level
+- **Output**: Updated story metadata
+- **Event Flow**: Consumes `story.draft`
 
-#### ModerationAgent
-- **Purpose**: Ensures content safety
-- **Input**: Story text, generated images
-- **Process**: Checks for inappropriate content
-- **Output**: Safety score, flags for manual review if needed
+#### QuotaAgent
+- **Purpose**: Enforces tenant quotas
+- **Input**: Story creation request, tenant context
+- **Process**: Checks TenantPolicy.story_quota
+- **Output**: Approval or rejection based on quota
+- **Event Flow**: Consumes `story.request`
+
+#### PersonalizationAgent
+- **Purpose**: Personalizes content recommendations
+- **Input**: User play events
+- **Process**: Updates per-user embeddings for recommendations
+- **Output**: Updated user preference data
+- **Event Flow**: Consumes `play.event`
 
 ### 6.3 User-Facing Agents
 
 #### StoryCompanion
-- **Purpose**: Interactive story co-creation
+- **Purpose**: Co-creation chat assistant for families
 - **Implementation**: Chat interface with CrewAI backend
-- **Features**: Suggests plot elements, characters, helps develop story
+- **Features**: Suggests themes, characters, helps develop story
+- **Workflow**: Chat → Fill Details → Generate → Preview → Save to Library
+- **Event Flow**: Consumes user input → Produces structured story form
 
 #### SearchAssistant
-- **Purpose**: Conversational search for stories
-- **Implementation**: Natural language query processing
+- **Purpose**: Conversational assistant to surface content
+- **Implementation**: Natural language query processing with semantic search
 - **Features**: Understands intent, suggests relevant stories
+- **Integration**: Works with SearchAgent for backend processing
 
 ### 6.4 Agent Communication
 
@@ -376,11 +518,28 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
 - Feature detection for progressive enhancement
 - Unified asset pipeline for web and mobile
 
+### 7.4 Multi-Tenant Considerations
+
+1. **Tenant Context**:
+   - Maintain tenant context across all app screens
+   - Ensure proper isolation of tenant data in UI
+   - Support tenant-specific theming and branding
+
+2. **Profile-Based UI**:
+   - Dynamically adjust UI based on user's profile permissions
+   - Hide/show features based on profile capabilities
+   - Prevent access to unauthorized features
+
+3. **Offline Capabilities**:
+   - Cache tenant-specific content for offline use
+   - Maintain tenant context during offline operation
+   - Sync tenant-bound data when connection is restored
+
 ---
 
 ## 8. Development Roadmap
 
-### 8.1 Phase 1: Foundation (Weeks 1-4)
+### 8.1 Phase 1: Foundation
 
 1. **Setup Development Environment**:
    - Configure Django project structure
@@ -392,17 +551,19 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
    - Create Django models
    - Set up migrations
 
-3. **Authentication System**:
+3. **Authentication & Multi-Tenant System**:
    - Implement SSO with Google and Apple
-   - Set up RBAC system
-   - Create JWT authentication for API
+   - Set up Profile-based permission system
+   - Implement UserIdentity model for IDP linking
+   - Create JWT authentication with tenant context
+   - Implement row-level security for tenant isolation
 
 4. **Basic Frontend**:
    - Implement responsive templates
    - Set up HTMX integration
    - Create basic UI components
 
-### 8.2 Phase 2: Core Functionality (Weeks 5-8)
+### 8.2 Phase 2: Core Functionality
 
 1. **Story Management**:
    - Implement story CRUD operations
@@ -419,12 +580,16 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
    - Implement basic agent tasks
    - Create agent task monitoring
 
-4. **Admin Interface**:
+4. **Admin & Governance Interface**:
    - Customize Django admin
    - Create admin dashboard
-   - Implement user management
+   - Implement tenant management
+   - Create profile management interface
+   - Implement user-to-profile assignment
+   - Set up tenant policy management
+   - Implement audit logging for governance actions
 
-### 8.3 Phase 3: Advanced Features (Weeks 9-12)
+### 8.3 Phase 3: Advanced Features
 
 1. **Story Generation Workflow**:
    - Implement full agent pipeline
@@ -446,7 +611,7 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
    - Create payment integration
    - Set up access control based on subscription
 
-### 8.4 Phase 4: Mobile & Polish (Weeks 13-16)
+### 8.4 Phase 4: Mobile & Polish
 
 1. **CapacitorJS Integration**:
    - Set up Capacitor project
@@ -559,23 +724,41 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
 
 - Encryption at rest for all data
 - TLS for all communications
-- Secure asset storage with signed URLs
+- Secure asset storage with signed URLs and tenant prefixes
 - GDPR and COPPA compliance measures
+- SECNUMCLOUD (ANSSI) compliance controls
 
-### 11.2 Authentication Security
+### 11.2 Multi-Tenant Security
+
+- Row-level security (RLS) for all tenant-bound tables
+- Tenant context set at the beginning of each request
+- Tenant isolation enforced at database level
+- Storage isolation with tenant-specific prefixes
+- Immutable audit logs for tenant operations
+
+### 11.3 Identity Management
+
+- Global uniqueness of (idp_issuer, idp_subject) pairs
+- Tenant-bound identity linking
+- Composite DB constraint to prevent cross-tenant identity conflicts
+- Secure invitation flow with tenant_id embedding
+
+### 11.4 Authentication Security
 
 - OAuth2 best practices
 - JWT token security (short expiry, refresh tokens)
+- Tenant context included in token payload
 - Rate limiting for authentication endpoints
 - Account lockout after failed attempts
 
-### 11.3 Application Security
+### 11.5 Application Security
 
 - Input validation and sanitization
 - CSRF protection
 - XSS prevention
 - SQL injection protection
 - Regular security audits
+- WORM (Write Once Read Many) storage for audit trails
 
 ---
 
@@ -630,13 +813,23 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
 
 ## 14. Conclusion & Next Steps
 
-This technical implementation document provides a comprehensive roadmap for building the Talemo platform. The architecture is designed to be scalable, secure, and maintainable, with a focus on mobile-first user experience and AI-powered content generation.
+This technical implementation document provides a comprehensive roadmap for building the Talemo platform. The architecture is designed to be scalable, secure, and maintainable, with a focus on mobile-first user experience, AI-powered content generation, and multi-tenant governance. The implementation aligns with the PRD requirements, particularly the emphasis on tenant isolation, profile-based permissions, and SECNUMCLOUD compliance.
+
+### Key Architectural Decisions:
+
+1. **Multi-Tenant Architecture**: Strict tenant isolation using PostgreSQL Row-Level Security and tenant-prefixed storage paths
+2. **Profile-Based Permissions**: Replacing traditional RBAC with a more flexible and manageable profile-based system
+3. **Identity Management**: Global uniqueness of identity provider credentials with tenant binding
+4. **Agent-Based Workflows**: Stateless, tenant-scoped agents for content generation, moderation, and personalization
+5. **Compliance-Ready Design**: Architecture mapped to SECNUMCLOUD controls with audit trails and immutable logs
 
 ### Immediate Next Steps:
 
-1. **Technical Validation**: Proof-of-concept for CrewAI + Celery integration
-2. **Development Environment**: Set up initial project structure and Docker environment
-3. **Team Onboarding**: Brief development team on architecture and roadmap
-4. **Sprint Planning**: Break down Phase 1 tasks into sprint-sized work items
+1. **Technical Validation**: Proof-of-concept for CrewAI + Celery integration with tenant context
+2. **Multi-Tenant POC**: Validate Profile & RLS scaffold with sample load test
+3. **Development Environment**: Set up initial project structure and Docker environment
+4. **Team Onboarding**: Brief development team on architecture and roadmap
+5. **Sprint Planning**: Break down Phase 1 tasks into sprint-sized work items
+6. **Compliance Mapping**: Map PRD controls to SECNUMCLOUD checklist; schedule external gap assessment
 
 The implementation will follow an agile approach, with regular reviews and adjustments to the plan as development progresses.
