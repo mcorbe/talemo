@@ -26,11 +26,14 @@ Our initial release focuses on three core capabilities with an exclusive focus o
 
 At launch, we will solely focus on AI-generated story content without any pre-existing catalog. This approach allows us to prove that AI-generated content works for parents and kids before potentially adding licensed content in the future.
 
+We're targeting the 6-8 year old "creative kids" segment as our primary audience, as they can self-serve creation flows while still benefiting from parental guidance.
+
 This focused approach allows us to:
 - Launch a compelling product within 4 months
 - Validate core user behaviors and retention metrics
 - Build a strong foundation with French families with children under 10
 - Control costs while building toward unit economic sustainability
+- Pursue hardware partnerships rather than competing head-on
 
 ### What makes Talemo different
 
@@ -333,46 +336,55 @@ This strategic choice should frame our next pricing or growth-loop experiments.
 
 ## 7. Personas & Use Cases
 
+### 7.1 Primary Persona: Creative Kids (6-8 years)
+
+Our narrow wedge persona focus is the 6-8 year old "creative kids" segment. This age group:
+- Can self-serve creation flows with minimal parental assistance
+- Has developed reading skills but still enjoys being read to
+- Is highly imaginative and enjoys storytelling
+- Can navigate digital interfaces independently
+- Benefits from screen-free audio experiences
+
 | Persona                   | Description                                                                      |
 | ------------------------- | -------------------------------------------------------------------------------- |
+| **Creative Child (Emma, 7)**  | Our primary persona: Imaginative, tech-savvy child who enjoys creating and customizing stories. Can navigate the app independently but benefits from parental guidance. |
 | **Family Administrator**  | Creates a household tenant, invites family members, manages profiles.            |
 | **Parent (Amélie, 38)**   | Browses AI-generated bedtime stories on phone, filters by length/theme.          |
-| **Child (Léo, 8)**        | Taps colourful card, plays AI-generated story, creates own stories with AI assistance. |
 | **Grandparent (Michel, 65)** | Receives shared stories from family, listens with grandchildren during visits.  |
-| **Story Creator (Lucas)** | Parent who writes text, triggers AI asset generation, records own narration.     |
 
-### Core User Journeys (MVP)
+### 7.2 Core User Journeys (MVP)
 
-1. **AI Story Discovery & Playback**
-   - Parent browses AI-generated stories
+1. **Creative Child Story Creation** (Primary Journey)
+   - Child (6-8y) selects "Create Story" on their profile
+   - Chooses characters, setting, and basic plot elements through visual interface
+   - AI generates complete story with appropriate complexity for age
+   - Child reviews, makes simple edits if desired
+   - Publishes to family's AI story collection
+   - Option to upgrade to Creator Premium if weekly limit reached
+
+2. **AI Story Discovery & Playback**
+   - Child or parent browses AI-generated stories
    - Selects AI story based on theme/length
    - Activates dark-screen mode
    - Child listens to AI-generated story
 
-2. **AI Story Creation**
-   - Child/parent selects "Create Story"
-   - Enters basic story elements (characters, setting)
-   - AI generates complete story
-   - Reviews and publishes to family's AI story collection
-
-3. **Record-Your-Own Narration for AI Stories**
-   - Select existing AI-generated story
-   - Choose "Record My Voice"
-   - Record narration following text prompts
+3. **Record-Your-Own Narration**
+   - Child selects existing AI-generated story
+   - Chooses "Record My Voice"
+   - Records narration following text prompts with age-appropriate guidance
    - Save as alternative audio track for the AI story
 
-4. **Family Sharing Journey**
-   - Parent selects story to share
-   - Generates unique family sharing link
-   - Sends link to grandparents or other family members
-   - Family members listen without needing an account
-   - Option to save story to their own account if they sign up
+4. **Hardware Connection Journey** (Post-MVP)
+   - Parent connects Talemo account to compatible hardware (Lunii, Yoto, etc.)
+   - Child's created stories sync to the device
+   - Child can listen to their creations on screen-free hardware
+   - Hardware-specific features (cards, figurines) trigger story playback
 
 ---
 
-## 7. Functional Requirements
+## 8. Functional Requirements
 
-### 7.1 Core Experience (MVP Focus)
+### 8.1 Core Experience (MVP Focus)
 
 | Ref    | Feature                | Description                                                                        | Priority |
 | ------ | ---------------------- | ---------------------------------------------------------------------------------- | -------- |
@@ -389,7 +401,7 @@ This strategic choice should frame our next pricing or growth-loop experiments.
 | COR-11 | **Offline AI Story Packs** | Downloadable AI-generated stories for offline use in cars, rural areas, and travel scenarios | P1 |
 | COR-12 | **Family Sharing**      | Ability to share stories with extended family members via secure links            | P1       |
 
-### 7.2 Governance & Multi-Tenancy
+### 8.2 Governance & Multi-Tenancy
 
 | Ref    | Requirement                                                                                                 | Priority |
 | ------ | ----------------------------------------------------------------------------------------------------------- | -------- |
@@ -401,7 +413,7 @@ This strategic choice should frame our next pricing or growth-loop experiments.
 
 ---
 
-## 8. Agent Architecture (Streamlined for MVP)
+## 9. Agent Architecture (Streamlined for MVP)
 
 The platform runs a focused suite of stateless **CrewAI** agents orchestrated by Celery. Each agent receives a tenant-scoped message, performs one atomic task, emits an event for the next stage, and writes an audit trace for SECNUMCLOUD.
 
@@ -420,11 +432,11 @@ The platform runs a focused suite of stateless **CrewAI** agents orchestrated by
 
 ---
 
-## 9. Cost Control Roadmap
+## 10. Cost Control Roadmap
 
 To achieve our target of €0.03 per story generation, we will implement the following optimizations, clearly distinguishing between pure engineering tasks and those requiring model R&D:
 
-### 9.1 Model & Voice Caching
+### 10.1 Model & Voice Caching
 
 | Phase | Optimization | Impact | Timeline | Implementation Type | Risk Level |
 |-------|--------------|--------|----------|---------------------|------------|
@@ -432,7 +444,7 @@ To achieve our target of €0.03 per story generation, we will implement the fol
 | 2 | Create a library of pre-generated voice clips for story templates | Additional 10-15% reduction | Month 2 | **Pure Engineering** | Low |
 | 3 | Develop voice fingerprinting to avoid regenerating similar audio | Additional 10% reduction | Month 3 | **Hybrid** (70% Engineering, 30% R&D) | Medium |
 
-### 9.2 Local Inference
+### 10.2 Local Inference
 
 | Phase | Optimization | Impact | Timeline | Implementation Type | Risk Level |
 |-------|--------------|--------|----------|---------------------|------------|
@@ -440,7 +452,7 @@ To achieve our target of €0.03 per story generation, we will implement the fol
 | 2 | Implement client-side TTS for select devices with sufficient capabilities | 30-40% reduction in cloud TTS costs | Month 3-4 | **Pure Engineering** | Medium |
 | 3 | Develop hybrid approach with on-device generation for common content | Additional 10-15% reduction | Post-MVP | **Hybrid** (60% Engineering, 40% R&D) | Medium |
 
-### 9.3 Model Optimization
+### 10.3 Model Optimization
 
 | Phase | Optimization | Impact | Timeline | Implementation Type | Risk Level |
 |-------|--------------|--------|----------|---------------------|------------|
@@ -448,7 +460,7 @@ To achieve our target of €0.03 per story generation, we will implement the fol
 | 2 | Implement prompt optimization techniques to reduce token usage | 10-15% reduction | Month 1 | **Pure Engineering** | Low |
 | 3 | Create story templates that require minimal LLM customization | 15-20% reduction | Month 2 | **Pure Engineering** | Low |
 
-### 9.4 Cost Reduction Projection
+### 10.4 Cost Reduction Projection
 
 | Timeline | Cost Per Story | Optimization Methods | Engineering vs. R&D Dependency |
 |----------|----------------|----------------------|--------------------------------|
@@ -458,7 +470,7 @@ To achieve our target of €0.03 per story generation, we will implement the fol
 | Month 3 | €0.04-0.05 | Fine-tuned models + voice fingerprinting | **60% Engineering, 40% R&D** (medium risk) |
 | Month 4-6 | €0.03 | Client-side inference + hybrid approach | **70% Engineering, 30% R&D** (medium risk) |
 
-### 9.5 Risk Mitigation Strategy
+### 10.5 Risk Mitigation Strategy
 
 For optimizations with R&D dependencies, we've developed fallback approaches:
 
@@ -525,39 +537,50 @@ To maximize retention and drive organic growth among French families, we will:
 
 ## 11. Monetization & Business Model
 
+### 11.1 Creator-Led Revenue Model
+
+Based on our analysis, we're shifting to a creator-focused subscription model as our primary revenue driver, with advertising as a minimal fallback:
+
 | Ref    | Model                | Description                                                                           |
 | ------ | -------------------- | ------------------------------------------------------------------------------------- |
-| MON-01 | **Freemium with Ads**| Free tier with kid-safe ads (access to 5 rotating AI-generated stories/week) |
-| MON-02 | **Consumer-only** | €5 one-time payment unlocks permanent ad-free experience (no creation) |
-| MON-03 | **Creative Suite** | €1/month includes 1 story/week; additional stories €0.25 each |
+| MON-01 | **Creator Premium**  | €3.99/month subscription for unlimited story creation and ad-free experience |
+| MON-02 | **Free with Ads**    | Limited access with kid-safe contextual ads (5 rotating AI-generated stories/week) |
+| MON-03 | **Hardware Bundles** | White-label or SDK deals with Lunii/Yoto/Tonies for co-creation on their devices |
 
-### 11.1 Unit Economics
+### 11.2 Unit Economics
 
 | Metric | Target | Strategy |
 |--------|--------|----------|
-| ARPU (Free with Ads) | €1.80/year | €2 CPM × 75 impressions/month/1000 × 12 months |
-| ARPU (Consumer-only) | €5.00 one-time | One-time purchase for permanent ad removal |
-| ARPU (Creative Suite) | €38.00/year | €1 × 12 + (2 extra stories/week × 52 × €0.25) |
+| Creator Conversion | ≥ 15% of MAU (stretch 20%) | Pushes blended ARPU >€0.65 and derisks reliance on ads |
+| Monthly Blended ARPU | €0.46 (vs. €0.07 ads-only) | 7× improvement over ad-only model |
+| ARPU (Creator Premium) | €47.88/year | €3.99 × 12 months |
+| ARPU (Free with Ads) | €0.84/year | €0.90 CPM × 75 impressions/month/1000 × 12 months (conservative estimate) |
 | CAC | ≤ €12 | Focused marketing in French parenting channels + referral program |
-| LTV | ≥ €36 | Target 7+ month retention for creative suite subscribers |
-| Gross Margin | > 85% | After implementing cost control roadmap to reach €0.03/story |
+| D30 Retention | ≥ 35% | Benchmark for paid audio-learning apps; critical for LTV/CAC |
+| Gross Margin | ≥ 70% | With on-device TTS or €0.03/story cost ceiling |
+| CAC Payback | < 6 months on paid cohort | Keeps cash needs within the €0.8M pre-seed envelope |
 
-> Note: For a steady-state "ARR" view, we treat the €5 one-time purchase as revenue recognized in the year it happens. For strict SaaS ARR calculations, this would be considered non-recurring revenue.
+This creator-led model dramatically reduces the MAU required to reach our revenue targets:
 
-### 11.2 Detailed Business Model (€6M ARR: €2M France + €4M Rest of Europe)
+| Metric | Baseline (ads-only) | Creator-led (15% convert @ €3.99) |
+|--------|---------------------|-----------------------------------|
+| Monthly blended ARPU | €0.07 | €0.65 (9.3× higher) |
+| MAU needed for €1M ARR | 1.26M | 0.13M (10× fewer) |
 
-Based on best-available ad-monetization and AI-inference benchmarks, we've developed a comprehensive business model to reach €6M ARR (€2M in France and €4M across the rest of Europe) with a capital-efficient approach.
+### 11.3 Detailed Business Model (€1M ARR Pre-Seed Milestone)
 
-#### 11.2.1 Revenue Assumptions (FY2025)
+Based on our creator-led revenue model and best-available AI-inference benchmarks, we've developed a comprehensive business model to reach €1M ARR with a capital-efficient approach, requiring significantly fewer users than our previous ad-heavy model.
+
+#### 11.3.1 Revenue Assumptions (FY2025)
 
 | Revenue Stream | Assumptions | Source/Rationale |
 |----------------|-------------|------------------|
-| **Ad Revenue** | €2.0 net kids-safe eCPM | COPPA-compliant rewarded or interstitial ads in Western Europe typically net $3.8–4.5 CPM; kids targeting trims ~30% |
+| **Creator Premium** | €3.99/month subscription | Primary revenue driver with 15% conversion target |
+| **Ad Revenue** | €0.90 net kids-safe eCPM | Post-DSA contextual-only ads to minors; conservative estimate |
 | | 75 impressions/free MAU/month | 3 sessions × 4 ads each × ~6 fill-rate discount |
-| **Consumer-only (ad-free)** | €5 one-time payment | Permanent ad removal without creation capabilities |
-| **Creative Suite** | €1/month + €0.25/extra story | Includes 1 story/week; average uptake 2 extra stories/week |
+| **Hardware Partnerships** | White-label/SDK revenue | Potential to attach to 1% of Tonies + Yoto's 4M installed base |
 
-#### 11.2.2 Cost Structure
+#### 11.3.2 Cost Structure
 
 | Cost Category | Assumptions | Details |
 |---------------|-------------|---------|
@@ -566,113 +589,138 @@ Based on best-available ad-monetization and AI-inference benchmarks, we've devel
 | **Moderation + Misc** | €0.01/story | Quality assurance and safety |
 | **All-in AI Cost/Story** | €0.06 | Voice + image + moderation |
 | **Hosting/Streaming** | €0.20/active user/year | Cloud infrastructure costs |
-| **Variable Cost per Creative Family** | €9.4/year | 3 stories/week × 52 × €0.06 |
+| **Variable Cost per Creator User** | €15.6/year | 5 stories/week × 52 × €0.06 |
 
-#### 11.2.3 User Mix to Achieve €6M ARR (€2M France + €4M Rest of Europe)
+#### 11.3.3 User Mix to Achieve €1M ARR (Pre-Seed Milestone)
 
-##### France Market (€2M ARR)
-| Segment | Users | Revenue |
-|---------|-------|---------|
-| Free, ad-supported | 645,000 MAU | 645K × €1.8 ≈ €1,162K |
-| Consumer-only (ad-free) | 35,000 users | 35K × €5 ≈ €175K |
-| Creative Suite | 17,500 subscribers | 17.5K × €38 ≈ €663K |
-| **Total France** | **~700,000 MAU** | **€2.0M** |
+With our creator-led model focusing on €3.99/month subscriptions, we can achieve €1M ARR with dramatically fewer users:
 
-##### Rest of Europe (€4M ARR)
-Based on our market viability analysis and country-specific ARPU calculations, we need approximately 1.25 million families across nine European markets to achieve €4M ARR:
+| Segment | Users | Monthly Revenue | Annual Revenue |
+|---------|-------|----------------|----------------|
+| Creator Premium (15%) | 27,000 subscribers | 27K × €3.99 ≈ €107.7K | €1,292K |
+| Free with Ads (85%) | 153,000 MAU | 153K × €0.07/mo ≈ €10.7K | €128K |
+| **Total** | **180,000 MAU** | **€118.4K MRR** | **€1.42M ARR** |
 
-| Country Group | Families | Revenue | Key Markets |
-|---------------|----------|---------|------------|
-| Tier 1 | 616K | €2.3M | 🇬🇧 UK (308K), 🇩🇪 Germany (308K) |
-| Tier 2 | 388K | €1.1M | 🇪🇸 Spain (194K), 🇮🇹 Italy (194K) |
-| Tier 3 | 244K | €0.6M | 🇵🇱 Poland (106K), 🇳🇱 Netherlands (40K), 🇸🇪 Sweden (40K), 🇧🇪 Belgium (40K), 🇦🇹 Austria (18K) |
-| **Total EU-9** | **~1.25M MAU** | **€4.0M** | |
+This represents a dramatic reduction from the 700,000 MAU required in our previous model, making our growth targets much more achievable with limited marketing resources.
 
-The blended revenue per active user varies by country based on local eCPM rates, ranging from €2.28 (Poland) to €4.11 (UK), with penetration requirements all below 8% of families with children under 10.
+#### 11.3.4 Hardware Partnership Potential
 
-#### 11.2.4 Gross Margin Analysis
+By pursuing white-label or SDK deals with established hardware players, we can further accelerate growth:
+
+| Partner | Installed Base (EU) | Potential Attachment | Annual Revenue Potential |
+|---------|---------------------|----------------------|--------------------------|
+| Tonies + Yoto | ~4M devices | 1% adoption | 40K users × €3.99 × 12 = €1.92M |
+| Lunii | ~1.5M devices | 2% adoption | 30K users × €3.99 × 12 = €1.44M |
+
+Even modest adoption rates of our creation tools by existing hardware users could generate substantial additional revenue without the CAC burden of direct acquisition.
+
+#### 11.3.5 Gross Margin Analysis
 
 | Cost Bucket | Amount | Notes |
 |-------------|--------|-------|
-| AI Variable (creative only) | €163K | €9.36 × 17.5K creative users |
-| Hosting/Streaming | €140K | €0.20 × 700K total users |
-| **Total Variable Costs** | **€303K** | |
-| **Gross Profit** | **€1.70M** | **85% gross margin** |
+| AI Variable (creator users) | €421K | €15.6 × 27K creator users |
+| Hosting/Streaming | €36K | €0.20 × 180K total users |
+| **Total Variable Costs** | **€457K** | |
+| **Gross Profit** | **€963K** | **≈70% gross margin** |
 
-#### 11.2.5 Operational Structure
+This margin is healthy and sustainable, especially as we implement our cost optimization roadmap to bring AI costs down to €0.03 per story, which would improve margins to >80%.
 
-A lean team of approximately 8 FTE can efficiently operate the platform:
-- 4 Engineering
-- 1 Design
-- 1 Ad Operations
-- 1 Content
+#### 11.3.6 Operational Structure
+
+A lean team of approximately 8 FTE can efficiently operate the platform during the pre-seed phase:
+- 4 Engineering (focus on on-device TTS and creator tools)
+- 1 Design (focus on 6-8y "creative kids" UX)
+- 1 Partnership Manager (hardware & distribution deals)
+- 1 Content (story templates & moderation)
 - 1 Founder/Business Development
 
 **Fixed Operational Costs:**
 - Team: €480K/year (all-in cost)
 - Tools & Legal: €120K/year
-- Paid User Acquisition: €300K/year
+- Paid User Acquisition: €150K/year (reduced due to hardware partnerships)
 
-This structure maintains EBITDA positive operations while supporting growth.
+This structure maintains capital efficiency while focusing on our core creator-led value proposition.
 
-#### 11.2.6 Key Funnel Metrics
+#### 11.3.7 Key Funnel Metrics
 
 | Funnel KPI | Target | Rationale |
 |------------|--------|-----------|
-| 12-month cumulative installs | ≈2.8M | Assumes D30 retention 25% → 0.7M MAU |
-| Free → Consumer-only conversion | 5% | Requires strong "remove ads permanently for €5" messaging |
-| Free → Creative Suite attach | 2.5% | Push after 3rd user-generated idea |
+| 12-month cumulative installs | ≈515K | Assumes D30 retention 35% → 180K MAU |
+| Free → Creator Premium conversion | 15% (stretch 20%) | Critical metric for revenue model success |
+| D30 retention (creator kids) | ≥ 35% | Benchmark for paid audio-learning apps |
+| CAC payback | < 6 months on paid cohort | Ensures sustainable unit economics |
 
-With these conversion rates, approximately 92.5% of users remain on the ad-supported tier, 5% purchase the one-time ad removal, and 2.5% subscribe to the Creative Suite.
+With these conversion rates, approximately 85% of users remain on the ad-supported tier while 15% subscribe to the Creator Premium tier, generating the bulk of our revenue. This is a significant improvement over the previous model's 7.5% paid conversion rate.
 
-#### 11.2.7 Business Model Sensitivity
+#### 11.3.8 Business Model Sensitivity
 
-| Lever | Effect on MAU needed for €2M |
-|-------|------------------------------|
-| Lift "consumer-only" attach from 5% → 8% | ↓ to 620K MAU |
-| Lift creative attach from 2.5% → 4% | ↓ to 610K MAU |
-| Raise eCPM from €2 → €2.5 | ↓ to 624K MAU |
-| Cut AI cost to €0.03/story | Margin ↑ to 88% (no MAU impact) |
+| Lever | Effect on €1M ARR Business |
+|-------|---------------------------|
+| Lift Creator Premium conversion from 15% → 20% | MAU needed ↓ to 135K (25% fewer) |
+| Increase subscription price to €4.99/month | Revenue ↑ by 25% with same user base |
+| Improve D30 retention from 35% → 45% | Reduces 12-month CAC by ~22% |
+| Cut AI cost to €0.03/story | Margin ↑ to 85% (from 70%) |
+| Hardware partnership adoption at 2% | Additional €3.36M ARR potential |
 
-### 11.3 EU Rollout Strategy for €6M ARR
+### 11.4 Focused Market Strategy
 
-With our goal of achieving €2M ARR in France and an additional €4M ARR across the rest of Europe, we need a strategic approach to market expansion. Using the €5 one-time "remove ads" pricing model, the MAU requirements for each European market vary based on local eCPM rates:
+With our creator-led model, we can achieve our €1M ARR milestone with a much more focused market approach, concentrating exclusively on France during the pre-seed phase:
 
-| Country | eCPM (€) | Blended ARPU | MAU for €2M | % of Families <10 yrs |
-|---------|----------|--------------|-------------|----------------------|
-| 🇫🇷 France | 2.0 | €2.87 | 700K | ≈16% |
-| 🇬🇧 UK | 3.5 | €4.11 | 486K | 10% |
-| 🇩🇪 Germany | 2.5 | €3.28 | 610K | 12% |
-| 🇸🇪 Sweden | 2.9 | €3.61 | 553K | 76% |
-| 🇳🇱 Netherlands | 2.2 | €3.03 | 660K | 57% |
-| 🇪🇸 Spain | 1.8 | €2.70 | 741K | 28% |
-| 🇮🇹 Italy | 1.8 | €2.70 | 741K | 24% |
-| 🇧🇪 Belgium | 2.1 | €2.95 | 678K | 85% |
-| 🇦🇹 Austria | 2.2 | €3.03 | 660K | 124% (mathematically impossible) |
-| 🇵🇱 Poland | 1.3 | €2.28 | 876K | 37% |
+| Country | Target MAU | Creator Premium (15%) | Monthly Revenue | Annual Revenue |
+|---------|------------|----------------------|-----------------|----------------|
+| 🇫🇷 France | 180K | 27K subscribers | €107.7K | €1.29M |
 
-The blended ARPU is calculated using the formula: (0.925 × eCPM × 0.9) + (0.05 × €5) + (0.025 × €38)
+This represents just 4.2% of French families with children under 10 (4.3M total) - a much more achievable target than the 16% penetration required in our previous model.
 
-This analysis informs our European expansion strategy:
+#### 11.4.1 Post-Seed European Expansion
 
-1. **Phase A: France** - Achieve €2M ARR by reaching 700K MAU (16% of families with children under 10)
-2. **Phase B: UK & Germany** - Focus on these markets to build toward €2.3M ARR, as they offer the most favorable combination of market size and required penetration rates (616K families total)
-3. **Phase C: Spain & Italy** - Add these markets to gain an additional €1.1M ARR (388K families total)
-4. **Phase D: Poland, Netherlands, Sweden, Belgium & Austria** - Complete the remaining €0.6M ARR with these markets (244K families total)
+After proving our creator-led model in France and securing seed funding, we'll expand to select European markets with a similar approach:
 
-The one-time payment model for ad removal requires higher MAU targets compared to a subscription model, but our phased approach makes the €6M ARR goal achievable. The penetration ask is now ≤8% in every market outside France, dramatically less than the 16% we need at home.
+| Country | Target MAU | Creator Conversion | Annual Revenue Potential |
+|---------|------------|-------------------|--------------------------|
+| 🇬🇧 UK | 150K | 15% (22.5K subs) | €1.08M |
+| 🇩🇪 Germany | 150K | 15% (22.5K subs) | €1.08M |
 
-### 11.4 Regulatory & Business Risk Mitigation
+This focused approach allows us to:
+1. Validate our model in France with minimal capital (€0.5-0.8M pre-seed)
+2. Prove creator conversion and retention metrics
+3. Establish hardware partnerships to reduce CAC
+4. Expand to key European markets with seed funding (€3-4M)
 
-Before fundraising, we've identified key risks and developed mitigation strategies to ensure business continuity and regulatory compliance:
+By focusing on creator conversion rather than massive scale, we can build a sustainable business with significantly less capital and marketing spend.
+
+### 11.5 Regulatory Compliance & Risk De-Risking
+
+We're proactively addressing regulatory concerns from day one, making compliance a competitive advantage rather than a burden:
+
+#### 11.5.1 CNIL-Style Parental Dashboard
+
+We'll build a comprehensive parental control dashboard that exceeds CNIL requirements:
+
+| Feature | Description | Benefit |
+|---------|-------------|---------|
+| **Granular Consent Management** | Parents can approve/revoke permissions for specific features | Exceeds GDPR-K requirements |
+| **Usage Monitoring** | Time spent, stories created/consumed, with weekly reports | Gives parents transparency |
+| **Content Filtering** | Age-appropriate content controls with parent override | Builds trust with families |
+| **Data Residency Controls** | All data hosted in France with SecNumCloud certification | Addresses sovereignty concerns |
+
+#### 11.5.2 AI Content Transparency
+
+| Feature | Description | Benefit |
+|---------|-------------|---------|
+| **AI-Generated Content Labeling** | Clear marking of AI-generated content per EU AI Act requirements | Regulatory compliance |
+| **Contextual-Only Advertising** | No behavioral targeting, fully DSA-compliant | Future-proof revenue model |
+| **CNIL Sandbox Submission** | Voluntary participation in CNIL's regulatory sandbox | Early feedback and trust badge |
+
+#### 11.5.3 Business Risk Mitigation
 
 | Risk | Mitigation Strategy |
 |------|---------------------|
-| **Ad inventory liquidity (kids campaigns seasonality)** | Sign insertion-order minimums with toy publishers for Q4-Q1; add contextual ads in low season to maintain revenue stability |
-| **Regulatory ads gating** | Anchor on SuperAwesome or Epic-KWS pipes to guarantee GDPR-K compliance for all ad inventory |
-| **AI cost volatility** | Secure 12-month commit discounts with GCP or bring SD-Turbo + Whisper-small models to local inference |
+| **AI cost volatility** | On-device TTS implementation within 6 months; local model caching | Reduces cloud dependency |
+| **Competitive response** | Hardware partnership strategy creates win-win with potential competitors | Turns threats into opportunities |
+| **Regulatory changes** | Proactive compliance and participation in regulatory sandboxes | Builds relationships with regulators |
 
-This approach creates a capital-efficient business with >40% EBITDA potential, making Talemo attractive to both seed VCs and strategic buyers in ed-tech or kids hardware markets.
+This approach not only creates a capital-efficient business but positions Talemo as a leader in responsible AI for children, making us attractive to both seed VCs and strategic buyers in ed-tech or kids hardware markets.
 
 ---
 
