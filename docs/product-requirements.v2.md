@@ -193,7 +193,7 @@ However, by weighting each country's own blended ARPU (higher eCPM lifts ARPU, s
 
 Total families required outside France: ≈1.25 million (not 1.39M) — a 10% buffer kept in.
 
-Penetration ask is now ≤8% in every market, dramatically less than the 16% we need at home.
+Penetration ask is ≤8% in every market, dramatically less than the 16% needed for France.
 
 #### 6.2.3 Revenue check
 
@@ -242,7 +242,7 @@ Based on the penetration rates required, we can categorize markets into three ti
 At €1.80 cost-per-install the extra 1.25M families abroad translate to ≈3.6M installs → ≈€6.5M gross UA over three years (net cost lower after organic/referrals).
 
 **Penetration realism**
-The highest single-country hurdle is UK/DE at ~6-7% of families < 10; Spain/Italy now below 8%.
+The highest single-country hurdle is UK/DE at ~6-7% of families < 10; Spain/Italy at below 8%.
 ➜ Still well inside typical kids-app reach benchmarks (Lunii box ≈9% after 8 years).
 
 **Price-mix upside**
@@ -263,74 +263,81 @@ Any uptick (e.g., 8% ad-free attach or 4% creative) cuts the required families b
 
 3. **Total footprint**: ≈2M MAU across Europe, sustaining a lean, €6M high-margin business—before any upside from better conversion, higher eCPMs or premium creative tiers.
 
-### 6.6 Reach Challenge: Realistic Penetration Caps
+### 6.6 Reach Challenge: Realistic Penetration Goals
 
-While our baseline model targets 16% penetration in France and up to 8% in other European markets, we must also consider a more conservative scenario with stricter penetration caps: maximum 5% in France (our main market) and 2% in supporting EU markets.
+While an aggressive growth model would target 16% penetration in France and up to 8% in other European markets, we must also consider a more conservative scenario with more realistic penetration goals: 5% in France (our main market), 5% in major markets (UK, Germany), 3% in mid-sized markets (Spain, Italy, Poland), and 2% in smaller markets (Netherlands, Sweden, Belgium, Austria).
 
 #### 6.6.1 Impact on Active Families and Revenue
 
-With these penetration caps applied to the same pricing, conversion mix, and ad-load as our baseline model:
+With these penetration goals applied to the standard pricing, conversion mix, and ad-load parameters:
 
-| Market | Families < 10 yrs | Penetration cap | Active families (000) | Blended ARPU (€/yr) | ARR (€000) |
-|--------|-------------------|-----------------|------------------------|---------------------|------------|
-| 🇫🇷 France | 4,300K | 5% | 215 | 2.87 | 617 |
-| 🇬🇧 United Kingdom | 4,700K | 2% | 94 | 4.11 | 386 |
-| 🇩🇪 Germany | 5,000K | 2% | 100 | 3.28 | 328 |
-| 🇪🇸 Spain | 2,650K | 2% | 53 | 2.70 | 143 |
-| 🇮🇹 Italy | 3,050K | 2% | 61 | 2.70 | 165 |
-| 🇵🇱 Poland | 2,380K | 2% | 48 | 2.28 | 109 |
-| 🇳🇱 Netherlands | 1,160K | 2% | 23 | 3.03 | 70 |
-| 🇸🇪 Sweden | 730K | 2% | 15 | 3.61 | 53 |
-| 🇧🇪 Belgium | 800K | 2% | 16 | 2.95 | 47 |
-| 🇦🇹 Austria | 540K | 2% | 11 | 3.03 | 33 |
-| EU-9 subtotal | — | — | 415 | — | 1,334 |
-| **Grand total** | — | — | **630K families** | — | **≈€1.95M ARR** |
+| Market | Families < 10 yrs | Penetration goal | Target MAU | Blended ARPU (€/yr) | ARR (€000) |
+|--------|-------------------|-----------------|------------|---------------------|------------|
+| 🇫🇷 France | 4,300K | 5% | 215,000 | 2.87 | 617 |
+| 🇬🇧 United Kingdom | 4,700K | 5% | 235,000 | 4.11 | 966 |
+| 🇩🇪 Germany | 5,000K | 5% | 250,000 | 3.28 | 820 |
+| 🇪🇸 Spain | 2,650K | 3% | 79,500 | 2.70 | 215 |
+| 🇮🇹 Italy | 3,050K | 3% | 91,500 | 2.70 | 247 |
+| 🇵🇱 Poland | 2,380K | 3% | 71,400 | 2.28 | 163 |
+| 🇳🇱 Netherlands | 1,160K | 2% | 23,200 | 3.03 | 70 |
+| 🇸🇪 Sweden | 730K | 2% | 14,600 | 3.61 | 53 |
+| 🇧🇪 Belgium | 800K | 2% | 16,000 | 2.95 | 47 |
+| 🇦🇹 Austria | 540K | 2% | 10,800 | 3.03 | 33 |
+| EU-9 subtotal | — | — | 792,000 | — | 2,614 |
+| **Grand total** | — | — | **1,007,000 families** | — | **≈€3.23M ARR** |
 
 #### 6.6.2 Key Implications
 
-1. **France**: 215K monthly-active families = €0.62M ARR.
-   This is only one-third of the earlier €2M goal because penetration is capped at 5% instead of 16%.
+1. **France**: 215,000 monthly-active families = €0.62M ARR.
+   This is only one-third of the initial €2M goal because penetration is set at 5% instead of 16%.
 
-2. **Rest of Europe**: at 2% penetration across nine markets, we add €1.33M ARR.
-   Biggest contributors are the UK and Germany (≈€0.39M + €0.33M).
+2. **Major Markets (UK, Germany)**: at 5% penetration, these markets contribute significantly with €0.97M + €0.82M = €1.79M ARR.
 
-3. **Pan-EU total**: ≈€1.95M, well short of the previous €6M ambition.
+3. **Mid-sized Markets (Spain, Italy, Poland)**: at 3% penetration, these markets add €0.63M ARR.
 
-#### 6.6.3 Why the Revenue Collapses
+4. **Smaller Markets**: at 2% penetration, the Netherlands, Sweden, Belgium, and Austria contribute €0.20M ARR.
 
-1. **Penetration is the primary lever**
-   - Reducing France from 16% → 5% alone cuts the domestic run-rate by -70%.
+5. **Pan-EU total**: ≈€3.23M ARR, which is a substantial revenue figure but still below the €6M ambition.
 
-2. **The one-off €5 "consumer" tier keeps ARPU modest**
-   - Even high-CPM UK families yield only €4.11/yr; at 2% reach you harvest little absolute cash.
+#### 6.6.3 Revenue Impact Analysis
 
-3. **Smaller markets stay sub-€100K** unless you:
-   - Raise ARPU, or
-   - Allow deeper penetration
+1. **Penetration remains the primary lever**
+   - Setting France at 5% instead of 16% still reduces the domestic run-rate by -70%.
+   - However, increasing UK and Germany to 5% (from 2%) significantly improves their contribution.
 
-#### 6.6.4 Options to Reach Higher Revenue with the Same Reach Limits
+2. **The ARPU impact varies by market**
+   - High-CPM markets like UK (€4.11/yr) benefit substantially from increased penetration.
+   - Mid-sized markets with 3% penetration show meaningful revenue contribution.
+
+3. **Market tier strategy is effective**
+   - Major markets (5%): Drive significant revenue (€2.4M combined)
+   - Mid-sized markets (3%): Provide solid contribution (€0.63M)
+   - Smaller markets (2%): Deliver incremental revenue (€0.20M)
+
+#### 6.6.4 Options to Further Increase Revenue
 
 | Lever | Δ to ARR (France + EU) |
 |-------|-------------------------|
-| Lift "consumer" attach 5% → 8% | +€0.25M |
-| Lift "creative" attach 2.5% → 4% | +€0.28M |
-| Introduce €3.99/mo "Unlimited Creative" for 1% of actives | +€0.14M |
-| Increase ad load to 90 imps/MAU/mo | +€0.10M |
-| Secure +€0.50 CPM uplift in UK/DE/NL/SE | +€0.13M |
+| Lift "consumer" attach 5% → 8% | +€0.40M |
+| Lift "creative" attach 2.5% → 4% | +€0.45M |
+| Introduce €3.99/mo "Unlimited Creative" for 1% of actives | +€0.22M |
+| Increase ad load to 90 imps/MAU/mo | +€0.16M |
+| Secure +€0.50 CPM uplift in UK/DE/NL/SE | +€0.21M |
 
-Even stacking two of these levers still leaves the plan well below €4M ARR. To approach the original target, we must either:
+With these penetration goals, we achieve €3.23M ARR. By stacking two of these levers, we could approach or exceed €4M ARR. To reach the ambitious €6M target, we would still need to:
 
-- Raise penetration (e.g., 8% FR, 4% EU); or
+- Further increase penetration in key markets; or
 - Add recurring value at a higher price point (e.g., €3–4 creative base).
 
 #### 6.6.5 Bottom Line
 
-With reach capped at 5% of French families and 2% elsewhere, the current freemium model supports ≈€2M ARR total. To hit more ambitious revenue numbers, we will need to increase:
+With our tiered penetration approach (5% in France and major markets, 3% in mid-sized markets, and 2% in smaller markets), the current freemium model can support ≈€3.23M ARR. To reach our more ambitious €6M ARR target, we should focus on:
 
-1. Household penetration, or
-2. Paid conversion / ARPU, ideally both.
+1. Further increasing household penetration in key markets,
+2. Improving paid conversion rates and ARPU, or
+3. A combination of both approaches.
 
-This strategic choice should frame our next pricing or growth-loop experiments.
+This strategic framework should guide our market entry sequencing, pricing strategy, and growth-loop experiments.
 
 ---
 
@@ -569,7 +576,7 @@ This creator-led model dramatically reduces the MAU required to reach our revenu
 
 ### 11.3 Detailed Business Model (€1M ARR Pre-Seed Milestone)
 
-Based on our creator-led revenue model and best-available AI-inference benchmarks, we've developed a comprehensive business model to reach €1M ARR with a capital-efficient approach, requiring significantly fewer users than our previous ad-heavy model.
+Based on our creator-led revenue model and best-available AI-inference benchmarks, we've developed a comprehensive business model to reach €1M ARR with a capital-efficient approach, requiring significantly fewer users than a traditional ad-heavy model would demand.
 
 #### 11.3.1 Revenue Assumptions (FY2025)
 
@@ -601,7 +608,7 @@ With our creator-led model focusing on €3.99/month subscriptions, we can achie
 | Free with Ads (85%) | 153,000 MAU | 153K × €0.07/mo ≈ €10.7K | €128K |
 | **Total** | **180,000 MAU** | **€118.4K MRR** | **€1.42M ARR** |
 
-This represents a dramatic reduction from the 700,000 MAU required in our previous model, making our growth targets much more achievable with limited marketing resources.
+This represents a dramatic reduction from the 700,000 MAU that would be required in an ads-only model, making our growth targets much more achievable with limited marketing resources.
 
 #### 11.3.4 Hardware Partnership Potential
 
@@ -650,7 +657,7 @@ This structure maintains capital efficiency while focusing on our core creator-l
 | D30 retention (creator kids) | ≥ 35% | Benchmark for paid audio-learning apps |
 | CAC payback | < 6 months on paid cohort | Ensures sustainable unit economics |
 
-With these conversion rates, approximately 85% of users remain on the ad-supported tier while 15% subscribe to the Creator Premium tier, generating the bulk of our revenue. This is a significant improvement over the previous model's 7.5% paid conversion rate.
+With these conversion rates, approximately 85% of users remain on the ad-supported tier while 15% subscribe to the Creator Premium tier, generating the bulk of our revenue. This is a significant improvement over the typical 7.5% paid conversion rate seen in standard freemium apps.
 
 #### 11.3.8 Business Model Sensitivity
 
@@ -670,7 +677,7 @@ With our creator-led model, we can achieve our €1M ARR milestone with a much m
 |---------|------------|----------------------|-----------------|----------------|
 | 🇫🇷 France | 180K | 27K subscribers | €107.7K | €1.29M |
 
-This represents just 4.2% of French families with children under 10 (4.3M total) - a much more achievable target than the 16% penetration required in our previous model.
+This represents just 4.2% of French families with children under 10 (4.3M total) - a much more achievable target than the 16% penetration that would be required in a high-volume, low-ARPU scenario.
 
 #### 11.4.1 Post-Seed European Expansion
 
