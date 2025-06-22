@@ -20,6 +20,7 @@ Talemo is an AI-powered platform designed to create and explore audio stories fo
 - **Storage**: MinIO (S3-compatible object storage)
 - **Frontend**: HTMX, Bootstrap 5, Alpine.js, Workbox (PWA)
 - **DevOps**: Docker, Docker Compose, GitHub Actions
+- **Monitoring**: StatsD, ELK Stack (Elasticsearch, Logstash, Kibana), APM, Prometheus, Grafana
 
 ## Project Structure
 
@@ -172,6 +173,55 @@ If you need to customize a specific service, you can modify its Dockerfile in th
 
 You can also customize the Docker Compose setup by modifying the `docker/docker-compose.dev.yml` file. For example, you might want to add a new service or change the port mappings.
 
+## Monitoring Stack
+
+The project includes a complete monitoring stack with StatsD, ELK (Elasticsearch, Logstash, Kibana), APM (Application Performance Monitoring), and Grafana. This stack provides comprehensive monitoring and observability for the application.
+
+### Monitoring Components
+
+- **Elasticsearch**: For storing logs and APM data
+- **Logstash**: For processing and forwarding logs
+- **Kibana**: For visualizing logs and APM data
+- **APM Server**: For collecting application performance data
+- **StatsD**: For collecting metrics
+- **Prometheus**: For storing metrics
+- **Grafana**: For visualizing metrics
+
+### Starting the Monitoring Stack
+
+To start the monitoring stack:
+
+```bash
+make monitoring-up
+```
+
+This will start all the monitoring services in detached mode.
+
+### Accessing Monitoring Services
+
+- **Grafana**: http://localhost:3000 (default credentials: admin/admin)
+- **Kibana**: http://localhost:5601
+- **Prometheus**: http://localhost:9090
+- **APM**: http://localhost:8200 (via Kibana)
+
+### Enabling Monitoring in Django
+
+To enable monitoring in the Django application, set the `MONITORING_ENABLED` environment variable to `true` in your `.env` file:
+
+```
+MONITORING_ENABLED=true
+```
+
+### Monitoring Commands
+
+The Makefile includes several commands for working with the monitoring stack:
+
+- `make monitoring-up` - Start the monitoring stack
+- `make monitoring-down` - Stop the monitoring stack
+- `make monitoring-ps` - Check monitoring container status
+- `make monitoring-logs` - Check logs for monitoring services
+- `make test-monitoring` - Run monitoring tests
+
 ## Development Workflow
 
 ### Code Changes
@@ -297,4 +347,8 @@ We follow a GitHub Flow branching strategy:
 
 ## Additional Documentation
 
-For more detailed information about the development setup, please refer to the [Development Setup Guide](docs/development-setup.md).
+For more detailed information, please refer to the following documentation:
+
+- [Development Setup Guide](docs/development-setup.md): Comprehensive guide to setting up the development environment
+- [Monitoring Setup Guide](docs/monitoring.md): Detailed information about the monitoring stack
+- [Docker Configuration](docker/README.md): Information about the Docker setup, including both development and monitoring environments

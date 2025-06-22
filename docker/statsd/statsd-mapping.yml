@@ -1,0 +1,79 @@
+mappings:
+  # Django request metrics
+  - match: "talemo.django.request.*"
+    name: "django_request_total"
+    labels:
+      view: "$1"
+      
+  # Django request latency metrics
+  - match: "talemo.django.request_latency.*"
+    name: "django_request_latency_seconds"
+    labels:
+      view: "$1"
+    
+  # Django database query metrics
+  - match: "talemo.django.db.query_count.*"
+    name: "django_db_query_count_total"
+    labels:
+      model: "$1"
+      
+  # Django database query latency metrics
+  - match: "talemo.django.db.query_latency.*"
+    name: "django_db_query_latency_seconds"
+    labels:
+      model: "$1"
+      
+  # Celery task metrics
+  - match: "talemo.celery.task.*.*"
+    name: "celery_task_total"
+    labels:
+      task: "$1"
+      status: "$2"
+      
+  # Celery task latency metrics
+  - match: "talemo.celery.task_latency.*"
+    name: "celery_task_latency_seconds"
+    labels:
+      task: "$1"
+      
+  # Agent metrics
+  - match: "talemo.agent.*.*"
+    name: "agent_task_total"
+    labels:
+      agent: "$1"
+      status: "$2"
+      
+  # Agent latency metrics
+  - match: "talemo.agent.latency.*"
+    name: "agent_task_latency_seconds"
+    labels:
+      agent: "$1"
+      
+  # Tenant metrics
+  - match: "talemo.tenant.*.*"
+    name: "tenant_operation_total"
+    labels:
+      tenant: "$1"
+      operation: "$2"
+      
+  # Story metrics
+  - match: "talemo.story.*.*"
+    name: "story_operation_total"
+    labels:
+      operation: "$1"
+      status: "$2"
+      
+  # Asset metrics
+  - match: "talemo.asset.*.*"
+    name: "asset_operation_total"
+    labels:
+      type: "$1"
+      operation: "$2"
+      
+  # Default catch-all rule
+  - match: "talemo.*.*.*"
+    name: "talemo_${1}_${2}_total"
+    labels:
+      category: "$1"
+      subcategory: "$2"
+      status: "$3"

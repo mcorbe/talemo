@@ -9,6 +9,7 @@ The Docker setup is designed to create a complete development environment with a
 ## File Structure
 
 - `docker-compose.dev.yml`: Docker Compose configuration for the development environment
+- `docker-compose.monitoring.yml`: Docker Compose configuration for the monitoring stack
 - `Dockerfile.web`: Dockerfile for the Django web server
 - `Dockerfile.celery`: Dockerfile for the Celery worker
 - `Dockerfile.celery-beat`: Dockerfile for the Celery Beat scheduler
@@ -16,6 +17,8 @@ The Docker setup is designed to create a complete development environment with a
 - `Dockerfile.dev`: Dockerfile for general development environment
 
 ## Container Architecture
+
+### Development Environment
 
 The development environment consists of the following containers:
 
@@ -30,9 +33,79 @@ The development environment consists of the following containers:
 
 Each service has its own Dockerfile to ensure proper isolation and to make it easier to scale individual components as needed.
 
+### Monitoring Stack
+
+The monitoring stack consists of the following containers:
+
+- **elasticsearch**: For storing logs and APM data
+- **logstash**: For processing and forwarding logs
+- **kibana**: For visualizing logs and APM data
+- **apm-server**: For collecting application performance data
+- **statsd**: For collecting metrics
+- **prometheus**: For storing metrics
+- **grafana**: For visualizing metrics
+
+The monitoring stack is defined in `docker-compose.monitoring.yml` and can be started separately from the development environment.
+
+## Development Setup
+
+### Prerequisites
+
+Before setting up the development environment, ensure you have the following installed:
+
+- **Docker** (version 24.0+) and **Docker Compose** (version 2.20+)
+- **Git** (version 2.40+)
+- **Python** (version 3.11+) for local development tools
+- **Node.js** (version 20.0+) and **npm** (version 9.0+) for frontend development
+- **PostgreSQL** client tools (version 15+) for database management
+
+### Environment Configuration
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-organization/talemo.git
+   cd talemo
+   ```
+
+2. Create a `.env` file in the project root with the necessary environment variables. You can use the `.env.example` file as a template:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Edit the `.env` file to set your specific configuration values.
+
+### Initial Setup
+
+1. Start the development environment:
+   ```bash
+   make up
+   ```
+
+2. Apply database migrations:
+   ```bash
+   make migrate
+   ```
+
+3. Create a superuser for the Django admin:
+   ```bash
+   make superuser
+   ```
+
+4. Load initial data (if available):
+   ```bash
+   make loaddata
+   ```
+
+5. Create the pgvector extension for vector similarity search:
+   ```bash
+   make pgvector
+   ```
+
 ## Usage
 
-### Starting the Environment
+### Development Environment
+
+#### Starting the Environment
 
 To start the development environment:
 
@@ -46,7 +119,7 @@ Or using the Makefile:
 make up
 ```
 
-### Accessing Services
+#### Accessing Development Services
 
 - Django Web Server: http://localhost:8000
 - Django Admin: http://localhost:8000/admin
@@ -54,7 +127,7 @@ make up
 - Flower Dashboard: http://localhost:5555
 - Mailhog: http://localhost:8025
 
-### Running Commands
+#### Running Commands
 
 To run commands in a container:
 
@@ -67,6 +140,61 @@ Or using the Makefile:
 ```bash
 make migrate
 ```
+
+### Monitoring Stack
+
+#### Starting the Monitoring Stack
+
+To start the monitoring stack:
+
+```bash
+docker-compose -f docker/docker-compose.monitoring.yml up -d
+```
+
+Or using the Makefile:
+
+```bash
+make monitoring-up
+```
+
+#### Stopping the Monitoring Stack
+
+To stop the monitoring stack:
+
+```bash
+docker-compose -f docker/docker-compose.monitoring.yml down
+```
+
+Or using the Makefile:
+
+```bash
+make monitoring-down
+```
+
+#### Accessing Monitoring Services
+
+- Grafana: http://localhost:3000 (login with admin/admin)
+- Kibana: http://localhost:5601
+- Prometheus: http://localhost:9090
+- APM: http://localhost:8200 (via Kibana)
+
+#### Enabling Monitoring in Django
+
+To enable monitoring in the Django application, set the `MONITORING_ENABLED` environment variable to `true` in your `.env` file:
+
+```
+MONITORING_ENABLED=true
+```
+
+#### Monitoring Commands
+
+The Makefile includes several commands for working with the monitoring stack:
+
+- `make monitoring-up` - Start the monitoring stack
+- `make monitoring-down` - Stop the monitoring stack
+- `make monitoring-ps` - Check monitoring container status
+- `make monitoring-logs` - Check logs for monitoring services
+- `make test-monitoring` - Run monitoring tests
 
 ## Customizing the Docker Setup
 
@@ -103,13 +231,39 @@ To add a new service:
 
 ## Troubleshooting
 
+### Development Environment
+
 - **Container fails to start**: Check the logs with `docker-compose -f docker/docker-compose.dev.yml logs [service_name]`
 - **Database connection issues**: Ensure the PostgreSQL container is running and healthy
 - **Volume mounting issues**: Check that the volume paths in `docker-compose.dev.yml` are correct
 
+### Monitoring Stack
+
+- **Elasticsearch not starting**: Check if you have enough memory allocated to Docker. Elasticsearch requires at least 2GB of memory.
+- **APM data not showing up**: Check if the APM server is running and if the Django application is configured to send data to it.
+- **StatsD metrics not showing up**: Check if the StatsD exporter is running and if the Django application is configured to send data to it.
+- **Monitoring service logs**: View logs with `docker-compose -f docker/docker-compose.monitoring.yml logs [service_name]` or use `make monitoring-logs`
+
 ## Related Documentation
+
+### Docker and Services
 
 - [Docker Documentation](https://docs.docker.com/)
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
 - [PostgreSQL with pgvector](https://github.com/pgvector/pgvector)
 - [MinIO Documentation](https://docs.min.io/)
+
+### Monitoring
+
+- [Elasticsearch Documentation](https://www.elastic.co/guide/index.html)
+- [Logstash Documentation](https://www.elastic.co/guide/en/logstash/current/index.html)
+- [Kibana Documentation](https://www.elastic.co/guide/en/kibana/current/index.html)
+- [APM Documentation](https://www.elastic.co/guide/en/apm/index.html)
+- [StatsD Exporter Documentation](https://github.com/prometheus/statsd_exporter)
+- [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
+- [Grafana Documentation](https://grafana.com/docs/)
+
+### Project Documentation
+
+- [Development Setup Guide](../docs/development-setup.md)
+- [Monitoring Setup Guide](../docs/monitoring.md)

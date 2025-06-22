@@ -481,6 +481,84 @@ Deployment configuration is managed using:
 - PagerDuty for alerting
 - Langfuse for AI observability
 
+#### 8.4.1 Monitoring Stack Setup
+
+The project includes a complete monitoring stack with StatsD, ELK (Elasticsearch, Logstash, Kibana), APM (Application Performance Monitoring), and Grafana.
+
+1. **Starting the Monitoring Stack**:
+   ```bash
+   docker-compose -f docker/docker-compose.monitoring.yml up -d
+   ```
+   Or using the Makefile:
+   ```bash
+   make monitoring-up
+   ```
+
+2. **Stopping the Monitoring Stack**:
+   ```bash
+   docker-compose -f docker/docker-compose.monitoring.yml down
+   ```
+   Or using the Makefile:
+   ```bash
+   make monitoring-down
+   ```
+
+3. **Accessing Monitoring Services**:
+   - Grafana: http://localhost:3000 (default credentials: admin/admin)
+   - Kibana: http://localhost:5601
+   - Prometheus: http://localhost:9090
+   - APM: http://localhost:8200 (via Kibana)
+
+4. **Enabling Monitoring in Django**:
+   To enable monitoring in the Django application, set the `MONITORING_ENABLED` environment variable to `true` in your `.env` file:
+   ```
+   MONITORING_ENABLED=true
+   ```
+
+5. **Monitoring Commands**:
+   The Makefile includes several commands for working with the monitoring stack:
+   - `make monitoring-up` - Start the monitoring stack
+   - `make monitoring-down` - Stop the monitoring stack
+   - `make monitoring-ps` - Check monitoring container status
+   - `make monitoring-logs` - Check logs for monitoring services
+   - `make test-monitoring` - Run monitoring tests
+
+6. **Adding Custom Metrics**:
+   - StatsD metrics:
+     ```python
+     from django_statsd.clients import statsd
+
+     # Increment a counter
+     statsd.incr('talemo.custom.counter')
+
+     # Record a timing
+     statsd.timing('talemo.custom.timing', 123)
+
+     # Set a gauge
+     statsd.gauge('talemo.custom.gauge', 42)
+     ```
+
+   - APM metrics:
+     ```python
+     from elasticapm.contrib.django.client import client
+
+     # Record a custom transaction
+     with client.capture_transaction('custom_transaction'):
+         # Do something
+
+     # Record a custom span
+     with client.capture_span('custom_span'):
+         # Do something
+
+     # Record a custom error
+     try:
+         # Do something that might fail
+     except Exception as e:
+         client.capture_exception()
+     ```
+
+For more detailed information about the monitoring setup, see the [Monitoring Setup Guide](../docs/monitoring.md).
+
 ---
 
 ## 9. Version Control Strategy

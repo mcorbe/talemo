@@ -1,0 +1,8 @@
+# Monitoring dependencies
+elastic-apm==6.18.0
+elastic-apm-django==6.18.0
+django-statsd-mozilla==0.4.0
+statsd==4.0.1
+prometheus-client==0.17.1
+django-prometheus==2.3.1
+python-logstash==0.4.8

@@ -3,6 +3,7 @@
 
 # Variables
 DOCKER_COMPOSE = docker-compose -f docker/docker-compose.dev.yml
+DOCKER_COMPOSE_MONITORING = docker-compose -f docker/docker-compose.monitoring.yml
 DOCKER_COMPOSE_EXEC_WEB = $(DOCKER_COMPOSE) exec web
 
 # Colors
@@ -34,6 +35,13 @@ help:
 	@echo "$(GREEN)make clean$(NC)           - Remove all containers and volumes"
 	@echo "$(GREEN)make pgvector$(NC)        - Create pgvector extension in the database"
 	@echo "$(GREEN)make create-tenant$(NC)   - Create a new tenant for multi-tenant development"
+	@echo ""
+	@echo "$(YELLOW)Talemo Monitoring Commands$(NC)"
+	@echo "$(GREEN)make monitoring-up$(NC)   - Start the monitoring stack"
+	@echo "$(GREEN)make monitoring-down$(NC) - Stop the monitoring stack"
+	@echo "$(GREEN)make monitoring-ps$(NC)   - Check monitoring container status"
+	@echo "$(GREEN)make monitoring-logs$(NC) - Check logs for monitoring services"
+	@echo "$(GREEN)make test-monitoring$(NC) - Run monitoring tests"
 
 # Docker commands
 .PHONY: up
@@ -155,3 +163,38 @@ logs:
 logs-celery:
 	@echo "$(YELLOW)Checking logs for celery service...$(NC)"
 	$(DOCKER_COMPOSE) logs -f celery
+
+# Monitoring commands
+.PHONY: monitoring-up
+monitoring-up:
+	@echo "$(YELLOW)Starting monitoring stack...$(NC)"
+	$(DOCKER_COMPOSE_MONITORING) up -d
+	@echo "$(GREEN)Monitoring stack started!$(NC)"
+	@echo "Grafana: http://localhost:3000 (login with admin/admin)"
+	@echo "Kibana: http://localhost:5601"
+	@echo "Prometheus: http://localhost:9090"
+	@echo "APM: http://localhost:8200 (via Kibana)"
+
+.PHONY: monitoring-down
+monitoring-down:
+	@echo "$(YELLOW)Stopping monitoring stack...$(NC)"
+	$(DOCKER_COMPOSE_MONITORING) down
+	@echo "$(GREEN)Monitoring stack stopped!$(NC)"
+
+.PHONY: monitoring-ps
+monitoring-ps:
+	@echo "$(YELLOW)Checking monitoring container status...$(NC)"
+	$(DOCKER_COMPOSE_MONITORING) ps
+
+.PHONY: monitoring-logs
+monitoring-logs:
+	@echo "$(YELLOW)Checking logs for monitoring services...$(NC)"
+	@echo "Available services: elasticsearch, logstash, kibana, apm-server, statsd, prometheus, grafana"
+	@read -p "Enter service name: " service; \
+	$(DOCKER_COMPOSE_MONITORING) logs -f $$service
+
+.PHONY: test-monitoring
+test-monitoring:
+	@echo "$(YELLOW)Running monitoring tests...$(NC)"
+	$(DOCKER_COMPOSE_EXEC_WEB) python scripts/test_monitoring.py --all
+	@echo "$(GREEN)Monitoring tests completed!$(NC)"
