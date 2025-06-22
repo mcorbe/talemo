@@ -716,6 +716,53 @@ The agent architecture will be implemented using CrewAI, with Django as the orch
 - Alerting system
 - Backup and disaster recovery plan
 
+### 10.4 AI Observability Implementation
+
+#### 10.4.1 OpenTelemetry Integration
+
+- Implement CrewAI's built-in OpenTelemetry instrumentation
+- Configure OTel collectors for span collection and export
+- Define custom attributes for tenant context and agent metadata
+- Implement trace context propagation across agent workflows
+
+#### 10.4.2 Token Usage & Cost Tracking
+
+- Instrument all LLM calls to track token usage
+- Implement per-model, per-tenant, and per-request token counting
+- Set up cost calculation based on current model pricing
+- Create tenant-specific usage dashboards and reports
+- Implement budget alerts and quota enforcement
+
+#### 10.4.3 Observability Platform Integration
+
+1. **Development Environment**:
+   - Integrate Arize Phoenix for local development and testing
+   - Implement one-line instrumentation: `CrewAIInstrumentor().instrument()`
+   - Set up local UI at http://localhost:6006 for trace visualization
+
+2. **Production Environment**:
+   - Implement Langfuse integration for production telemetry
+   - Configure OpenLIT integration with `openlit.init(tracer=langfuse._otel_tracer)`
+   - Set up cost tracking and latency monitoring
+   - Implement prompt versioning and evaluation
+
+3. **Agent Performance Analysis**:
+   - Integrate AgentOps for session replays and run comparisons
+   - Implement side-by-side diffing for agent iteration analysis
+   - Set up performance benchmarking for agent workflows
+
+4. **Fallback Monitoring**:
+   - Track primary and fallback service usage
+   - Monitor success rates and latency differences
+   - Implement automatic alerting for fallback activations
+
+#### 10.4.4 Privacy & Compliance
+
+- Implement PII redaction in all telemetry data
+- Ensure GDPR and COPPA compliance in observability data
+- Configure immutable WORM storage for AI operation logs
+- Implement retention policies aligned with compliance requirements
+
 ---
 
 ## 11. Security Considerations

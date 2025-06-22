@@ -253,7 +253,36 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 13. Admin Features
+## 13. AI Observability & Monitoring
+
+| Ref    | Category                | Implementation                                                                      |
+| ------ | ----------------------- | ----------------------------------------------------------------------------------- |
+| OBS‑01 | **OpenTelemetry**       | Expose agent runs, tool calls, and LLM invocations as OpenTelemetry spans           |
+| OBS‑02 | **Token Usage Tracking**| Monitor and log token consumption per model, tenant, and request                    |
+| OBS‑03 | **Cost Monitoring**     | Track AI service costs with dashboards and alerts for budget thresholds             |
+| OBS‑04 | **Performance Metrics** | Latency tracking for AI operations with percentile breakdowns                       |
+| OBS‑05 | **Observability UI**    | Integration with Arize Phoenix for local development and testing                    |
+| OBS‑06 | **Production Telemetry**| Langfuse integration for production environments with cost & latency charts         |
+| OBS‑07 | **Agent Runs Analysis** | Session replays and side-by-side diffing of agent runs via AgentOps                 |
+| OBS‑08 | **Fallback Monitoring** | Track fallback service usage and success rates                                      |
+| OBS‑09 | **Audit Compliance**    | Ensure all AI operations are logged to immutable WORM storage for compliance        |
+
+### 13.1 Observability Platform Integration
+
+| Platform               | Use Case                                           | Implementation Effort |
+| ---------------------- | -------------------------------------------------- | --------------------- |
+| **Arize Phoenix**      | Local development, testing, embeddings visualization| Low                   |
+| **Langfuse + OpenLIT** | Production monitoring, cost tracking, prompt versioning | Low-Medium        |
+| **AgentOps**           | Agent run comparisons during development iterations | Low                   |
+| **Langtrace**          | Lightweight OSS-only tracing for environments with minimal overhead | Low    |
+| **OpenLIT**            | Stand-alone OTel backend with Grafana/Tempo integration | Medium           |
+| **MLflow**             | Integration with existing ML lifecycle management   | Medium                |
+
+All observability solutions will be implemented with privacy-first design, ensuring no PII or sensitive data is included in telemetry.
+
+---
+
+## 14. Admin Features
 
 | Ref    | Feature                   | Description                                                |
 | ------ | ------------------------- | ---------------------------------------------------------- |
@@ -264,7 +293,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 14. Go-To-Market Plan
+## 15. Go-To-Market Plan
 
 | Ref    | Stage     | Tactics                                                                                                                 |
 | ------ | --------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -275,7 +304,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 15. Monetization & Business Model
+## 16. Monetization & Business Model
 
 | Ref    | Model                | Description                                                                           |
 | ------ | -------------------- | ------------------------------------------------------------------------------------- |
@@ -286,7 +315,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 16. Compliance & Safety
+## 17. Compliance & Safety
 
 | Ref    | Area                    | Implementation                                                                      |
 | ------ | ----------------------- | ----------------------------------------------------------------------------------- |
@@ -299,7 +328,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 17. App Store Compliance Strategy
+## 18. App Store Compliance Strategy
 
 | Ref    | Requirement                | Implementation                                                |
 | ------ | -------------------------- | ------------------------------------------------------------ |
@@ -312,7 +341,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 18. Open Strategic Questions
+## 19. Open Strategic Questions
 
 1. Which regional launch first: France‑only vs multilingual?
 2. Minimum licensing required for branded IP?
@@ -323,7 +352,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 19. Next Steps (Pre‑Implementation)
+## 20. Next Steps (Pre‑Implementation)
 
 | Area                       | Action Item                                                                         | Owner             |
 | -------------------------- |-------------------------------------------------------------------------------------|-------------------|
