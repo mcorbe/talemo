@@ -202,6 +202,59 @@ Talemo’s blend of *AI-assisted creation*, *governance-grade privacy*, and *cro
 | COR‑14 | **Pass Culture Integration** | Support for Pass Culture vouchers in payment flow; special pricing for municipal libraries |
 | COR‑15 | **Mode Inclusif**      | Enhanced accessibility features including open captions, dyslexia-friendly font options, and downloadable transcripts |
 | COR‑16 | **Data Residency Controls** | User-selectable data storage location with French hosting option; CNIL-compliant parental consent wizard |
+| COR‑17 | **Learning Analytics Dashboard** | School-focused dashboard showing usage, progress, and comprehension metrics for students |
+| COR‑18 | **Parental Controls UI** | Advanced time limits, quiet hours, and content filters with "couvre-feu" features for French families |
+| COR‑19 | **Hardware Export** | MP3 + metadata bundle export for Yoto, Lunii Store, and voice assistants like Alexa Kids |
+| COR‑20 | **Gamification System** | Badges, streaks, and XP for daily engagement, particularly effective for 6-12-year-olds |
+| COR‑21 | **Language Toggle** | On-the-fly language switching for bilingual French households and future EU expansion |
+| COR‑22 | **ENT/Pronote SSO** | CAS/SAML single sign-on integration with French school platforms (beyond Google/Apple SSO) |
+| COR‑23 | **Library Circulation Model** | Checkout quotas for municipal libraries, integrated with Pass Culture ecosystem |
+| COR‑24 | **Offline Story Packs** | Downloadable content for offline use in cars, rural areas, and travel scenarios |
+| COR‑25 | **Voice Commands** | Next, pause, resume functionality via voice for hands-free operation in French homes |
+| COR‑26 | **Grandparent Access** | Shared links for grandparents to access specific stories without full tenant access |
+| COR‑27 | **Teacher Playlists** | Educator tools to queue multiple stories and track classroom completion |
+| COR‑28 | **Reading Level Labels** | French curriculum-aligned CE1/CM1 level tags for filtered search and age-appropriate content |
+
+### 7.1.1 Feature Prioritization for France Launch
+
+The following table outlines capabilities that are critical for the French market launch, categorized by priority:
+
+| #  | Capability | Why It Matters (France Launch & Beyond) | COR Ref | Priority Category |
+|----|------------|----------------------------------------|---------|------------------|
+| 1  | Branching / choice-based stories | Differentiates vs. passive audio (Sybel) and matches Lunii's interactive mechanic. | COR-07 | High-leverage differentiator |
+| 2  | Record-your-own narration | Lets families add personal voices; aligns with Bookinou's appeal. | COR-08 | Must-add for Day-1 France GA |
+| 3  | Learning analytics dashboard | Schools need usage & progress data to justify purchase. | COR-17 | High-leverage differentiator |
+| 4  | Comprehension & vocabulary quizzes | Turns Talemo into an ELA resource; deepens classroom fit. | COR-09 | High-leverage differentiator |
+| 5  | Advanced parental controls UI (time limits, quiet hours) | French parent groups expect "couvre-feu" features. | COR-18 | Must-add for Day-1 France GA |
+| 6  | Accessibility pack (captions, dyslexia font, transcripts) | Required for loi Handicap compliance in public education. | COR-15 | Must-add for Day-1 France GA |
+| 7  | Hardware / voice-assistant export (MP3 + metadata bundle) | Enables partnerships with Yoto, Lunii Store, Alexa Kids. | COR-19 | High-leverage differentiator |
+| 8  | Multi-author / classroom collaboration mode | Supports group projects in écoles primaires & collèges. | COR-11 | High-leverage differentiator |
+| 9  | Gamified progress (badges, streaks, XP) | Proven driver of daily engagement for 6-12-year-olds. | COR-20 | Engagement & retention hook |
+| 10 | Localization & on-the-fly language toggle | Needed for bilingual French households and future EU roll-outs. | COR-21 | Engagement & retention hook |
+| 11 | ENT / Pronote single sign-on (CAS/SAML) | Critical for French school IT admins; Google/Apple SSO alone is insufficient. | COR-22 | Must-add for Day-1 France GA |
+| 12 | Library loan / circulation model | Lets municipal libraries license stories with checkout quotas; taps into Pass Culture ecosystem. | COR-23 | Engagement & retention hook |
+| 13 | Offline story packs (download-to-cache) | Matches screen-free devices' "stories anywhere" promise—car trips, rural zones. | COR-24 | Must-add for Day-1 France GA |
+| 14 | Voice-command navigation (next, pause, resume) | Aligns with rising smart-speaker usage in French homes. | COR-25 | Engagement & retention hook |
+| 15 | Shared grand-parent access link | Supports inter-generation storytelling without merging tenants. | COR-26 | Engagement & retention hook |
+| 16 | Teacher playlists & co-view mode | Lets educators queue multiple stories and track completion. | COR-27 | High-leverage differentiator |
+| 17 | Age-rating / reading-level labels | French curriculum still tags CE1/CM1 levels; enables filtered search. | COR-28 | Engagement & retention hook |
+| 18 | Dark-screen / "Mode Conte" switch | Addresses moins d'écrans sentiment while maintaining app reach. | COR-12 | Must-add for Day-1 France GA |
+
+#### Priority Categories for France Launch
+
+1. **Must-add for Day-1 France GA** → #2, #5, #6, #11, #13, #18
+   - These features are essential for the initial launch in the French market
+   - They address key French market requirements and competitive gaps
+
+2. **High-leverage differentiators** → #1, #3, #4, #7, #8, #16
+   - These features provide significant competitive advantages
+   - They help position Talemo against established players like Lunii and Sybel
+
+3. **Engagement & retention hooks** → #9, #10, #12, #14, #15, #17
+   - These features drive ongoing engagement and retention
+   - They support long-term growth and user satisfaction
+
+Folding these 18 items into the roadmap—prioritized as above—will close the last strategic gaps against Lunii (hardware interactivity), Sybel (catalogue depth), and school procurement hurdles while reinforcing Talemo's "create-and-listen, privacy-by-design" promise for French users.
 
 ### 7.2 Governance & Multi‑Tenancy
 
