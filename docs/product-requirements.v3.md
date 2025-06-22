@@ -90,6 +90,9 @@ This focused approach allows us to:
 | **Customer Acquisition Cost (CAC)**    | ≤ €12                          | Target for sustainable user acquisition                   |
 | **LTV / CAC Ratio**                    | ≥ 3.0 ×                        | Business sustainability metric                            |
 | **Creator Premium Conversion**         | ≥ 15%                          | Critical for creator-led business model                   |
+| **Search-to-Play conversion rate**     | ≥ 55%                          | Measures effectiveness of semantic search                 |
+| **Duplicate stories generated / 1k prompts** | ≤ 1.0                    | Measures effectiveness of duplication guard               |
+| **Average TTS € per story**            | ≤ €0.062                       | Measures cost efficiency improvements                     |
 
 ---
 
@@ -192,7 +195,7 @@ Our narrow wedge persona focus is the 6-8 year old "creative kids" segment. This
 ### 8.1 Core Experience (MVP Focus)
 
 | Ref    | Feature                | Description                                                                        | Priority |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------- | -------- |
+|--------| ---------------------- | ---------------------------------------------------------------------------------- | -------- |
 | COR-01 | **AI Story List**     | Browsable, filterable list of available AI-generated stories                       | P0       |
 | COR-02 | **AI Story Detail**   | Individual AI story view with metadata and playback controls                        | P0       |
 | COR-03 | **AI Story Creation** | Interface for creating and editing AI-generated stories                             | P0       |
@@ -203,8 +206,10 @@ Our narrow wedge persona focus is the 6-8 year old "creative kids" segment. This
 | COR-08 | **« Mode Conte »**     | Dark-screen/lock-mode that blanks display after one tap, keeps audio controls on lock-screen | P0 |
 | COR-09 | **French Voices**      | Native French voice packs with Parisian and regional accents                       | P0       |
 | COR-10 | **Data Residency Controls** | User-selectable data storage location with French hosting option; CNIL-compliant consent | P0 |
-| COR-11 | **Offline AI Story Packs** | Downloadable AI-generated stories for offline use in cars, rural areas, and travel scenarios | P1 |
-| COR-12 | **Family Sharing**      | Ability to share stories with extended family members via secure links            | P1       |
+| COR-11 | **Semantic Story Search** | Vector-powered search that ranks results by cosine similarity on embeddings, with full-text fallback | P0 |
+| COR-12 | **Duplication Guard**   | Vector similarity check against existing library to prevent near-identical stories | P0       |
+| COR-13 | **Offline AI Story Packs** | Downloadable AI-generated stories for offline use in cars, rural areas, and travel scenarios | P1 |
+| COR-14 | **Family Sharing**      | Ability to share stories with extended family members via secure links            | P1       |
 
 ### 8.2 Governance & Multi-Tenancy
 
@@ -215,6 +220,7 @@ Our narrow wedge persona focus is the 6-8 year old "creative kids" segment. This
 | GOV-03 | **Identity uniqueness** – composite DB constraint `(idp_issuer, idp_subject)` is globally unique.           | P0       |
 | GOV-04 | **Tenant-wide feature flags / quotas** – `TenantPolicy` KV store (e.g., `story_quota = 50`).               | P0       |
 | GOV-05 | **Row-level security** – every tenant-bound table enforces `tenant_id = current_setting('app.tenant')`.     | P0       |
+
 
 ---
 
@@ -228,6 +234,7 @@ The platform runs a focused suite of stateless **CrewAI** agents orchestrated by
 | AGT-02 | **TTSAgent**             | Synthesises speech via tenant-selected voice pack; stores `.mp3` in MinIO.       | `story.approved` → `asset.audio.ready`             |
 | AGT-03 | **IllustratorAgent**     | Generates cover art (Stable Diffusion XL); stores `.png` under tenant prefix.    | `story.approved` → `asset.image.ready`             |
 | AGT-04 | **QuotaAgent**           | Enforces `TenantPolicy.story_quota`; blocks over-limit creations.                | `story.request`                                    |
+| AGT-05 | **EmbeddingAgent**       | Generates vector embeddings for semantic search and duplication detection.       | `story.draft` → `story.embedded` / `story.duplicate` |
 
 ### User-facing Agents
 
@@ -537,6 +544,8 @@ A narrowly-scoped, four-month MVP proves that **creator-led engagement + €3.99
 | CAC drifts > €18                   | Shift budget to hardware funnels & referral credits, lift price to €4.99 if retention supports. |
 | AI generation costs stick at €0.06 | Margin still ≥ 55 %; maintain pay-back under 9 m.                                               |
 | Regulatory delay                   | CNIL sandbox early, SecNumCloud chosen up-front.                                                |
+| **Cold-start embeddings spike Postgres RAM** | Back-fill in 500-story batches; monitor `shared_buffers`, scale to 16 GB tier if cache miss > 5 %. |
+| **False-positive duplicate blocks frustrate kids** | Log vetoes; auto-whitelist after parental override; tune cosine threshold weekly. |
 
 ### 15.9 Bottom Line
 
