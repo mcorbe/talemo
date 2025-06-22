@@ -2,19 +2,8 @@
 
 ## 1. Document Control
 
-| Item | Value |
-| ---- | ----- |
-|      |       |
-
-|   |
-| - |
-
-|   |
-| - |
-
 | **Product**   | Family Audio‑Stories Platform                     |
 | ------------- | ------------------------------------------------- |
-| **Version**   | **0.4** (Governance & SECNUMCLOUD alignment)      |
 | **Author**    | Product Team / CTO                                |
 | **Date**      | 22 Jun 2025                                       |
 | **Reviewers** | Engineering · Design · Marketing · Legal · SecOps |
@@ -23,13 +12,13 @@
 
 ## 2. Executive Summary
 
-A **mobile‑first** platform for families and institutions to **discover, listen to, and create** short audio stories. v0.4 introduces a **multi‑tenant governance layer** with tenant‑scoped **Profiles**, **UserIdentity** linking of multiple IDPs, and a **TenantPolicy** KV store. These changes hard‑enforce data isolation and map cleanly to the French **ANSSI SECNUMCLOUD** controls, while keeping the stack Django / PostgreSQL / Celery / MinIO and agent‑centric.
+A **mobile‑first** platform for families and institutions to **discover, listen to, and create** short audio stories. The platform includes a **multi‑tenant governance layer** with tenant‑scoped **Profiles**, **UserIdentity** linking of multiple IDPs, and a **TenantPolicy** KV store. These features hard‑enforce data isolation and map cleanly to the French **ANSSI SECNUMCLOUD** controls, while keeping the stack Django / PostgreSQL / Celery / MinIO and agent‑centric.
 
 ---
 
 ## 3. Goals & Non‑Goals
 
-### 3.1 Goals (additions in **bold**)
+### 3.1 Goals
 
 1. Deliver an intuitive, mobile‑first experience for families to **discover** and **listen** to audio stories.
 2. Provide creators/admins a workflow to **generate new stories** (text → audio + illustration) via CrewAI.
@@ -42,14 +31,14 @@ A **mobile‑first** platform for families and institutions to **discover, liste
 9. **Guarantee one digital identity (IDP issuer+subject) = one tenant** across the platform.
 10. Prepare for a **freemium subscription model**, B2B licensing, and future IP partnerships.
 
-### 3.2 Non‑Goals (unchanged)
+### 3.2 Non‑Goals
 
 - Full public social features (likes, comments) — deferred.
 - Native desktop app — focus is mobile PWA + optional wrappers.
 
 ---
 
-## 4. Success Metrics (unchanged)
+## 4. Success Metrics
 
 | Metric                                 | Target                         |
 | -------------------------------------- | ------------------------------ |
@@ -65,8 +54,8 @@ A **mobile‑first** platform for families and institutions to **discover, liste
 
 ## 5. Personas & Use Cases
 
-- **Family Administrator** (new) – creates a household tenant, invites parents & children, manages profiles.
-- **Institution Admin** (new) – librarian/teacher controlling an organisation tenant.
+- **Family Administrator** – creates a household tenant, invites parents & children, manages profiles.
+- **Institution Admin** – librarian/teacher controlling an organisation tenant.
 - **Parent (Amélie, 38)** – browses bedtime stories on phone, filters by length/theme.
 - **Child (Léo, 8)** – taps colourful card, plays story.
 - **Story Creator (Lucas, 30)** – writes text, triggers AI asset generation.
@@ -77,11 +66,11 @@ A **mobile‑first** platform for families and institutions to **discover, liste
 
 ## 6. Functional Requirements
 
-### 6.1 Core Experience (retained)
+### 6.1 Core Experience
 
 - Story List, Story Detail, Story Creation, Agentic Assistant, Admin Dashboard, SSO.
 
-### 6.2 Governance & Multi‑Tenancy (new)
+### 6.2 Governance & Multi‑Tenancy
 
 | Ref    | Requirement                                                                                                 |
 | ------ | ----------------------------------------------------------------------------------------------------------- |
@@ -168,14 +157,12 @@ AgentTask     id · agent_type · input · output · status · …
 
 ---
 
-## 10. Technical Architecture (minor additions)
+## 10. Technical Architecture
 
 - Backend: Django + Django REST + PostgreSQL **(RLS enabled)**
 - Auth: `django‑allauth` SSO + IDP linking via `UserIdentity`.
 - Permission evaluation: request loads `Profile.permissions` JSON once; quotas from `TenantPolicy`.
 - Storage: MinIO/S3 prefixes per tenant.
-
-Mobile‑app strategy and other subsections unchanged.
 
 ## 10.1 Mobile App Architecture & Strategy
 
@@ -219,7 +206,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 12. Security & Access Control (rewritten)
+## 12. Security & Access Control
 
 - **Authorization**: permissions flow strictly via Profiles; no per‑user toggles.
 - **Identity binding**: `(issuer, subject)` uniqueness rule blocks cross‑tenant login.
@@ -257,7 +244,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 16. Compliance & Safety (update)
+## 16. Compliance & Safety
 
 - Target **GDPR, COPPA, and SECNUMCLOUD (ANSSI)** certification.
 - Explicit mapping of IS‑1 → IS‑5 controls to backlog epics (see Engineering doc).
@@ -278,7 +265,7 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 18. Open Strategic Questions (updated)
+## 18. Open Strategic Questions
 
 1. Which regional launch first: France‑only vs multilingual?
 2. Minimum licensing required for branded IP?
@@ -288,14 +275,14 @@ All frontends will follow a **single source of truth** using Django’s templati
 
 ---
 
-## 19. Next Steps (Pre‑Implementation) (unchanged except SECNUMCLOUD)
+## 19. Next Steps (Pre‑Implementation)
 
-| Area                      | Action Item                                                                       | Owner          |
-| ------------------------- | --------------------------------------------------------------------------------- | -------------- |
-| 🔐 **Compliance Audit**   | Map PRD v0.4 controls to SECNUMCLOUD checklist; schedule external gap assessment. | SecOps + Legal |
+| Area                      | Action Item                                                                   | Owner          |
+| ------------------------- | ----------------------------------------------------------------------------- | -------------- |
+| 🔐 **Compliance Audit**   | Map PRD controls to SECNUMCLOUD checklist; schedule external gap assessment. | SecOps + Legal |
 | 📦 **MVP Tech Stack POC** | Validate Profile & RLS scaffold with sample load test.                            | Engineering    |
 | … (other rows unchanged)  |                                                                                   |                |
 
 ---
 
-*End of Document (v0.4)*
+*End of Document*
