@@ -12,7 +12,23 @@
 
 ## 2. Executive Summary
 
-A **mobile‑first** platform for families and institutions to **discover, listen to, and create** short audio stories. The platform includes a **multi‑tenant governance layer** with tenant‑scoped **Profiles**, **UserIdentity** linking of multiple IDPs, and a **TenantPolicy** KV store. These features hard‑enforce data isolation and map cleanly to the French **ANSSI SECNUMCLOUD** controls, while keeping the stack Django / PostgreSQL / Celery / MinIO and agent‑centric.
+**Talemo turns screen-time into shared audio imagination.**  
+
+It is a mobile-first platform where families, schools, and libraries can **discover, listen to, and co-create short audio stories**—all inside a lightning-fast Progressive Web App that works on any phone or tablet.
+
+### What makes Talemo different
+
+#### Where it delights
+- **Instant joy** — three taps from home-screen to playback keep “time-to-first-play” under 30 seconds, so parents can calm a restless child fast.  
+- **Kids become storytellers** — an intuitive composer plus AI agents (voice, illustration, story coaching) lets children craft narrated tales in minutes, turning them from passive consumers into creators.  
+- **Free to start, easy to grow** — a generous freemium tier removes barriers; households upgrade for unlimited creation, while institutions license per seat or flat-fee.
+
+#### How it wins
+- **Multi-tenant privacy by design** — every household or institution is its own secure silo, enforced down to row-level security and tenant-scoped storage.  
+- **Compliance baked-in** — governance, audit trails, and control mapping align with GDPR, COPPA, and France’s SECNUMCLOUD, giving schools enterprise-grade assurance with zero IT effort.  
+- **Agent-centric architecture** — modular AI services run on a lean Django + PostgreSQL stack, keeping the product fast today and future-proof for new creative workflows.
+
+**The outcome:** Talemo delivers wholesome, interactive audio experiences that strengthen family bonds, empower young voices, and give educators a safe, ready-made storytelling lab—while meeting the strict governance and compliance standards that modern digital learning demands.
 
 ---
 
