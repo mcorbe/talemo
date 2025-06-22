@@ -249,15 +249,41 @@ talemo/
 
 3. Create a superuser:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
+   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py createsuperuser
    ```
 
 4. Load initial data:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web python manage.py loaddata initial_data
+   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py loaddata initial_data
    ```
 
-### 6.2 Development Workflow
+### 6.2 Development Workflow using the Makefile
+
+The project includes a Makefile to simplify common development tasks. To see all available commands, run:
+
+```bash
+make help
+```
+
+Some common commands include:
+
+- `make up` - Start the development environment
+- `make down` - Stop the development environment
+- `make ps` - Check container status
+- `make build` - Build the containers
+- `make migrate` - Apply migrations
+- `make migrations` - Create migrations
+- `make test` - Run tests
+- `make coverage` - Run tests with coverage
+- `make logs` - Check logs for web service
+- `make logs-celery` - Check logs for celery service
+- `make shell` - Open a Django shell
+- `make clean` - Remove all containers and volumes
+- `make pgvector` - Create pgvector extension in the database
+
+Using the Makefile is the recommended way to interact with the development environment as it provides a consistent interface and handles the complexity of the underlying commands.
+
+### 6.3 Development Workflow
 
 1. **Code Changes**:
    - Make changes to the codebase
@@ -265,13 +291,13 @@ talemo/
    - For frontend changes, run `npm run watch` to compile assets automatically
 
 2. **Database Changes**:
-   - Create migrations: `docker-compose -f docker-compose.dev.yml exec web python manage.py makemigrations`
-   - Apply migrations: `docker-compose -f docker-compose.dev.yml exec web python manage.py migrate`
+   - Create migrations: `docker-compose -f docker/docker-compose.dev.yml exec web python manage.py makemigrations`
+   - Apply migrations: `docker-compose -f docker/docker-compose.dev.yml exec web python manage.py migrate`
 
 3. **Testing**:
-   - Run tests: `docker-compose -f docker-compose.dev.yml exec web pytest`
-   - Run specific tests: `docker-compose -f docker-compose.dev.yml exec web pytest tests/test_stories.py`
-   - Generate coverage report: `docker-compose -f docker-compose.dev.yml exec web pytest --cov=talemo`
+   - Run tests: `docker-compose -f docker/docker-compose.dev.yml exec web pytest`
+   - Run specific tests: `docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/test_stories.py`
+   - Generate coverage report: `docker-compose -f docker/docker-compose.dev.yml exec web pytest --cov=talemo`
 
 4. **Debugging**:
    - Django Debug Toolbar is enabled in development
@@ -279,7 +305,7 @@ talemo/
    - Use browser developer tools for frontend debugging
    - Check Flower dashboard for Celery task monitoring
 
-### 6.3 Working with Agents
+### 6.4 Working with Agents
 
 1. **Local Agent Development**:
    - Agents run in the Celery worker container
@@ -296,11 +322,11 @@ talemo/
    - Use the agent playground at `/agents/playground/`
    - Inspect agent tasks in the database
 
-### 6.4 Multi-Tenant Development
+### 6.5 Multi-Tenant Development
 
 1. **Creating Test Tenants**:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web python manage.py create_tenant
+   make create-tenant
    ```
 
 2. **Switching Tenants**:
@@ -310,7 +336,7 @@ talemo/
 3. **Testing Tenant Isolation**:
    - Create test data in multiple tenants
    - Verify data isolation using the tenant switcher
-   - Run tenant isolation tests: `docker-compose -f docker-compose.dev.yml exec web pytest tests/test_tenant_isolation.py`
+   - Run tenant isolation tests: `docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/test_tenant_isolation.py`
 
 ---
 
@@ -365,28 +391,28 @@ tests/
 
 1. **Run all tests**:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web pytest
+   docker-compose -f docker/docker-compose.dev.yml exec web pytest
    ```
 
 2. **Run specific test types**:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web pytest tests/unit/
-   docker-compose -f docker-compose.dev.yml exec web pytest tests/integration/
+   docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/
+   docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/integration/
    ```
 
 3. **Run with coverage**:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web pytest --cov=talemo
+   docker-compose -f docker/docker-compose.dev.yml exec web pytest --cov=talemo
    ```
 
 4. **Run E2E tests**:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web python manage.py cypress run
+   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py cypress run
    ```
 
 5. **Run performance tests**:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec web locust -f tests/performance/locustfile.py
+   docker-compose -f docker/docker-compose.dev.yml exec web locust -f tests/performance/locustfile.py
    ```
 
 ### 7.4 CI Integration
@@ -625,8 +651,8 @@ We follow a GitHub Flow branching strategy:
 
 1. Check the logs:
    ```bash
-   docker-compose -f docker-compose.dev.yml logs -f web
-   docker-compose -f docker-compose.dev.yml logs -f celery
+   docker-compose -f docker/docker-compose.dev.yml logs -f web
+   docker-compose -f docker/docker-compose.dev.yml logs -f celery
    ```
 
 2. Debug the application:
