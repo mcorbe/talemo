@@ -5,7 +5,6 @@
 | **Product**   | Talemo - French Audio-Stories Platform (MVP)     |
 | ------------- | ------------------------------------------------- |
 | **Author**    | Product Team / CTO                                |
-| **Date**      | June 2023                                         |
 | **Reviewers** | Engineering · Design · Marketing · Legal · SecOps |
 
 ---
@@ -89,8 +88,8 @@ This focused approach allows us to:
 | 🟢 **Mobile PWA Lighthouse Perf**      | ≥ 85                           | Technical performance requirement                         |
 | 🟢 **Customer Acquisition Cost (CAC)** | ≤ €12                          | Target for sustainable user acquisition                   |
 | 🟢 **LTV / CAC Ratio**                 | ≥ 3.0 ×                        | Business sustainability metric                            |
-| 🟢 **Cost Per Story Generation**       | ≤ €0.03 (roadmap)              | Target for unit economics viability                       |
-| 🟢 **Paying Subscribers**              | ≥ 5,000 in 6 months            | Demonstrates consumer willingness to pay                  |
+| 🟢 **Cost Per Story Generation**       | ≤ €0.03 (by Month 6)           | Target for unit economics viability (see §11.4 for progression) |
+| 🟢 **Paying Subscribers**              | ≥ 5,000 in 6 months (interim); 27,000 for €1.4M ARR | Demonstrates consumer willingness to pay; aligns with §11.3 creator-led model |
 
 ---
 
@@ -130,6 +129,8 @@ For our French launch, we will emphasize these three key angles in all press bri
 
 ## 6. Addressable Market Analysis
 
+> **Note:** This section presents an earlier model with higher MAU requirements (e.g., 700K French MAU) and is kept for reference. The current creator-led monetization strategy in §11 succeeds with significantly lower MAU (180K) due to higher ARPU from subscriptions.
+
 ### 6.1 Target Market: Families with Children Under 10
 
 Our refined target audience is families with at least one child under 10 years old. This focus allows us to address the most relevant audience for children's audio stories while providing more accurate market sizing.
@@ -159,7 +160,7 @@ For France specifically: 0-4 yrs = 3.45M, 5-9 yrs = 3.89M ⇒ 7.34M children < 1
 
 ### 6.2 Baseline Reach Required for €6M ARR (€2M France + €4M Rest of Europe)
 
-Our business goal is to achieve €2M ARR in France plus an additional €4M ARR across the rest of Europe (EU-9). Using our pricing model (ads + €5 one-time consumer tier + €1/mo creative tier) with the unchanged blended ARPU of €2.87:
+Our business goal is to achieve €2M ARR in France plus an additional €4M ARR across the rest of Europe (EU-9). Using our pricing model (€5 one-time consumer tier + €1/mo creative tier) with the unchanged blended ARPU of €2.87:
 
 #### 6.2.1 France (€2M ARR)
 
@@ -189,7 +190,7 @@ However, by weighting each country's own blended ARPU (higher eCPM lifts ARPU, s
 | 🇸🇪 SE | 3.61 | 730 | 40K | 5.4% |
 | 🇧🇪 BE | 2.95 | 800 | 40K | 5.0% |
 | 🇦🇹 AT | 3.03 | 540 | 18K | 3.3% |
-| EU-9 subtotal | — | — | ≈1,246K | — |
+| EU-9 subtotal | — | — | ≈1,248K | — |
 
 Total families required outside France: ≈1.25 million (not 1.39M) — a 10% buffer kept in.
 
@@ -228,7 +229,7 @@ Based on the penetration rates required, we can categorize markets into three ti
 
 | Lever | Effect |
 |-------|--------|
-| Lift "ad-free" attach 5% → 8% | Required families ↓ ~12% across all countries |
+| Lift premium attach 5% → 8% | Required families ↓ ~12% across all countries |
 | Lift creative attach 2.5% → 4% | Families ↓ ~14% |
 | Upsell "unlimited creative" at €3.99 to 1% of actives | Adds €0.40 to blended ARPU → families target ↓ ~7% |
 | Secure €2.5+ CPM (contextual video) in DE/NL/SE | Families target ↓ 5-10% in those markets |
@@ -246,7 +247,7 @@ The highest single-country hurdle is UK/DE at ~6-7% of families < 10; Spain/Ital
 ➜ Still well inside typical kids-app reach benchmarks (Lunii box ≈9% after 8 years).
 
 **Price-mix upside**
-Any uptick (e.g., 8% ad-free attach or 4% creative) cuts the required families by ~15%.
+Any uptick (e.g., 8% premium attach or 4% creative) cuts the required families by ~15%.
 
 #### 6.5.2 Sequencing stays intact
 
@@ -269,7 +270,7 @@ While an aggressive growth model would target 16% penetration in France and up t
 
 #### 6.6.1 Impact on Active Families and Revenue
 
-With these penetration goals applied to the standard pricing, conversion mix, and ad-load parameters:
+With these penetration goals applied to the standard pricing and conversion mix parameters:
 
 | Market | Families < 10 yrs | Penetration goal | Target MAU | Blended ARPU (€/yr) | ARR (€000) |
 |--------|-------------------|-----------------|------------|---------------------|------------|
@@ -321,8 +322,8 @@ With these penetration goals applied to the standard pricing, conversion mix, an
 | Lift "consumer" attach 5% → 8% | +€0.40M |
 | Lift "creative" attach 2.5% → 4% | +€0.45M |
 | Introduce €3.99/mo "Unlimited Creative" for 1% of actives | +€0.22M |
-| Increase ad load to 90 imps/MAU/mo | +€0.16M |
-| Secure +€0.50 CPM uplift in UK/DE/NL/SE | +€0.21M |
+| Increase engagement to 90 interactions/MAU/mo | +€0.16M |
+| Secure +€0.50 revenue uplift per user in UK/DE/NL/SE | +€0.21M |
 
 With these penetration goals, we achieve €3.23M ARR. By stacking two of these levers, we could approach or exceed €4M ARR. To reach the ambitious €6M target, we would still need to:
 
@@ -489,9 +490,9 @@ This approach ensures we have engineering-only paths to significant cost reducti
 
 ---
 
-## 10. Go-To-Market Plan
+## 11. Go-To-Market Plan
 
-### 10.1 France-First Strategy
+### 11.1 France-First Strategy
 
 Talemo will launch exclusively in the French market, leveraging our competitive analysis and addressing the specific needs of French families.
 
@@ -501,7 +502,7 @@ Talemo will launch exclusively in the French market, leveraging our competitive 
 | GTM-02 | Launch    | App Store + Google Play + PWA with French-first UI/UX, French influencer storytelling packs, launch campaign with free ad-free trial. Highlight "audio-first, minimal-screen" messaging to address "Zéro écran" concerns. |
 | GTM-03 | Expansion | Targeted campaigns for specific parent segments (new parents, parents of 4-6 year olds, etc.) with customized story packs and features. |
 
-### 10.1.1 Customer Acquisition Budget & Assumptions
+### 11.1.1 Customer Acquisition Budget & Assumptions
 
 To achieve our target CAC of ≤ €12, we've developed a detailed acquisition model with the following components:
 
@@ -519,7 +520,7 @@ To achieve our target CAC of ≤ €12, we've developed a detailed acquisition m
 - Referral incentive: 1 creative story credit (€0.50 value) for each successful referral
 - Net effect: 25-30% of users acquired through referrals, reducing blended CAC to ≤ €12
 
-### 10.2 Family Engagement Strategy
+### 11.2 Family Engagement Strategy
 
 To maximize retention and drive organic growth among French families, we will:
 
@@ -542,9 +543,9 @@ To maximize retention and drive organic growth among French families, we will:
 
 ---
 
-## 11. Monetization & Business Model
+## 12. Monetization & Business Model
 
-### 11.1 Creator-Led Revenue Model
+### 12.1 Creator-Led Revenue Model
 
 Based on our analysis, we're shifting to a creator-focused subscription model as our primary revenue driver, with advertising as a minimal fallback:
 
@@ -554,14 +555,14 @@ Based on our analysis, we're shifting to a creator-focused subscription model as
 | MON-02 | **Free with Ads**    | Limited access with kid-safe contextual ads (5 rotating AI-generated stories/week) |
 | MON-03 | **Hardware Bundles** | White-label or SDK deals with Lunii/Yoto/Tonies for co-creation on their devices |
 
-### 11.2 Unit Economics
+### 12.2 Unit Economics
 
 | Metric | Target | Strategy |
 |--------|--------|----------|
-| Creator Conversion | ≥ 15% of MAU (stretch 20%) | Pushes blended ARPU >€0.65 and derisks reliance on ads |
-| Monthly Blended ARPU | €0.46 (vs. €0.07 ads-only) | 7× improvement over ad-only model |
+| Creator Conversion | ≥ 15% of MAU (stretch 20%) | Pushes blended ARPU >€0.65 and improves revenue stability |
+| Monthly Blended ARPU | €0.46 (vs. €0.07 previous model) | ≈6.6× improvement over previous model |
 | ARPU (Creator Premium) | €47.88/year | €3.99 × 12 months |
-| ARPU (Free with Ads) | €0.84/year | €0.90 CPM × 75 impressions/month/1000 × 12 months (conservative estimate) |
+| ARPU (Free with Ads) | €0.81/year | €0.90 CPM × 75 impressions/month/1000 × 12 months (conservative estimate) |
 | CAC | ≤ €12 | Focused marketing in French parenting channels + referral program |
 | D30 Retention | ≥ 35% | Benchmark for paid audio-learning apps; critical for LTV/CAC |
 | Gross Margin | ≥ 70% | With on-device TTS or €0.03/story cost ceiling |
@@ -569,16 +570,16 @@ Based on our analysis, we're shifting to a creator-focused subscription model as
 
 This creator-led model dramatically reduces the MAU required to reach our revenue targets:
 
-| Metric | Baseline (ads-only) | Creator-led (15% convert @ €3.99) |
+| Metric | Baseline (previous model) | Creator-led (15% convert @ €3.99) |
 |--------|---------------------|-----------------------------------|
 | Monthly blended ARPU | €0.07 | €0.65 (9.3× higher) |
 | MAU needed for €1M ARR | 1.26M | 0.13M (10× fewer) |
 
-### 11.3 Detailed Business Model (€1M ARR Pre-Seed Milestone)
+### 12.3 Detailed Business Model (€1.4M ARR Pre-Seed Milestone)
 
-Based on our creator-led revenue model and best-available AI-inference benchmarks, we've developed a comprehensive business model to reach €1M ARR with a capital-efficient approach, requiring significantly fewer users than a traditional ad-heavy model would demand.
+Based on our creator-led revenue model and best-available AI-inference benchmarks, we've developed a comprehensive business model to reach €1.4M ARR with a capital-efficient approach, requiring significantly fewer users than the previous model would demand.
 
-#### 11.3.1 Revenue Assumptions (FY2025)
+#### 12.3.1 Revenue Assumptions (FY2025)
 
 | Revenue Stream | Assumptions | Source/Rationale |
 |----------------|-------------|------------------|
@@ -587,7 +588,7 @@ Based on our creator-led revenue model and best-available AI-inference benchmark
 | | 75 impressions/free MAU/month | 3 sessions × 4 ads each × ~6 fill-rate discount |
 | **Hardware Partnerships** | White-label/SDK revenue | Potential to attach to 1% of Tonies + Yoto's 4M installed base |
 
-#### 11.3.2 Cost Structure
+#### 12.3.2 Cost Structure
 
 | Cost Category | Assumptions | Details |
 |---------------|-------------|---------|
@@ -598,7 +599,7 @@ Based on our creator-led revenue model and best-available AI-inference benchmark
 | **Hosting/Streaming** | €0.20/active user/year | Cloud infrastructure costs |
 | **Variable Cost per Creator User** | €15.6/year | 5 stories/week × 52 × €0.06 |
 
-#### 11.3.3 User Mix to Achieve €1M ARR (Pre-Seed Milestone)
+#### 12.3.3 User Mix to Achieve €1M ARR (Pre-Seed Milestone)
 
 With our creator-led model focusing on €3.99/month subscriptions, we can achieve €1M ARR with dramatically fewer users:
 
@@ -608,9 +609,9 @@ With our creator-led model focusing on €3.99/month subscriptions, we can achie
 | Free with Ads (85%) | 153,000 MAU | 153K × €0.07/mo ≈ €10.7K | €128K |
 | **Total** | **180,000 MAU** | **€118.4K MRR** | **€1.42M ARR** |
 
-This represents a dramatic reduction from the 700,000 MAU that would be required in an ads-only model, making our growth targets much more achievable with limited marketing resources.
+This represents a dramatic reduction from the 700,000 MAU that would be required in the previous model, making our growth targets much more achievable with limited marketing resources.
 
-#### 11.3.4 Hardware Partnership Potential
+#### 12.3.4 Hardware Partnership Potential
 
 By pursuing white-label or SDK deals with established hardware players, we can further accelerate growth:
 
@@ -621,18 +622,18 @@ By pursuing white-label or SDK deals with established hardware players, we can f
 
 Even modest adoption rates of our creation tools by existing hardware users could generate substantial additional revenue without the CAC burden of direct acquisition.
 
-#### 11.3.5 Gross Margin Analysis
+#### 12.3.5 Gross Margin Analysis
 
 | Cost Bucket | Amount | Notes |
 |-------------|--------|-------|
 | AI Variable (creator users) | €421K | €15.6 × 27K creator users |
 | Hosting/Streaming | €36K | €0.20 × 180K total users |
 | **Total Variable Costs** | **€457K** | |
-| **Gross Profit** | **€963K** | **≈70% gross margin** |
+| **Gross Profit** | **€963K** | **68% gross margin** |
 
 This margin is healthy and sustainable, especially as we implement our cost optimization roadmap to bring AI costs down to €0.03 per story, which would improve margins to >80%.
 
-#### 11.3.6 Operational Structure
+#### 12.3.6 Operational Structure
 
 A lean team of approximately 8 FTE can efficiently operate the platform during the pre-seed phase:
 - 4 Engineering (focus on on-device TTS and creator tools)
@@ -648,7 +649,7 @@ A lean team of approximately 8 FTE can efficiently operate the platform during t
 
 This structure maintains capital efficiency while focusing on our core creator-led value proposition.
 
-#### 11.3.7 Key Funnel Metrics
+#### 12.3.7 Key Funnel Metrics
 
 | Funnel KPI | Target | Rationale |
 |------------|--------|-----------|
@@ -659,7 +660,7 @@ This structure maintains capital efficiency while focusing on our core creator-l
 
 With these conversion rates, approximately 85% of users remain on the ad-supported tier while 15% subscribe to the Creator Premium tier, generating the bulk of our revenue. This is a significant improvement over the typical 7.5% paid conversion rate seen in standard freemium apps.
 
-#### 11.3.8 Business Model Sensitivity
+#### 12.3.8 Business Model Sensitivity
 
 | Lever | Effect on €1M ARR Business |
 |-------|---------------------------|
@@ -669,7 +670,7 @@ With these conversion rates, approximately 85% of users remain on the ad-support
 | Cut AI cost to €0.03/story | Margin ↑ to 85% (from 70%) |
 | Hardware partnership adoption at 2% | Additional €3.36M ARR potential |
 
-### 11.4 Focused Market Strategy
+### 12.4 Focused Market Strategy
 
 With our creator-led model, we can achieve our €1M ARR milestone with a much more focused market approach, concentrating exclusively on France during the pre-seed phase:
 
@@ -679,7 +680,7 @@ With our creator-led model, we can achieve our €1M ARR milestone with a much m
 
 This represents just 4.2% of French families with children under 10 (4.3M total) - a much more achievable target than the 16% penetration that would be required in a high-volume, low-ARPU scenario.
 
-#### 11.4.1 Post-Seed European Expansion
+#### 12.4.1 Post-Seed European Expansion
 
 After proving our creator-led model in France and securing seed funding, we'll expand to select European markets with a similar approach:
 
@@ -696,11 +697,11 @@ This focused approach allows us to:
 
 By focusing on creator conversion rather than massive scale, we can build a sustainable business with significantly less capital and marketing spend.
 
-### 11.5 Regulatory Compliance & Risk De-Risking
+### 12.5 Regulatory Compliance & Risk De-Risking
 
 We're proactively addressing regulatory concerns from day one, making compliance a competitive advantage rather than a burden:
 
-#### 11.5.1 CNIL-Style Parental Dashboard
+#### 12.5.1 CNIL-Style Parental Dashboard
 
 We'll build a comprehensive parental control dashboard that exceeds CNIL requirements:
 
@@ -711,7 +712,7 @@ We'll build a comprehensive parental control dashboard that exceeds CNIL require
 | **Content Filtering** | Age-appropriate content controls with parent override | Builds trust with families |
 | **Data Residency Controls** | All data hosted in France with SecNumCloud certification | Addresses sovereignty concerns |
 
-#### 11.5.2 AI Content Transparency
+#### 12.5.2 AI Content Transparency
 
 | Feature | Description | Benefit |
 |---------|-------------|---------|
@@ -719,7 +720,7 @@ We'll build a comprehensive parental control dashboard that exceeds CNIL require
 | **Contextual-Only Advertising** | No behavioral targeting, fully DSA-compliant | Future-proof revenue model |
 | **CNIL Sandbox Submission** | Voluntary participation in CNIL's regulatory sandbox | Early feedback and trust badge |
 
-#### 11.5.3 Business Risk Mitigation
+#### 12.5.3 Business Risk Mitigation
 
 | Risk | Mitigation Strategy |
 |------|---------------------|
@@ -731,9 +732,9 @@ This approach not only creates a capital-efficient business but positions Talemo
 
 ---
 
-## 12. Exit Narratives
+## 13. Exit Narratives
 
-### 12.1 Strategic Acquisition Paths (3-5 Year Horizon)
+### 13.1 Strategic Acquisition Paths (3-5 Year Horizon)
 
 | Potential Acquirer | Strategic Fit | Path to Acquisition |
 |-------------------|---------------|---------------------|
@@ -741,7 +742,7 @@ This approach not only creates a capital-efficient business but positions Talemo
 | **Bayard** | - Major French children's publisher seeking digital transformation<br>- Our platform extends their IP to interactive audio<br>- Complements their existing family content offerings | 1. Secure content licensing deal<br>2. Co-develop exclusive French stories<br>3. Integrate with their parent-focused distribution channels<br>4. Demonstrate technology advantage over competitors |
 | **Spotify Kids** | - Our creation tools fill gap in their consumption-only model<br>- French-first approach complements their global reach<br>- Our family-focused features enhance their consumer offering | 1. Build user base with strong retention metrics<br>2. Develop API for potential integration<br>3. Demonstrate unique engagement vs. passive listening<br>4. Position as their "creation studio" for kids content |
 
-### 12.2 Key Metrics for Acquisition Attractiveness
+### 13.2 Key Metrics for Acquisition Attractiveness
 
 | Metric | Target | Rationale |
 |--------|--------|-----------|
@@ -755,9 +756,9 @@ This approach not only creates a capital-efficient business but positions Talemo
 
 ---
 
-## 13. Development Roadmap
+## 14. Development Roadmap
 
-### 13.1 4-Month MVP Timeline with Critical Path
+### 14.1 4-Month MVP Timeline with Critical Path
 
 | Week | Focus | Key Deliverables | Milestone |
 |------|-------|------------------|-----------|
@@ -766,7 +767,7 @@ This approach not only creates a capital-efficient business but positions Talemo
 | **Weeks 9-12** | Key Features | - Record-your-own functionality<br>- Dark-screen mode implementation<br>- Offline capabilities | Feature Complete (Week 12) |
 | **Weeks 13-16** | QA & Launch Prep | - Performance optimization<br>- Final UI/UX refinement<br>- Security audit<br>- App store submission | **Beta Launch: October 15, 2025** |
 
-### 13.2 Critical Path Gantt Chart
+### 14.2 Critical Path Gantt Chart
 
 ```
                     Week: 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
@@ -789,7 +790,7 @@ QA & Launch                                         [==========]
 BETA LAUNCH                                                    [X]
 ```
 
-### 13.3 Post-MVP Priorities
+### 14.3 Post-MVP Priorities
 
 1. Enhanced analytics for retention optimization
 2. Advanced parental controls and family management features
