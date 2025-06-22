@@ -14,7 +14,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ../scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -24,38 +24,21 @@ services:
   # Django Web Server
   web:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: docker/Dockerfile.web
     container_name: talemo-web
     restart: unless-stopped
     depends_on:
       - db
       - redis
       - minio
-    environment:
-      - DEBUG=True
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-7dbq8%y^m^u6na#nxpza1@*j=lhnp(++-ccuw)3uem5j969-$2}
-      - ALLOWED_HOSTS=localhost,127.0.0.1
-      - DB_NAME=${DB_NAME:-talemo}
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_URL=redis://redis:6379/0
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - MINIO_ENDPOINT=minio:9000
-      - MINIO_BUCKET=${MINIO_BUCKET:-talemo}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - STABILITY_API_KEY=${STABILITY_API_KEY:-}
-      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
-      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - mailhog
+    env_file:
+      - ../.env
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
+      - ../:/app
     command: >
       bash -c "python manage.py migrate &&
                python manage.py runserver 0.0.0.0:8000"
@@ -93,77 +76,53 @@ services:
   # Celery worker for asynchronous tasks
   celery:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: docker/Dockerfile.celery
     container_name: talemo-celery
     restart: unless-stopped
     depends_on:
       - redis
       - db
-    environment:
-      - DEBUG=True
-      - DB_NAME=${DB_NAME:-talemo}
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_URL=redis://redis:6379/0
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - MINIO_ENDPOINT=minio:9000
-      - MINIO_BUCKET=${MINIO_BUCKET:-talemo}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - STABILITY_API_KEY=${STABILITY_API_KEY:-}
-      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
-      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - mailhog
+    env_file:
+      - ../.env
     volumes:
-      - .:/app
-    command: celery -A config worker -l info
+      - ../:/app
 
   # Celery Beat for scheduled tasks
   celery-beat:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: docker/Dockerfile.celery-beat
     container_name: talemo-celery-beat
     restart: unless-stopped
     depends_on:
       - redis
       - db
       - celery
-    environment:
-      - DEBUG=True
-      - DB_NAME=${DB_NAME:-talemo}
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_URL=redis://redis:6379/0
+      - mailhog
+    env_file:
+      - ../.env
     volumes:
-      - .:/app
-    command: celery -A config beat -l info
+      - ../:/app
 
   # Flower for Celery monitoring
   flower:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: docker/Dockerfile.flower
     container_name: talemo-flower
     restart: unless-stopped
     depends_on:
       - redis
       - celery
-    environment:
-      - REDIS_URL=redis://redis:6379/0
+      - mailhog
+    env_file:
+      - ../.env
     ports:
       - "5555:5555"
     volumes:
-      - .:/app
-    command: celery -A config flower --port=5555
+      - ../:/app
 
   # Mailhog for email testing
   mailhog:

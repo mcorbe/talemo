@@ -40,7 +40,13 @@ AWS_DEFAULT_ACL = "public-read"
 AWS_QUERYSTRING_AUTH = False
 
 # Email
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "mailhog")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "1025"))
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
+EMAIL_USE_TLS = False
+DEFAULT_FROM_EMAIL = "noreply@talemo.local"
 
 # Debug Toolbar
 if DEBUG:
