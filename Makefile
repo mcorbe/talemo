@@ -15,33 +15,58 @@ NC := \033[0m # No Color
 # Help
 .PHONY: help
 help:
-	@echo "$(YELLOW)Talemo Development Commands$(NC)"
-	@echo "$(GREEN)make up$(NC)              - Start the development environment"
-	@echo "$(GREEN)make down$(NC)            - Stop the development environment"
-	@echo "$(GREEN)make ps$(NC)              - Check container status"
-	@echo "$(GREEN)make build$(NC)           - Build the containers"
-	@echo "$(GREEN)make restart$(NC)         - Restart the development environment"
-	@echo "$(GREEN)make migrate$(NC)         - Apply migrations"
-	@echo "$(GREEN)make migrations$(NC)      - Create migrations"
-	@echo "$(GREEN)make superuser$(NC)       - Create a superuser"
-	@echo "$(GREEN)make loaddata$(NC)        - Load initial data"
-	@echo "$(GREEN)make test$(NC)            - Run tests"
-	@echo "$(GREEN)make test-unit$(NC)       - Run unit tests"
-	@echo "$(GREEN)make test-integration$(NC) - Run integration tests"
-	@echo "$(GREEN)make coverage$(NC)        - Run tests with coverage"
-	@echo "$(GREEN)make logs$(NC)            - Check logs for web service"
-	@echo "$(GREEN)make logs-celery$(NC)     - Check logs for celery service"
-	@echo "$(GREEN)make shell$(NC)           - Open a Django shell"
-	@echo "$(GREEN)make clean$(NC)           - Remove all containers and volumes"
-	@echo "$(GREEN)make pgvector$(NC)        - Create pgvector extension in the database"
-	@echo "$(GREEN)make create-tenant$(NC)   - Create a new tenant for multi-tenant development"
+	@echo "$(YELLOW)Talemo Commands$(NC)"
 	@echo ""
-	@echo "$(YELLOW)Talemo Monitoring Commands$(NC)"
-	@echo "$(GREEN)make monitoring-up$(NC)   - Start the monitoring stack"
-	@echo "$(GREEN)make monitoring-down$(NC) - Stop the monitoring stack"
-	@echo "$(GREEN)make monitoring-ps$(NC)   - Check monitoring container status"
-	@echo "$(GREEN)make monitoring-logs$(NC) - Check logs for monitoring services"
-	@echo "$(GREEN)make test-monitoring$(NC) - Run monitoring tests"
+	@echo "$(YELLOW)Setup Commands:$(NC)"
+	@echo "$(GREEN)make setup$(NC)                  - Setup the entire environment"
+	@echo "$(GREEN)make setup-infrastructure$(NC)   - Setup infrastructure environment"
+	@echo "$(GREEN)make setup-monitoring$(NC)       - Setup monitoring environment"
+	@echo "$(GREEN)make setup-application$(NC)      - Setup application environment"
+	@echo ""
+	@echo "$(YELLOW)Install Commands:$(NC)"
+	@echo "$(GREEN)make install$(NC)                - Install all dependencies"
+	@echo "$(GREEN)make install-infrastructure$(NC) - Install infrastructure dependencies"
+	@echo "$(GREEN)make install-monitoring$(NC)     - Install monitoring dependencies"
+	@echo "$(GREEN)make install-application$(NC)    - Install application dependencies"
+	@echo ""
+	@echo "$(YELLOW)Build Commands:$(NC)"
+	@echo "$(GREEN)make build$(NC)                  - Build all containers"
+	@echo "$(GREEN)make build-infrastructure$(NC)   - Build infrastructure containers"
+	@echo "$(GREEN)make build-monitoring$(NC)       - Build monitoring containers"
+	@echo "$(GREEN)make build-application$(NC)      - Build application containers"
+	@echo ""
+	@echo "$(YELLOW)Run Commands:$(NC)"
+	@echo "$(GREEN)make run$(NC)                    - Run all services as daemons"
+	@echo "$(GREEN)make run-infrastructure$(NC)     - Run infrastructure services as daemons"
+	@echo "$(GREEN)make run-monitoring$(NC)         - Run monitoring services as daemons"
+	@echo "$(GREEN)make run-application$(NC)        - Run application services as daemons"
+	@echo ""
+	@echo "$(YELLOW)Development Commands:$(NC)"
+	@echo "$(GREEN)make up$(NC)                     - Start the development environment"
+	@echo "$(GREEN)make down$(NC)                   - Stop the development environment"
+	@echo "$(GREEN)make ps$(NC)                     - Check container status"
+	@echo "$(GREEN)make restart$(NC)                - Restart the development environment"
+	@echo "$(GREEN)make migrate$(NC)                - Apply migrations"
+	@echo "$(GREEN)make migrations$(NC)             - Create migrations"
+	@echo "$(GREEN)make superuser$(NC)              - Create a superuser"
+	@echo "$(GREEN)make loaddata$(NC)               - Load initial data"
+	@echo "$(GREEN)make test$(NC)                   - Run tests"
+	@echo "$(GREEN)make test-unit$(NC)              - Run unit tests"
+	@echo "$(GREEN)make test-integration$(NC)       - Run integration tests"
+	@echo "$(GREEN)make coverage$(NC)               - Run tests with coverage"
+	@echo "$(GREEN)make logs$(NC)                   - Check logs for web service"
+	@echo "$(GREEN)make logs-celery$(NC)            - Check logs for celery service"
+	@echo "$(GREEN)make shell$(NC)                  - Open a Django shell"
+	@echo "$(GREEN)make clean$(NC)                  - Remove all containers and volumes"
+	@echo "$(GREEN)make pgvector$(NC)               - Create pgvector extension in the database"
+	@echo "$(GREEN)make create-tenant$(NC)          - Create a new tenant for multi-tenant development"
+	@echo ""
+	@echo "$(YELLOW)Monitoring Commands:$(NC)"
+	@echo "$(GREEN)make monitoring-up$(NC)          - Start the monitoring stack"
+	@echo "$(GREEN)make monitoring-down$(NC)        - Stop the monitoring stack"
+	@echo "$(GREEN)make monitoring-ps$(NC)          - Check monitoring container status"
+	@echo "$(GREEN)make monitoring-logs$(NC)        - Check logs for monitoring services"
+	@echo "$(GREEN)make test-monitoring$(NC)        - Run monitoring tests"
 
 # Docker commands
 .PHONY: up
@@ -62,10 +87,8 @@ down:
 	@echo "$(GREEN)Development environment stopped!$(NC)"
 
 .PHONY: build
-build:
-	@echo "$(YELLOW)Building containers...$(NC)"
-	$(DOCKER_COMPOSE) build
-	@echo "$(GREEN)Containers built!$(NC)"
+build: build-infrastructure build-application
+	@echo "$(GREEN)All containers built!$(NC)"
 
 .PHONY: restart
 restart:
@@ -198,3 +221,101 @@ test-monitoring:
 	@echo "$(YELLOW)Running monitoring tests...$(NC)"
 	$(DOCKER_COMPOSE_EXEC_WEB) python scripts/test_monitoring.py --all
 	@echo "$(GREEN)Monitoring tests completed!$(NC)"
+
+# Setup commands
+.PHONY: setup setup-infrastructure setup-monitoring setup-application
+
+setup: setup-infrastructure setup-monitoring setup-application
+	@echo "$(GREEN)All environments have been set up!$(NC)"
+
+setup-infrastructure:
+	@echo "$(YELLOW)Setting up infrastructure environment...$(NC)"
+	@if [ ! -f .env ]; then \
+		cp .env.example .env; \
+		echo "Created .env file from .env.example"; \
+	fi
+	@echo "$(GREEN)Infrastructure environment setup complete!$(NC)"
+
+setup-monitoring:
+	@echo "$(YELLOW)Setting up monitoring environment...$(NC)"
+	@mkdir -p docker/prometheus/data
+	@mkdir -p docker/grafana/data
+	@mkdir -p docker/elasticsearch/data
+	@echo "$(GREEN)Monitoring environment setup complete!$(NC)"
+
+setup-application:
+	@echo "$(YELLOW)Setting up application environment...$(NC)"
+	@if [ ! -d "venv" ]; then \
+		python -m venv venv; \
+		echo "Created virtual environment"; \
+	fi
+	@echo "$(GREEN)Application environment setup complete!$(NC)"
+
+# Install commands
+.PHONY: install install-infrastructure install-monitoring install-application
+
+install: install-infrastructure install-monitoring install-application
+	@echo "$(GREEN)All dependencies have been installed!$(NC)"
+
+install-infrastructure:
+	@echo "$(YELLOW)Installing infrastructure dependencies...$(NC)"
+	@echo "No specific infrastructure dependencies to install"
+	@echo "$(GREEN)Infrastructure dependencies installed!$(NC)"
+
+install-monitoring:
+	@echo "$(YELLOW)Installing monitoring dependencies...$(NC)"
+	@. venv/bin/activate && pip install -r requirements-monitoring.txt
+	@echo "$(GREEN)Monitoring dependencies installed!$(NC)"
+
+install-application:
+	@echo "$(YELLOW)Installing application dependencies...$(NC)"
+	@. venv/bin/activate && pip install -r requirements-dev.txt
+	@echo "$(GREEN)Application dependencies installed!$(NC)"
+
+# Build commands
+.PHONY: build-infrastructure build-monitoring build-application
+
+build-infrastructure:
+	@echo "$(YELLOW)Building infrastructure containers...$(NC)"
+	$(DOCKER_COMPOSE) build db redis minio mailhog
+	@echo "$(GREEN)Infrastructure containers built!$(NC)"
+
+build-monitoring:
+	@echo "$(YELLOW)Building monitoring containers...$(NC)"
+	$(DOCKER_COMPOSE_MONITORING) build
+	@echo "$(GREEN)Monitoring containers built!$(NC)"
+
+build-application:
+	@echo "$(YELLOW)Building application containers...$(NC)"
+	$(DOCKER_COMPOSE) build web celery celery-beat flower
+	@echo "$(GREEN)Application containers built!$(NC)"
+
+# Run commands
+.PHONY: run run-infrastructure run-monitoring run-application
+
+run: run-infrastructure run-monitoring run-application
+	@echo "$(GREEN)All services are running as daemons!$(NC)"
+	@echo "Django Web Server: http://localhost:8000"
+	@echo "Django Admin: http://localhost:8000/admin"
+	@echo "MinIO Console: http://localhost:9001 (login with minioadmin/minioadmin)"
+	@echo "Flower Dashboard: http://localhost:5555"
+	@echo "Mailhog: http://localhost:8025"
+	@echo "Grafana: http://localhost:3000 (login with admin/admin)"
+	@echo "Kibana: http://localhost:5601"
+	@echo "Prometheus: http://localhost:9090"
+	@echo "APM: http://localhost:8200 (via Kibana)"
+
+run-infrastructure:
+	@echo "$(YELLOW)Running infrastructure services as daemons...$(NC)"
+	$(DOCKER_COMPOSE) up -d db redis minio mailhog
+	@echo "$(GREEN)Infrastructure services are running!$(NC)"
+
+run-monitoring:
+	@echo "$(YELLOW)Running monitoring services as daemons...$(NC)"
+	$(DOCKER_COMPOSE_MONITORING) up -d
+	@echo "$(GREEN)Monitoring services are running!$(NC)"
+
+run-application:
+	@echo "$(YELLOW)Running application services as daemons...$(NC)"
+	$(DOCKER_COMPOSE) up -d web celery celery-beat flower
+	@echo "$(GREEN)Application services are running!$(NC)"

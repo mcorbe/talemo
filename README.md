@@ -88,6 +88,73 @@ This project uses Docker Compose to set up a development environment with all th
    make loaddata
    ```
 
+### Available Makefile Commands
+
+The project includes a comprehensive set of Makefile commands to streamline development. You can view all available commands by running `make help`. Here's an overview of the key command categories:
+
+#### Setup Commands
+
+These commands set up the environment for development:
+
+- `make setup` - Set up the entire environment (infrastructure, monitoring, application)
+- `make setup-infrastructure` - Set up infrastructure environment (creates .env file)
+- `make setup-monitoring` - Set up monitoring environment (creates necessary directories)
+- `make setup-application` - Set up application environment (creates virtual environment)
+
+#### Install Commands
+
+These commands install dependencies:
+
+- `make install` - Install all dependencies
+- `make install-infrastructure` - Install infrastructure dependencies
+- `make install-monitoring` - Install monitoring dependencies
+- `make install-application` - Install application dependencies
+
+#### Build Commands
+
+These commands build Docker containers:
+
+- `make build` - Build all containers (infrastructure and application)
+- `make build-infrastructure` - Build infrastructure containers (db, redis, minio, mailhog)
+- `make build-monitoring` - Build monitoring containers
+- `make build-application` - Build application containers (web, celery, celery-beat, flower)
+
+#### Run Commands
+
+These commands run services as daemons:
+
+- `make run` - Run all services as daemons
+- `make run-infrastructure` - Run infrastructure services as daemons
+- `make run-monitoring` - Run monitoring services as daemons
+- `make run-application` - Run application services as daemons
+
+#### Development Commands
+
+These commands are useful for day-to-day development:
+
+- `make up` - Start the development environment
+- `make down` - Stop the development environment
+- `make ps` - Check container status
+- `make restart` - Restart the development environment
+- `make migrate` - Apply migrations
+- `make migrations` - Create migrations
+- `make superuser` - Create a superuser
+- `make loaddata` - Load initial data
+- `make test` - Run tests
+- `make logs` - Check logs for web service
+- `make shell` - Open a Django shell
+- `make clean` - Remove all containers and volumes
+
+#### Monitoring Commands
+
+These commands manage the monitoring stack:
+
+- `make monitoring-up` - Start the monitoring stack
+- `make monitoring-down` - Stop the monitoring stack
+- `make monitoring-ps` - Check monitoring container status
+- `make monitoring-logs` - Check logs for monitoring services
+- `make test-monitoring` - Run monitoring tests
+
 ### Container Architecture
 
 The development environment consists of the following containers:
