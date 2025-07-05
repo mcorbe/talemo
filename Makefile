@@ -3,7 +3,6 @@
 
 # Variables
 DOCKER_COMPOSE = docker compose -f docker/docker-compose.dev.yml -p talemo
-DOCKER_COMPOSE_MONITORING = docker compose -f docker/docker-compose.monitoring.yml -p talemo
 DOCKER_COMPOSE_EXEC_WEB = $(DOCKER_COMPOSE) exec web
 
 # Colors
@@ -33,7 +32,6 @@ help:
 	@echo "$(GREEN)make build-application$(NC)      - Build application containers (web, celery, celery-beat, flower)"
 	@echo "$(GREEN)make build-ai$(NC)               - Build AI service container"
 	@echo "$(GREEN)make build-all$(NC)              - Build all containers including AI service"
-	@echo "$(GREEN)make build-monitoring$(NC)       - Build monitoring containers"
 	@echo "$(GREEN)make build-<container>$(NC)      - Build a specific container (e.g., make build-celery)"
 	@echo ""
 	@echo "$(YELLOW)Application Commands:$(NC)"
@@ -52,12 +50,6 @@ help:
 	@echo "$(GREEN)make shell$(NC)                  - Open a Django shell"
 	@echo "$(GREEN)make pgvector$(NC)               - Create pgvector extension in the database"
 	@echo ""
-	@echo "$(YELLOW)Development Monitoring Commands:$(NC)"
-	@echo "$(GREEN)make monitoring-up$(NC)          - Start the monitoring stack"
-	@echo "$(GREEN)make monitoring-down$(NC)        - Stop the monitoring stack"
-	@echo "$(GREEN)make monitoring-ps$(NC)          - Check monitoring container status"
-	@echo "$(GREEN)make monitoring-logs$(NC)        - Check logs for monitoring services"
-	@echo "$(GREEN)make test-monitoring$(NC)        - Run monitoring tests"
 
 # Development Docker commands
 .PHONY: up up-%
@@ -208,44 +200,10 @@ logs-celery:
 	@echo "$(YELLOW)Checking logs for celery service...$(NC)"
 	$(DOCKER_COMPOSE) logs -f celery
 
-# Monitoring commands
-.PHONY: monitoring-up
-monitoring-up:
-	@echo "$(YELLOW)Starting monitoring stack...$(NC)"
-	$(DOCKER_COMPOSE_MONITORING) up -d
-	@echo "$(GREEN)Monitoring stack started!$(NC)"
-	@echo "Grafana: http://localhost:$(GRAFANA_PORT) (login with admin/admin)"
-	@echo "Kibana: http://localhost:$(KIBANA_PORT)"
-	@echo "Prometheus: http://localhost:$(PROMETHEUS_PORT)"
-	@echo "APM: http://localhost:$(APM_SERVER_PORT) (via Kibana)"
-
-.PHONY: monitoring-down
-monitoring-down:
-	@echo "$(YELLOW)Stopping monitoring stack...$(NC)"
-	$(DOCKER_COMPOSE_MONITORING) down
-	@echo "$(GREEN)Monitoring stack stopped!$(NC)"
-
-.PHONY: monitoring-ps
-monitoring-ps:
-	@echo "$(YELLOW)Checking monitoring container status...$(NC)"
-	$(DOCKER_COMPOSE_MONITORING) ps
-
-.PHONY: monitoring-logs
-monitoring-logs:
-	@echo "$(YELLOW)Checking logs for monitoring services...$(NC)"
-	@echo "Available services: elasticsearch, logstash, kibana, apm-server, statsd, prometheus, grafana"
-	@read -p "Enter service name: " service; \
-	$(DOCKER_COMPOSE_MONITORING) logs -f $$service
-
-.PHONY: test-monitoring
-test-monitoring:
-	@echo "$(YELLOW)Running monitoring tests...$(NC)"
-	$(DOCKER_COMPOSE_EXEC_WEB) python scripts/test_monitoring.py --all
-	@echo "$(GREEN)Monitoring tests completed!$(NC)"
 
 
 # Build commands
-.PHONY: build-infrastructure build-monitoring build-application build-ai build-all build-%
+.PHONY: build-infrastructure build-application build-ai build-all build-%
 
 build-%:
 	@echo "$(YELLOW)Building $* container...$(NC)"
@@ -257,10 +215,6 @@ build-infrastructure:
 	$(DOCKER_COMPOSE) build db redis minio mailhog
 	@echo "$(GREEN)Infrastructure containers built!$(NC)"
 
-build-monitoring:
-	@echo "$(YELLOW)Building monitoring containers...$(NC)"
-	$(DOCKER_COMPOSE_MONITORING) build
-	@echo "$(GREEN)Monitoring containers built!$(NC)"
 
 build-application:
 	@echo "$(YELLOW)Building application containers in parallel...$(NC)"

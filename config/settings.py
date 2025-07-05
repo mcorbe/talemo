@@ -16,12 +16,8 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Import monitoring configuration
-try:
-    from .monitoring import ELASTIC_APM, STATSD_HOST, STATSD_PORT, STATSD_PREFIX, STATSD_CLIENT, LOGGING, MONITORING_APPS, MONITORING_MIDDLEWARE
-    MONITORING_ENABLED = os.environ.get('MONITORING_ENABLED', 'false').lower() == 'true'
-except ImportError:
-    MONITORING_ENABLED = False
+# Monitoring is disabled
+MONITORING_ENABLED = False
 
 
 # Quick-start development settings - unsuitable for production
@@ -57,9 +53,7 @@ INSTALLED_APPS = [
     "talemo.stories",
 ]
 
-# Add monitoring apps if monitoring is enabled
-if MONITORING_ENABLED:
-    INSTALLED_APPS += MONITORING_APPS
+# Monitoring is disabled, no monitoring apps added
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -71,12 +65,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Add monitoring middleware if monitoring is enabled
-if MONITORING_ENABLED:
-    # Insert APM and Prometheus middleware at the beginning
-    MIDDLEWARE = MONITORING_MIDDLEWARE[:1] + MIDDLEWARE
-    # Add StatsD middleware at the end
-    MIDDLEWARE += MONITORING_MIDDLEWARE[1:]
+# Monitoring is disabled, no monitoring middleware added
 
 ROOT_URLCONF = "config.urls"
 
