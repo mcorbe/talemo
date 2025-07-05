@@ -2,6 +2,8 @@
 
 This document provides a comprehensive checklist of work packages required to implement the Talemo platform based on the technical implementation document.
 
+Things marked as [N] are exlucded from POC.
+
 ## 1. Core Infrastructure
 
 ### Database Setup
@@ -11,7 +13,7 @@ This document provides a comprehensive checklist of work packages required to im
 - [x] Implement database schema with tenant isolation
 - [x] Set up Redis for caching and message broker
 - [x] Configure MinIO/S3 for asset storage with tenant prefixes
-- [ ] Implement WORM storage for audit logs
+- [N] Implement WORM storage for audit logs
 
 ### Django Application Setup
 - [x] Set up Django project structure
@@ -24,11 +26,11 @@ This document provides a comprehensive checklist of work packages required to im
 ## 2. Authentication & Authorization
 
 ### Authentication System
-- [ ] Implement Google OAuth2 integration
-- [ ] Implement Apple Sign-In integration
-- [ ] Set up JWT token authentication
-- [ ] Configure token refresh mechanism
-- [ ] Implement tenant context in token payload
+- [N] Implement Google OAuth2 integration
+- [N] Implement Apple Sign-In integration
+- [N] Set up JWT token authentication
+- [N] Configure token refresh mechanism
+- [N] Implement tenant context in token payload
 
 ### Profile-Based Access Control
 - [N] Implement Profile model with permissions JSON
@@ -42,22 +44,22 @@ This document provides a comprehensive checklist of work packages required to im
 - [x] Implement basic tenant isolation
 - [x] Create tenant context middleware
 - [x] Set up tenant isolation for storage paths
-- [ ] Implement tenant invitation flow
-- [ ] Create tenant policy management
+- [N] Implement tenant invitation flow
+- [N] Create tenant policy management
 
 ### Parental Consent Management
-- [ ] Implement CNIL-compliant consent system
-- [ ] Create parental verification flow
-- [ ] Set up consent audit trail
-- [ ] Implement consent revocation mechanism
+- [N] Implement CNIL-compliant consent system
+- [N] Create parental verification flow
+- [N] Set up consent audit trail
+- [N] Implement consent revocation mechanism
 
 ## 3. Agent Architecture
 
 ### CrewAI Integration
-- [ ] Set up CrewAI framework
-- [ ] Create agent bridge between Django and CrewAI
-- [ ] Implement Celery tasks for agent orchestration
-- [ ] Set up agent communication via Redis
+- [x] Set up CrewAI framework
+- [x] Create agent bridge between Django and CrewAI
+- [x] Implement Celery tasks for agent orchestration
+- [x] Set up agent communication via Redis
 
 ### Agent Implementation
 - [ ] Implement ModerationAgent
