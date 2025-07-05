@@ -43,7 +43,7 @@ talemo/
 └── docs/                     # Documentation
 ```
 
-## Development Setup with Docker Compose
+## Docker-Based Development Environment
 
 This project uses Docker Compose to set up a development environment with all the necessary services, including PostgreSQL with pgvector extension for vector similarity search. Each service runs in its own container for better isolation and scalability.
 
@@ -92,63 +92,48 @@ This project uses Docker Compose to set up a development environment with all th
 
 The project includes a comprehensive set of Makefile commands to streamline development. You can view all available commands by running `make help`. Here's an overview of the key command categories:
 
-#### Setup Commands
+#### Docker Environment Commands
 
-These commands set up the environment for development:
+These commands manage the Docker environment:
 
-- `make setup` - Set up the entire environment (infrastructure, monitoring, application)
-- `make setup-infrastructure` - Set up infrastructure environment (creates .env file)
-- `make setup-monitoring` - Set up monitoring environment (creates necessary directories)
-- `make setup-application` - Set up application environment (creates virtual environment)
+- `make up` - Build (if needed) and start all development containers
+- `make down` - Stop all development containers
+- `make ps` - Check container status
+- `make restart` - Restart all development containers
+- `make logs` - Check logs for web service
+- `make logs-celery` - Check logs for celery service
+- `make clean` - Remove all containers and volumes
 
-#### Install Commands
-
-These commands install dependencies:
-
-- `make install` - Install all dependencies
-- `make install-infrastructure` - Install infrastructure dependencies
-- `make install-monitoring` - Install monitoring dependencies
-- `make install-application` - Install application dependencies
-
-#### Build Commands
+#### Docker Build Commands
 
 These commands build Docker containers:
 
 - `make build` - Build all containers (infrastructure and application)
 - `make build-infrastructure` - Build infrastructure containers (db, redis, minio, mailhog)
-- `make build-monitoring` - Build monitoring containers
 - `make build-application` - Build application containers (web, celery, celery-beat, flower)
 
-#### Run Commands
+#### Application Commands
 
-These commands run services as daemons:
+These commands run operations inside the Docker containers:
 
-- `make run` - Run all services as daemons
-- `make run-infrastructure` - Run infrastructure services as daemons
-- `make run-monitoring` - Run monitoring services as daemons
-- `make run-application` - Run application services as daemons
-
-#### Development Commands
-
-These commands are useful for day-to-day development:
-
-- `make up` - Start the development environment
-- `make down` - Stop the development environment
-- `make ps` - Check container status
-- `make restart` - Restart the development environment
-- `make migrate` - Apply migrations
-- `make migrations` - Create migrations
+- `make migrate` - Apply database migrations
+- `make migrations` - Create database migrations
 - `make superuser` - Create a superuser
 - `make loaddata` - Load initial data
 - `make test` - Run tests
-- `make logs` - Check logs for web service
+- `make test-unit` - Run unit tests
+- `make test-integration` - Run integration tests
+- `make coverage` - Run tests with coverage
 - `make shell` - Open a Django shell
-- `make clean` - Remove all containers and volumes
+- `make pgvector` - Create pgvector extension in the database
+- `make create-tenant` - Create a new tenant for multi-tenant development
+
 
 #### Monitoring Commands
 
-These commands manage the monitoring stack:
+These commands manage the Docker-based monitoring stack:
 
+- `make build-monitoring` - Build monitoring containers
 - `make monitoring-up` - Start the monitoring stack
 - `make monitoring-down` - Stop the monitoring stack
 - `make monitoring-ps` - Check monitoring container status
@@ -240,9 +225,9 @@ If you need to customize a specific service, you can modify its Dockerfile in th
 
 You can also customize the Docker Compose setup by modifying the `docker/docker-compose.dev.yml` file. For example, you might want to add a new service or change the port mappings.
 
-## Monitoring Stack
+## Docker-Based Monitoring Stack
 
-The project includes a complete monitoring stack with StatsD, ELK (Elasticsearch, Logstash, Kibana), APM (Application Performance Monitoring), and Grafana. This stack provides comprehensive monitoring and observability for the application.
+The project includes a complete Docker-based monitoring stack with StatsD, ELK (Elasticsearch, Logstash, Kibana), APM (Application Performance Monitoring), and Grafana. This stack provides comprehensive monitoring and observability for the application.
 
 ### Monitoring Components
 
@@ -299,15 +284,6 @@ After setting up Langtrace, you can instrument your LLM calls in the agents modu
 - Response times
 - Completion content
 
-### Monitoring Commands
-
-The Makefile includes several commands for working with the monitoring stack:
-
-- `make monitoring-up` - Start the monitoring stack
-- `make monitoring-down` - Stop the monitoring stack
-- `make monitoring-ps` - Check monitoring container status
-- `make monitoring-logs` - Check logs for monitoring services
-- `make test-monitoring` - Run monitoring tests
 
 ## Development Workflow
 
