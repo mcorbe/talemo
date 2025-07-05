@@ -1,10 +1,18 @@
 """
 URL configuration for the stories API.
 """
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import StoryViewSet, TagViewSet, StorySearchView
 
 app_name = 'stories_api'
 
+# Create a router and register our viewsets with it
+router = DefaultRouter()
+router.register(r'stories', StoryViewSet, basename='story')
+router.register(r'tags', TagViewSet, basename='tag')
+router.register(r'search', StorySearchView, basename='search')
+
 urlpatterns = [
-    # Add API endpoints here
+    path('', include(router.urls)),
 ]
