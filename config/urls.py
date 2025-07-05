@@ -26,7 +26,6 @@ urlpatterns = [
 
     # App URLs
     path('stories/', include('talemo.stories.urls')),
-    path('agents/', include('talemo.agents.urls')),
 
     # Redirect root to stories
     path('', RedirectView.as_view(url='/stories/', permanent=False)),

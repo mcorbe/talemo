@@ -1,4 +1,4 @@
 """
-Models for the story_list app.
+Models for the stories app.
 """
 from .story import Story
