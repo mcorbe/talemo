@@ -3,17 +3,20 @@ Tenant models for multi-tenant functionality.
 """
 from django.db import models
 from django.contrib.auth.models import User
+from django_tenants.models import TenantMixin, DomainMixin
 
 
-class Tenant(models.Model):
+class Tenant(TenantMixin):
     """
     Tenant model for multi-tenant functionality.
     """
     name = models.CharField(max_length=100)
-    schema_name = models.CharField(max_length=63, unique=True)
     created_on = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
+
+    # default true, schema will be automatically created and synced when it is saved
+    auto_create_schema = True
 
     class Meta:
         db_table = 'core_tenant'
@@ -22,12 +25,10 @@ class Tenant(models.Model):
         return self.name
 
 
-class Domain(models.Model):
+class Domain(DomainMixin):
     """
     Domain model for multi-tenant functionality.
     """
-    domain = models.CharField(max_length=253, unique=True)
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='domains')
     is_primary = models.BooleanField(default=True)
 
     class Meta:
