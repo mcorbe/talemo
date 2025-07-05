@@ -132,10 +132,7 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "TAGS": [
         {"name": "stories", "description": "Operations related to stories"},
-        {"name": "assets", "description": "Operations related to assets (images, audio)"},
         {"name": "agents", "description": "Operations related to AI agents"},
-        {"name": "governance", "description": "Operations related to parental controls and consent"},
-        {"name": "subscriptions", "description": "Operations related to subscriptions"},
     ],
 }
 

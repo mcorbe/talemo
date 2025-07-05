@@ -9,16 +9,16 @@ logger = logging.getLogger(__name__)
 
 class IllustratorAgent(BaseAgent):
     """
-    Agent responsible for generating illustrations for stories.
+    Agent responsible for generating illustrations for story_list.
     """
     def __init__(self, verbose=True):
         super().__init__(
             name="Illustrator",
             role="Visual Artist and Image Generator",
-            goal="Create high-quality illustrations for stories",
+            goal="Create high-quality illustrations for story_list",
             backstory=(
                 "You are an AI-powered illustrator specialized in creating "
-                "beautiful and engaging images for children's stories. You can "
+                "beautiful and engaging images for children's story_list. You can "
                 "generate illustrations in various styles, from cartoon to realistic, "
                 "always ensuring they are appropriate for the target age group."
             ),
@@ -244,19 +244,19 @@ class EmbeddingAgent(BaseAgent):
 
 class StoryCompanion(BaseAgent):
     """
-    Agent responsible for assisting users in creating and developing stories.
+    Agent responsible for assisting users in creating and developing story_list.
     """
     def __init__(self, verbose=True):
         super().__init__(
             name="Story Companion",
             role="Creative Writing Assistant and Story Development Guide",
-            goal="Help users create engaging and age-appropriate stories",
+            goal="Help users create engaging and age-appropriate story_list",
             backstory=(
                 "You are a friendly and creative writing assistant specialized in helping "
-                "families create wonderful stories together. You have extensive knowledge "
+                "families create wonderful story_list together. You have extensive knowledge "
                 "of storytelling techniques, character development, and narrative structures "
                 "appropriate for children. You excel at guiding users through the creative "
-                "process, offering suggestions, and helping refine ideas into compelling stories."
+                "process, offering suggestions, and helping refine ideas into compelling story_list."
             ),
             verbose=verbose
         )

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class StoryCreationCrew(BaseCrew):
     """
-    A crew for creating complete stories with illustrations and narration.
+    A crew for creating complete story_list with illustrations and narration.
     """
     def __init__(self, verbose=True):
         """
@@ -140,7 +140,7 @@ class StoryCreationCrew(BaseCrew):
 
 class StoryEnhancementCrew(BaseCrew):
     """
-    A crew for enhancing existing stories with illustrations and narration.
+    A crew for enhancing existing story_list with illustrations and narration.
     """
     def __init__(self, verbose=True):
         """

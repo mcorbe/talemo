@@ -1,17 +1,14 @@
 """
-URL configuration for the stories app.
+URL configuration for the story_list app.
 """
 from django.urls import path
 from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 
-app_name = 'stories'
+app_name = 'story_list'
 
 urlpatterns = [
-    # Add URL patterns here
-    path('', TemplateView.as_view(template_name='stories/index.html'), name='index'),
-
-    # Story player with Mode Conte feature
-    path('player/', views.story_player, name='player'),
-    path('player/<uuid:story_id>/', views.story_player, name='player_with_id'),
+    path('', views.story_list, name='index'),
 ]

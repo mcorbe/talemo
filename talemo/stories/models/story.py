@@ -7,7 +7,7 @@ from django.conf import settings
 
 class Story(models.Model):
     """
-    Model for storing stories.
+    Model for storing story_list.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
@@ -56,8 +56,8 @@ class Story(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = 'stories'
-        verbose_name_plural = 'stories'
+        app_label = 'story_list'
+        verbose_name_plural = 'story_list'
         ordering = ['-created_at']
 
     def __str__(self):

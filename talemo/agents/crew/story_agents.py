@@ -9,18 +9,18 @@ logger = logging.getLogger(__name__)
 
 class StorytellerAgent(BaseAgent):
     """
-    Agent responsible for creating and developing stories.
+    Agent responsible for creating and developing story_list.
     """
     def __init__(self, verbose=True):
         super().__init__(
             name="Storyteller",
             role="Creative Writer and Storyteller",
-            goal="Create engaging and age-appropriate stories for children",
+            goal="Create engaging and age-appropriate story_list for children",
             backstory=(
                 "You are a master storyteller with years of experience creating "
-                "captivating stories for children. You understand narrative structure, "
+                "captivating story_list for children. You understand narrative structure, "
                 "character development, and how to create content that is both "
-                "entertaining and educational. You specialize in creating stories "
+                "entertaining and educational. You specialize in creating story_list "
                 "that are appropriate for different age groups and that contain "
                 "positive messages and lessons."
             ),
@@ -55,7 +55,7 @@ class StorytellerAgent(BaseAgent):
 
 class IllustratorAgent(BaseAgent):
     """
-    Agent responsible for creating visual descriptions for stories.
+    Agent responsible for creating visual descriptions for story_list.
     """
     def __init__(self, verbose=True):
         super().__init__(
@@ -66,7 +66,7 @@ class IllustratorAgent(BaseAgent):
                 "You are a talented illustrator with a keen eye for visual storytelling. "
                 "You excel at translating narrative elements into compelling visual scenes "
                 "that capture the imagination of children. Your illustrations are colorful, "
-                "expressive, and help bring stories to life."
+                "expressive, and help bring story_list to life."
             ),
             verbose=verbose
         )
@@ -109,7 +109,7 @@ class NarratorAgent(BaseAgent):
             backstory=(
                 "You are an experienced voice actor and narrator who specializes in "
                 "children's content. You understand how to use tone, pacing, and emotion "
-                "to bring stories to life through audio. You excel at creating scripts "
+                "to bring story_list to life through audio. You excel at creating scripts "
                 "that guide narrators on how to perform the story for maximum engagement."
             ),
             verbose=verbose

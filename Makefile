@@ -40,9 +40,8 @@ help:
 	@echo "$(GREEN)make migrations$(NC)             - Create database migrations"
 	@echo "$(GREEN)make superuser$(NC)              - Create a superuser"
 	@echo "$(GREEN)make loaddata$(NC)               - Load initial data"
-	@echo "$(GREEN)make seed$(NC)                   - Seed the database with initial data"
 	@echo "$(GREEN)make collectstatic$(NC)          - Collect static files"
-	@echo "$(GREEN)make setup-dev$(NC)              - Setup development environment (migrate, seed, collectstatic)"
+	@echo "$(GREEN)make setup-dev$(NC)              - Setup development environment (migrate, collectstatic)"
 	@echo "$(GREEN)make test$(NC)                   - Run tests"
 	@echo "$(GREEN)make test-unit$(NC)              - Run unit tests"
 	@echo "$(GREEN)make test-integration$(NC)       - Run integration tests"
@@ -142,12 +141,6 @@ loaddata:
 	$(DOCKER_COMPOSE_EXEC_WEB) python manage.py loaddata initial_data
 	@echo "$(GREEN)Initial data loaded!$(NC)"
 
-.PHONY: seed
-seed:
-	@echo "$(YELLOW)Seeding the database...$(NC)"
-	$(DOCKER_COMPOSE_EXEC_WEB) python manage.py seed_data --domain=localhost --create-test-users
-	@echo "$(GREEN)Database seeded!$(NC)"
-
 .PHONY: collectstatic
 collectstatic:
 	@echo "$(YELLOW)Collecting static files...$(NC)"
@@ -155,7 +148,7 @@ collectstatic:
 	@echo "$(GREEN)Static files collected!$(NC)"
 
 .PHONY: setup-dev
-setup-dev: migrate seed collectstatic
+setup-dev: migrate collectstatic
 	@echo "$(GREEN)Development environment setup complete!$(NC)"
 
 .PHONY: shell
