@@ -92,10 +92,10 @@ Things marked as [N] are exlucded from POC.
 - [x] Implement performance optimizations
 
 ### Native App Wrappers (CapacitorJS)
-- [ ] Configure CapacitorJS for PWA wrapping
-- [ ] Implement native plugins for enhanced functionality
-- [ ] Set up platform-specific configurations
-- [ ] Prepare for app store submissions
+- [x] Configure CapacitorJS for PWA wrapping
+- [x] Implement native plugins for enhanced functionality
+- [x] Set up platform-specific configurations
+- [x] Prepare for app store submissions
 
 ### "Mode Conte" Implementation
 - [ ] Create dark-screen mode interface

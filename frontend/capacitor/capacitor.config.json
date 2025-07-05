@@ -1,0 +1,39 @@
+{
+  "appId": "com.talemo.app",
+  "appName": "Talemo",
+  "webDir": "../static",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "http://localhost:8000",
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffff",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": true,
+      "androidSpinnerStyle": "large",
+      "iosSpinnerStyle": "small",
+      "spinnerColor": "#5c6bc0",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "ios": {
+    "contentInset": "always",
+    "cordovaSwiftVersion": "5.0",
+    "minVersion": "13.0",
+    "preferredContentMode": "mobile"
+  }
+}
