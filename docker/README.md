@@ -258,12 +258,12 @@ The Makefile includes several commands for working with the monitoring stack:
 To add new dependencies:
 
 1. Add the dependency to the appropriate requirements file:
-   - `requirements-base.txt`: Common dependencies for all containers
-   - `requirements-web.txt`: Web-specific dependencies
-   - `requirements-celery.txt`: Celery-specific dependencies
-   - `requirements-celery-beat.txt`: Celery Beat-specific dependencies
-   - `requirements-flower.txt`: Flower-specific dependencies
-   - `requirements-monitoring.txt`: Monitoring-specific dependencies
+   - `requirements/requirements-base.txt`: Common dependencies for all containers
+   - `requirements/requirements-web.txt`: Web-specific dependencies
+   - `requirements/requirements-celery.txt`: Celery-specific dependencies
+   - `requirements/requirements-celery-beat.txt`: Celery Beat-specific dependencies
+   - `requirements/requirements-flower.txt`: Flower-specific dependencies
+   - `requirements/requirements-monitoring.txt`: Monitoring-specific dependencies
 
 2. Rebuild the specific container:
    ```bash
