@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from frontend.views import service_worker, offline
 
 # API URL patterns
 api_patterns = [
@@ -45,6 +46,10 @@ urlpatterns = [
     path('stories/', include('talemo.stories.urls')),
     path('agents/', include('talemo.agents.urls')),
     path('assets/', include('talemo.assets.urls')),
+
+    # PWA URLs - must be at root level for service worker scope
+    path('service-worker.js', service_worker, name='service_worker'),
+    path('offline/', offline, name='offline'),
 
     # Redirect root to stories
     path('', RedirectView.as_view(url='/stories/', permanent=False)),

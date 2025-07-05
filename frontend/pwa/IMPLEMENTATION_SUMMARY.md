@@ -38,6 +38,14 @@ This document provides a summary of the Progressive Web App (PWA) implementation
 - Set up efficient caching strategies in the service worker
 - Prepared for image optimization
 
+## URL Configuration
+
+To ensure the service worker has the correct scope, it needs to be served from the root path. This was implemented by:
+
+1. Creating a view in `frontend/views.py` to serve the service worker file
+2. Adding a URL pattern in `config/urls.py` to serve the service worker from the root path
+3. Updating the service worker registration in the base template to use the correct URL
+
 ## Testing
 
 To test the PWA functionality:
