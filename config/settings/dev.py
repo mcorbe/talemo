@@ -66,3 +66,5 @@ STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY", "")
 # Observability
 LANGFUSE_PUBLIC_KEY = os.environ.get("LANGFUSE_PUBLIC_KEY", "")
 LANGFUSE_SECRET_KEY = os.environ.get("LANGFUSE_SECRET_KEY", "")
+LANGTRACE_ENABLED = os.environ.get("LANGTRACE_ENABLED", "False") == "True"
+LANGTRACE_HOST = os.environ.get("LANGTRACE_HOST", "https://cloud.langfuse.com")
