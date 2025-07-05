@@ -2,8 +2,8 @@
 # This file contains common commands for development
 
 # Variables
-DOCKER_COMPOSE = docker compose -f docker/docker-compose.dev.yml
-DOCKER_COMPOSE_MONITORING = docker compose -f docker/docker-compose.monitoring.yml
+DOCKER_COMPOSE = docker compose -f docker/docker-compose.dev.yml -p talemo
+DOCKER_COMPOSE_MONITORING = docker compose -f docker/docker-compose.monitoring.yml -p talemo
 DOCKER_COMPOSE_EXEC_WEB = $(DOCKER_COMPOSE) exec web
 
 # Colors
