@@ -3,7 +3,7 @@ URL configuration for the agents app.
 """
 from django.urls import path
 from django.views.generic import TemplateView
-from .views import playground
+from talemo.agents.views import playground
 
 app_name = 'agents'
 
