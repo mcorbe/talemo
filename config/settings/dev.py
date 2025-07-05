@@ -16,7 +16,7 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").s
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     "default": {
-        "ENGINE": "django_tenants.postgresql_backend",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("DB_NAME", "talemo"),
         "USER": os.environ.get("DB_USER", "postgres"),
         "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
@@ -25,7 +25,7 @@ DATABASES = {
     }
 }
 
-# MinIO Storage with tenant isolation
+# MinIO Storage
 DEFAULT_FILE_STORAGE = "talemo.assets.storage.default_storage"
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
@@ -56,9 +56,7 @@ DEFAULT_FROM_EMAIL = "noreply@talemo.local"
 # Debug Toolbar
 if DEBUG:
     INSTALLED_APPS += ["debug_toolbar"]
-    # Ensure TenantMainMiddleware remains at the beginning
-    tenant_middleware = MIDDLEWARE[0]
-    MIDDLEWARE = [tenant_middleware, "debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE[1:]
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE
     INTERNAL_IPS = ["127.0.0.1"]
 
 # Celery

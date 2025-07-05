@@ -3,7 +3,7 @@ Management command to seed the database with initial data.
 """
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from talemo.core.models import Tenant, Domain, Profile
+from talemo.core.models import Profile
 from django.conf import settings
 import os
 
@@ -20,19 +20,22 @@ class Command(BaseCommand):
         parser.add_argument('--test-users-count', type=int, default=3, help='Number of test users to create')
 
     def handle(self, *args, **options):
-        domain_name = options['domain']
         admin_username = options['admin_username']
         admin_password = options['admin_password']
         admin_email = options['admin_email']
         create_test_users = options['create_test_users']
         test_users_count = options['test_users_count']
 
-        # Ensure public tenant exists
-        self._ensure_public_tenant(domain_name, admin_username, admin_password, admin_email)
+        # Create admin user if it doesn't exist
+        if not User.objects.filter(username=admin_username).exists():
+            user = User.objects.create_superuser(username=admin_username, email=admin_email, password=admin_password)
+            self.stdout.write(self.style.SUCCESS(f'Created admin user: {admin_username}'))
+        else:
+            user = User.objects.get(username=admin_username)
+            self.stdout.write(self.style.SUCCESS(f'Using existing admin user: {admin_username}'))
 
         # Create profile for admin user if it doesn't exist
-        admin_user = User.objects.get(username=admin_username)
-        self._ensure_profile(admin_user)
+        self._ensure_profile(user)
 
         # Create test users if requested
         if create_test_users:
@@ -44,37 +47,6 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('Database seeding complete'))
 
-    def _ensure_public_tenant(self, domain_name, username, password, email):
-        """Ensure the public tenant exists."""
-        # Check if public tenant already exists
-        if not Tenant.objects.filter(name='Public Tenant').exists():
-            # Create admin user if it doesn't exist
-            if not User.objects.filter(username=username).exists():
-                user = User.objects.create_superuser(username=username, email=email, password=password)
-                self.stdout.write(self.style.SUCCESS(f'Created admin user: {username}'))
-            else:
-                user = User.objects.get(username=username)
-                self.stdout.write(self.style.SUCCESS(f'Using existing admin user: {username}'))
-
-            # Create public tenant
-            tenant = Tenant(name='Public Tenant', type='institution')
-            tenant.save()
-            self.stdout.write(self.style.SUCCESS('Created public tenant'))
-
-            # Create domain for public tenant
-            domain = Domain(domain=domain_name, tenant=tenant, is_primary=True)
-            domain.save()
-            self.stdout.write(self.style.SUCCESS(f'Created domain: {domain_name}'))
-        else:
-            self.stdout.write(self.style.SUCCESS('Public tenant already exists'))
-            # Ensure domain exists
-            tenant = Tenant.objects.get(name='Public Tenant')
-            if not Domain.objects.filter(domain=domain_name, tenant=tenant).exists():
-                domain = Domain(domain=domain_name, tenant=tenant, is_primary=True)
-                domain.save()
-                self.stdout.write(self.style.SUCCESS(f'Created domain: {domain_name}'))
-            else:
-                self.stdout.write(self.style.SUCCESS(f'Domain {domain_name} already exists'))
 
     def _ensure_profile(self, user):
         """Ensure the user has a profile."""

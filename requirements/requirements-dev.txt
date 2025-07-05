@@ -2,7 +2,6 @@
 Django>=4.2,<5.0
 djangorestframework>=3.14,<4.0
 django-allauth>=0.54,<1.0
-django-tenants>=3.5,<4.0
 django-storages>=1.13,<2.0
 
 # Database and caching
@@ -18,12 +17,6 @@ minio>=7.1,<8.0
 
 # Authentication
 pyjwt>=2.6,<3.0
-
-# AI and vector search
-crewai>=0.28,<1.0
-llama-index>=0.8,<1.0
-pgvector>=0.2,<1.0
-langfuse>=2.0,<3.0
 
 # Development tools
 pytest>=7.3,<8.0

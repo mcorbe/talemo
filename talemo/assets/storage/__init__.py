@@ -1,7 +1,7 @@
 """
 Storage module for asset management.
 """
-from .tenant_storage import TenantS3Boto3Storage
+from .storage import CustomS3Boto3Storage
 
-# Create a default instance of the tenant storage
-default_storage = TenantS3Boto3Storage()
+# Create a default instance of the storage
+default_storage = CustomS3Boto3Storage()

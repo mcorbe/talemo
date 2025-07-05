@@ -33,8 +33,8 @@ help:
 	@echo "$(GREEN)make build-monitoring$(NC)       - Build monitoring containers"
 	@echo ""
 	@echo "$(YELLOW)Application Commands:$(NC)"
-	@echo "$(GREEN)make init$(NC)                   - Initialize the application (build, start, setup tenants, create superuser)"
-	@echo "$(GREEN)make migrate$(NC)                - Apply standard database migrations (for tenant migrations, use setup-tenants)"
+	@echo "$(GREEN)make init$(NC)                   - Initialize the application (build, start, setup dev environment, create superuser)"
+	@echo "$(GREEN)make migrate$(NC)                - Apply database migrations"
 	@echo "$(GREEN)make migrations$(NC)             - Create database migrations"
 	@echo "$(GREEN)make superuser$(NC)              - Create a superuser"
 	@echo "$(GREEN)make loaddata$(NC)               - Load initial data"
@@ -47,8 +47,6 @@ help:
 	@echo "$(GREEN)make coverage$(NC)               - Run tests with coverage"
 	@echo "$(GREEN)make shell$(NC)                  - Open a Django shell"
 	@echo "$(GREEN)make pgvector$(NC)               - Create pgvector extension in the database"
-	@echo "$(GREEN)make setup-tenants$(NC)          - Setup multi-tenant functionality (run migrations and create public tenant)"
-	@echo "$(GREEN)make create-tenant$(NC)          - Create a new tenant for multi-tenant development"
 	@echo ""
 	@echo "$(YELLOW)Development Monitoring Commands:$(NC)"
 	@echo "$(GREEN)make monitoring-up$(NC)          - Start the monitoring stack"
@@ -106,23 +104,6 @@ ps:
 	$(DOCKER_COMPOSE) ps
 
 # Database commands
-.PHONY: setup-tenants
-setup-tenants:
-	@echo "$(YELLOW)Setting up multi-tenant functionality...$(NC)"
-	$(DOCKER_COMPOSE_EXEC_WEB) ./setup_tenants.sh
-	@echo "$(GREEN)Multi-tenant setup complete!$(NC)"
-
-.PHONY: apply-migrations
-apply-migrations:
-	@echo "$(YELLOW)Applying migrations for multi-tenant setup...$(NC)"
-	$(DOCKER_COMPOSE_EXEC_WEB) ./apply_migrations.sh
-	@echo "$(GREEN)Migrations applied successfully!$(NC)"
-
-.PHONY: create-tenant
-create-tenant:
-	@echo "$(YELLOW)Creating a new tenant...$(NC)"
-	$(DOCKER_COMPOSE_EXEC_WEB) python manage.py create_tenant
-	@echo "$(GREEN)Tenant created!$(NC)"
 
 .PHONY: pgvector
 pgvector:
@@ -132,7 +113,7 @@ pgvector:
 
 # Django commands
 .PHONY: init
-init: build up setup-tenants setup-dev superuser
+init: build up setup-dev superuser
 	@echo "$(GREEN)Application initialized!$(NC)"
 
 .PHONY: migrate
@@ -268,5 +249,5 @@ build-monitoring:
 
 build-application:
 	@echo "$(YELLOW)Building application containers...$(NC)"
-	$(DOCKER_COMPOSE) build web celery celery-beat flower
+	$(DOCKER_COMPOSE) build --parallel web celery celery-beat flower
 	@echo "$(GREEN)Application containers built!$(NC)"
