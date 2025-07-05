@@ -40,6 +40,8 @@ services:
       - ../:/app
     command: >
       bash -c "python manage.py migrate &&
+               python manage.py init_public_tenant --domain=${HOST:-0.0.0.0} &&
+               python manage.py collectstatic --noinput &&
                python manage.py runserver ${HOST:-0.0.0.0}:${PORT:-8000}"
 
   # Redis for caching and message broker

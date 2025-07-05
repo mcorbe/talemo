@@ -118,6 +118,7 @@ These commands run operations inside the Docker containers:
 
 - `make migrate` - Apply database migrations
 - `make migrations` - Create database migrations
+- `make apply-migrations` - Apply migrations for multi-tenant setup (both shared and tenant-specific)
 - `make superuser` - Create a superuser
 - `make loaddata` - Load initial data
 - `make test` - Run tests
@@ -211,6 +212,12 @@ make clean
   make build
   ```
 
+- **"relation does not exist" error when creating a superuser**: This error occurs when the database tables for the core app haven't been properly migrated in the multi-tenant setup. To fix this, run:
+  ```bash
+  make apply-migrations
+  ```
+  This will apply migrations for both shared apps (on the public schema) and tenant-specific apps.
+
 ### Customizing the Docker Setup
 
 All Docker-related files are organized in the `docker` directory:
@@ -296,7 +303,8 @@ After setting up Langtrace, you can instrument your LLM calls in the agents modu
 ### Database Changes
 
 - Create migrations: `make migrations`
-- Apply migrations: `make migrate`
+- Apply migrations: `make migrate` (for standard Django migrations)
+- Apply multi-tenant migrations: `make apply-migrations` (for both shared and tenant-specific apps)
 
 ### Testing
 

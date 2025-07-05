@@ -58,6 +58,11 @@ help:
 .PHONY: up
 up:
 	@echo "$(YELLOW)Starting development environment...$(NC)"
+	@echo "$(YELLOW)Checking for containers with project name 'docker'...$(NC)"
+	@if [ -n "$$(docker compose -f docker/docker-compose.dev.yml -p docker ps -q)" ]; then \
+		echo "$(YELLOW)Removing containers with project name 'docker'...$(NC)"; \
+		docker compose -f docker/docker-compose.dev.yml -p docker down -v; \
+	fi
 	$(DOCKER_COMPOSE) up -d
 	@echo "$(GREEN)Development environment started!$(NC)"
 	@echo "Django Web Server: http://localhost:$(PORT)"
@@ -85,7 +90,11 @@ restart:
 .PHONY: clean
 clean:
 	@echo "$(YELLOW)Removing all containers and volumes...$(NC)"
+	$(DOCKER_COMPOSE) stop
+	$(DOCKER_COMPOSE) rm -f
 	$(DOCKER_COMPOSE) down -v
+	@echo "$(YELLOW)Removing containers with project name 'docker'...$(NC)"
+	docker compose -f docker/docker-compose.dev.yml -p docker down -v
 	@echo "$(GREEN)All containers and volumes removed!$(NC)"
 
 .PHONY: ps
@@ -99,6 +108,12 @@ setup-tenants:
 	@echo "$(YELLOW)Setting up multi-tenant functionality...$(NC)"
 	$(DOCKER_COMPOSE_EXEC_WEB) ./setup_tenants.sh
 	@echo "$(GREEN)Multi-tenant setup complete!$(NC)"
+
+.PHONY: apply-migrations
+apply-migrations:
+	@echo "$(YELLOW)Applying migrations for multi-tenant setup...$(NC)"
+	$(DOCKER_COMPOSE_EXEC_WEB) ./apply_migrations.sh
+	@echo "$(GREEN)Migrations applied successfully!$(NC)"
 
 .PHONY: create-tenant
 create-tenant:

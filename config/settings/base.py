@@ -60,6 +60,7 @@ INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in S
 
 MIDDLEWARE = [
     "django_tenants.middleware.main.TenantMainMiddleware",
+    "talemo.core.middleware.tenant_middleware.TenantMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -161,3 +162,4 @@ CELERY_TIMEZONE = TIME_ZONE
 # Django Tenants
 TENANT_MODEL = "core.Tenant"
 TENANT_DOMAIN_MODEL = "core.Domain"
+PUBLIC_SCHEMA_URLCONF = "config.public_urls"
