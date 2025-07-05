@@ -53,7 +53,7 @@ The development environment is containerized using Docker to ensure consistency 
 
 1. Build and start the development containers:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml up -d
+   docker compose -f docker/docker-compose.dev.yml up -d
    ```
 
 2. The development environment includes the following services:
@@ -239,22 +239,22 @@ talemo/
 
 1. Start the development environment:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml up -d
+   docker compose -f docker/docker-compose.dev.yml up -d
    ```
 
 2. Apply migrations:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py migrate
+   docker compose -f docker/docker-compose.dev.yml exec web python manage.py migrate
    ```
 
 3. Create a superuser:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py createsuperuser
+   docker compose -f docker/docker-compose.dev.yml exec web python manage.py createsuperuser
    ```
 
 4. Load initial data:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py loaddata initial_data
+   docker compose -f docker/docker-compose.dev.yml exec web python manage.py loaddata initial_data
    ```
 
 ### 6.2 Development Workflow using the Makefile
@@ -391,28 +391,28 @@ tests/
 
 1. **Run all tests**:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web pytest
+   docker compose -f docker/docker-compose.dev.yml exec web pytest
    ```
 
 2. **Run specific test types**:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/
-   docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/integration/
+   docker compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/
+   docker compose -f docker/docker-compose.dev.yml exec web pytest tests/integration/
    ```
 
 3. **Run with coverage**:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web pytest --cov=talemo
+   docker compose -f docker/docker-compose.dev.yml exec web pytest --cov=talemo
    ```
 
 4. **Run E2E tests**:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web python manage.py cypress run
+   docker compose -f docker/docker-compose.dev.yml exec web python manage.py cypress run
    ```
 
 5. **Run performance tests**:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml exec web locust -f tests/performance/locustfile.py
+   docker compose -f docker/docker-compose.dev.yml exec web locust -f tests/performance/locustfile.py
    ```
 
 ### 7.4 CI Integration

@@ -131,19 +131,19 @@ make test-unit
 Or using Docker Compose directly:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/
+docker compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/
 ```
 
 To run a specific test file:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/test_story_model.py
+docker compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/test_story_model.py
 ```
 
 To run a specific test:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/test_story_model.py::TestStoryModel::test_story_creation
+docker compose -f docker/docker-compose.dev.yml exec web pytest tests/unit/test_story_model.py::TestStoryModel::test_story_creation
 ```
 
 ## Best Practices

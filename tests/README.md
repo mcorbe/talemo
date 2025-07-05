@@ -68,7 +68,7 @@ make test
 Or using Docker Compose directly:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml exec web pytest
+docker compose -f docker/docker-compose.dev.yml exec web pytest
 ```
 
 ### Running Specific Test Types
@@ -83,10 +83,10 @@ make test-unit
 make test-integration
 
 # E2E tests
-docker-compose -f docker/docker-compose.dev.yml exec web python manage.py cypress run
+docker compose -f docker/docker-compose.dev.yml exec web python manage.py cypress run
 
 # Performance tests
-docker-compose -f docker/docker-compose.dev.yml exec web locust -f tests/performance/locustfile.py
+docker compose -f docker/docker-compose.dev.yml exec web locust -f tests/performance/locustfile.py
 ```
 
 ### Running with Coverage
@@ -100,7 +100,7 @@ make coverage
 Or using Docker Compose directly:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml exec web pytest --cov=talemo
+docker compose -f docker/docker-compose.dev.yml exec web pytest --cov=talemo
 ```
 
 ## Test Configuration

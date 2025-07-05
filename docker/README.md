@@ -287,7 +287,7 @@ To add a new service:
 
 ### Development Environment
 
-- **Container fails to start**: Check the logs with `docker-compose -f docker/docker-compose.dev.yml logs [service_name]`
+- **Container fails to start**: Check the logs with `docker compose -f docker/docker-compose.dev.yml logs [service_name]`
 - **Database connection issues**: Ensure the PostgreSQL container is running and healthy
 - **Volume mounting issues**: Check that the volume paths in `docker-compose.dev.yml` are correct
 
