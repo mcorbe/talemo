@@ -9,9 +9,9 @@ echo "Setting up multi-tenant functionality..."
 echo "Running migrations for shared apps..."
 python manage.py migrate_schemas --shared
 
-# Initialize the public tenant
-echo "Initializing public tenant..."
-python manage.py init_public_tenant --domain=localhost --username=admin --password=admin --email=admin@example.com
+# Seed the database with initial data
+echo "Seeding the database with initial data..."
+python manage.py seed_data --domain=localhost --admin-username=admin --admin-password=admin --admin-email=admin@example.com --create-test-users
 
 # Run migrations for all tenants
 echo "Running migrations for all tenants..."

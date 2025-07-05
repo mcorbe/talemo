@@ -67,23 +67,30 @@ This project uses Docker Compose to set up a development environment with all th
    ```
    Edit the `.env` file to customize environment variables if needed. This file is used by all containers to ensure consistent configuration across services.
 
-3. Build and start the development containers:
+3. Initialize the application (this will build, start, setup tenants, setup development environment, and create a superuser):
    ```bash
-   make up
+   make init
    ```
-   This will start all the necessary containers for development.
+   This will perform all the necessary setup steps for development.
 
-4. Apply migrations:
-   ```bash
-   make migrate
-   ```
+   Alternatively, you can run the steps individually:
 
-5. Create a superuser:
-   ```bash
-   make superuser
-   ```
+   a. Build and start the development containers:
+      ```bash
+      make up
+      ```
 
-6. Load initial data (if available):
+   b. Setup the development environment (migrations, seed data, static files):
+      ```bash
+      make setup-dev
+      ```
+
+   c. Create a superuser:
+      ```bash
+      make superuser
+      ```
+
+4. Load additional fixtures (if available):
    ```bash
    make loaddata
    ```
@@ -116,11 +123,15 @@ These commands build Docker containers:
 
 These commands run operations inside the Docker containers:
 
+- `make init` - Initialize the application (build, start, setup tenants, setup development environment, create superuser)
 - `make migrate` - Apply database migrations
 - `make migrations` - Create database migrations
 - `make apply-migrations` - Apply migrations for multi-tenant setup (both shared and tenant-specific)
 - `make superuser` - Create a superuser
-- `make loaddata` - Load initial data
+- `make seed` - Seed the database with initial data
+- `make collectstatic` - Collect static files
+- `make setup-dev` - Setup development environment (migrate, seed, collectstatic)
+- `make loaddata` - Load additional fixtures
 - `make test` - Run tests
 - `make test-unit` - Run unit tests
 - `make test-integration` - Run integration tests

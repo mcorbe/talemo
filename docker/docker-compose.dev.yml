@@ -39,11 +39,7 @@ services:
     volumes:
       - ../:/app
     command: >
-      bash -c "python manage.py migrate &&
-               python manage.py init_public_tenant --domain=localhost &&
-               python manage.py collectstatic --noinput &&
-               python -c 'from django.conf import settings; print(f\"PUBLIC_SCHEMA_URLCONF = {settings.PUBLIC_SCHEMA_URLCONF}\")' &&
-               python manage.py runserver ${HOST:-0.0.0.0}:${PORT:-8000}"
+      bash -c "python manage.py runserver ${HOST:-0.0.0.0}:${PORT:-8000}"
 
   # Redis for caching and message broker
   redis:
