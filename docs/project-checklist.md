@@ -98,10 +98,10 @@ Things marked as [N] are exlucded from POC.
 - [x] Prepare for app store submissions
 
 ### "Mode Conte" Implementation
-- [ ] Create dark-screen mode interface
-- [ ] Implement audio controls for screen-off mode
-- [ ] Set up lock screen integration
-- [ ] Implement battery optimization for audio-only mode
+- [x] Create dark-screen mode interface
+- [x] Implement audio controls for screen-off mode
+- [x] Set up lock screen integration
+- [x] Implement battery optimization for audio-only mode
 
 ### Record-Your-Own Implementation
 - [ ] Create audio recording interface
