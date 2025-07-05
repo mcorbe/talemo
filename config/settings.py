@@ -51,9 +51,6 @@ INSTALLED_APPS = [
     "django.contrib.sites",
 
     # Third-party apps
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
     "rest_framework",
 
     # Local apps
@@ -97,7 +94,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
-                "django.template.context_processors.request",  # Required by allauth
+                "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -166,15 +163,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Authentication
 AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
-    # `allauth` specific authentication methods, such as login by e-mail
-    'allauth.account.auth_backends.AuthenticationBackend',
 ]
-
-# Allauth settings
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
 LOGIN_REDIRECT_URL = '/stories/'
 LOGOUT_REDIRECT_URL = '/'

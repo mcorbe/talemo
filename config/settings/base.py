@@ -12,9 +12,8 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# Django Tenants Configuration
-SHARED_APPS = [
-    'django_tenants',  # mandatory
+# Application definition
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -22,32 +21,12 @@ SHARED_APPS = [
     'django.contrib.admin',
     'django.contrib.staticfiles',
 
-    # Third-party shared apps
+    # Third-party apps
     'rest_framework',
     'django_extensions',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.apple',
     'drf_spectacular',
 
-    # Project shared apps
-    'talemo.core',
-]
-
-TENANT_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.admin',
-    'django.contrib.staticfiles',
-
-    # Third-party tenant apps
-    'rest_framework',
-
-    # Project tenant apps
+    # Project apps
     'talemo.core',
     'talemo.stories',
     'talemo.agents',
@@ -56,11 +35,7 @@ TENANT_APPS = [
     'talemo.subscriptions',
 ]
 
-# Application definition
-INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
-
 MIDDLEWARE = [
-    "django_tenants.middleware.main.TenantMainMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -68,13 +43,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware",
     "talemo.core.middleware.tenant_middleware.TenantMiddleware",
-]
-
-# Database router for django-tenants
-DATABASE_ROUTERS = [
-    'django_tenants.routers.TenantSyncRouter',
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -134,7 +103,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Authentication
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 # REST Framework
@@ -177,8 +145,3 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
-
-# Django Tenants
-TENANT_MODEL = "core.Tenant"
-TENANT_DOMAIN_MODEL = "core.Domain"
-PUBLIC_SCHEMA_URLCONF = "config.public_urls"

@@ -3,13 +3,13 @@ Asset model for the assets app.
 """
 from django.db import models
 import uuid
-from django_tenants.models import TenantMixin
 
-class Asset(TenantMixin):
+class Asset(models.Model):
     """
     Model for storing assets (images, audio files, etc.).
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE, related_name='assets')
     type = models.CharField(
         max_length=20,
         choices=[

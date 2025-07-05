@@ -3,11 +3,10 @@
 
 # REST framework
 djangorestframework>=3.14,<4.0
-django-allauth>=0.54,<1.0
-django-storages>=1.13,<2.0
-drf-spectacular>=0.26.0,<1.0  # OpenAPI schema generation
+drf-spectacular>=0.26.0,<1.0
 
 # Storage
+django-storages>=1.13,<2.0
 minio>=7.1,<8.0
 
 # AI and vector search

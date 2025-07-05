@@ -1,14 +1,13 @@
 """
-Tenant models for multi-tenant functionality.
+Tenant models for shared schema functionality.
 """
 from django.db import models
 import uuid
-from django_tenants.models import TenantMixin, DomainMixin
 
 
-class Tenant(TenantMixin):
+class Tenant(models.Model):
     """
-    Tenant model for multi-tenant functionality.
+    Tenant model for shared schema functionality.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
@@ -23,9 +22,6 @@ class Tenant(TenantMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # default true, schema will be automatically created and synced when it is saved
-    auto_create_schema = True
-
     class Meta:
         db_table = 'core_tenant'
 
@@ -33,10 +29,12 @@ class Tenant(TenantMixin):
         return self.name
 
 
-class Domain(DomainMixin):
+class Domain(models.Model):
     """
-    Domain model for multi-tenant functionality.
+    Domain model for shared schema functionality.
     """
+    domain = models.CharField(max_length=253, unique=True)
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='domains')
     is_primary = models.BooleanField(default=True)
 
     class Meta:

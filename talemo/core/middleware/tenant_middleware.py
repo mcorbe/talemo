@@ -1,19 +1,19 @@
 """
-Tenant middleware for multi-tenant functionality.
+Tenant middleware for shared schema multi-tenant functionality.
 """
 from django.conf import settings
-from django.db import connection
 from django.http import Http404
 from django.utils.deprecation import MiddlewareMixin
 
 
 class TenantMiddleware(MiddlewareMixin):
     """
-    Middleware for handling multi-tenant functionality.
+    Middleware for handling shared schema multi-tenant functionality.
+    Sets the current tenant on the request object.
     """
     def process_request(self, request):
         """
-        Process the request and set the tenant.
+        Process the request and set the tenant on the request object.
         """
         print("TenantMiddleware.process_request called")
         # Get the hostname from the request
@@ -27,11 +27,8 @@ class TenantMiddleware(MiddlewareMixin):
         if tenant_id:
             try:
                 from talemo.core.models import Tenant
-                tenant = Tenant.objects.get(schema_name=tenant_id)
-                connection.set_tenant(tenant)
-                if tenant.schema_name == 'public':
-                    request.urlconf = settings.PUBLIC_SCHEMA_URLCONF
-                    print(f"Using public schema urlconf: {settings.PUBLIC_SCHEMA_URLCONF}")
+                tenant = Tenant.objects.get(id=tenant_id)
+                request.tenant = tenant
                 return None
             except Tenant.DoesNotExist:
                 raise Http404("Tenant does not exist")
@@ -40,56 +37,35 @@ class TenantMiddleware(MiddlewareMixin):
         try:
             from talemo.core.models import Domain
             domain = Domain.objects.get(domain=hostname)
-            connection.set_tenant(domain.tenant)
-            if domain.tenant.schema_name == 'public':
-                request.urlconf = settings.PUBLIC_SCHEMA_URLCONF
-                print(f"Using public schema urlconf: {settings.PUBLIC_SCHEMA_URLCONF}")
+            request.tenant = domain.tenant
             return None
         except Domain.DoesNotExist:
-            # If we're in development, try to find any domain for the public tenant
+            # If we're in development, try to find any domain or create a default tenant
             if settings.DEBUG:
                 from talemo.core.models import Tenant, Domain
-                try:
-                    # Try to get the public tenant
-                    tenant = Tenant.objects.get(schema_name='public')
 
-                    # Check if we have any domains for this tenant
-                    domains = Domain.objects.filter(tenant=tenant)
-                    if domains.exists():
-                        # Create a new domain for the current hostname if it doesn't exist
-                        if not Domain.objects.filter(domain=hostname).exists():
-                            Domain.objects.create(
-                                domain=hostname,
-                                tenant=tenant,
-                                is_primary=False
-                            )
-                            print(f"Created new domain record for {hostname}")
+                # Try to get a default tenant
+                default_tenant = Tenant.objects.filter(name='Default').first()
 
-                    connection.set_tenant(tenant)
-                    request.urlconf = settings.PUBLIC_SCHEMA_URLCONF
-                    print(f"Using public schema urlconf: {settings.PUBLIC_SCHEMA_URLCONF}")
-                    return None
-                except Tenant.DoesNotExist:
-                    # If no public tenant exists, create one
-                    from django.contrib.auth.models import User
-                    admin_user = User.objects.filter(is_superuser=True).first()
-                    if admin_user:
-                        tenant = Tenant.objects.create(
-                            name='Public',
-                            schema_name='public',
-                            owner=admin_user
-                        )
-                        # Create a domain for the current hostname
-                        Domain.objects.create(
-                            domain=hostname,
-                            tenant=tenant,
-                            is_primary=True
-                        )
-                        print(f"Created new tenant and domain record for {hostname}")
-                        connection.set_tenant(tenant)
-                        request.urlconf = settings.PUBLIC_SCHEMA_URLCONF
-                        print(f"Using public schema urlconf: {settings.PUBLIC_SCHEMA_URLCONF}")
-                        return None
+                if not default_tenant:
+                    # Create a default tenant if none exists
+                    default_tenant = Tenant.objects.create(
+                        name='Default',
+                        type='family'
+                    )
+                    print(f"Created default tenant")
+
+                # Create a domain for the current hostname if it doesn't exist
+                if not Domain.objects.filter(domain=hostname).exists():
+                    Domain.objects.create(
+                        domain=hostname,
+                        tenant=default_tenant,
+                        is_primary=True
+                    )
+                    print(f"Created new domain record for {hostname}")
+
+                request.tenant = default_tenant
+                return None
 
             # If we're not in development or couldn't find/create a default tenant, raise 404
             raise Http404("Tenant does not exist")

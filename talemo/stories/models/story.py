@@ -3,14 +3,14 @@ Story model for the stories app.
 """
 from django.db import models
 import uuid
-from django_tenants.models import TenantMixin
 from django.conf import settings
 
-class Story(TenantMixin):
+class Story(models.Model):
     """
     Model for storing stories.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE, related_name='stories')
     title = models.CharField(max_length=255)
     description = models.TextField()
     content = models.TextField(help_text="The story text")

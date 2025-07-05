@@ -47,7 +47,7 @@ class Command(BaseCommand):
     def _ensure_public_tenant(self, domain_name, username, password, email):
         """Ensure the public tenant exists."""
         # Check if public tenant already exists
-        if not Tenant.objects.filter(schema_name='public').exists():
+        if not Tenant.objects.filter(name='Public Tenant').exists():
             # Create admin user if it doesn't exist
             if not User.objects.filter(username=username).exists():
                 user = User.objects.create_superuser(username=username, email=email, password=password)
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f'Using existing admin user: {username}'))
 
             # Create public tenant
-            tenant = Tenant(schema_name='public', name='Public Tenant', owner=user)
+            tenant = Tenant(name='Public Tenant', type='institution')
             tenant.save()
             self.stdout.write(self.style.SUCCESS('Created public tenant'))
 
@@ -68,7 +68,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS('Public tenant already exists'))
             # Ensure domain exists
-            tenant = Tenant.objects.get(schema_name='public')
+            tenant = Tenant.objects.get(name='Public Tenant')
             if not Domain.objects.filter(domain=domain_name, tenant=tenant).exists():
                 domain = Domain(domain=domain_name, tenant=tenant, is_primary=True)
                 domain.save()

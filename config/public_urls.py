@@ -15,8 +15,6 @@ urlpatterns = [
     # Admin
     path("admin/", admin.site.urls),
 
-    # Authentication
-    path('accounts/', include('allauth.urls')),
 
     # Simple home view for testing
     path('', home_view, name='home'),

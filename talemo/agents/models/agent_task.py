@@ -4,14 +4,14 @@ Agent task model for storing agent task information.
 from django.db import models
 import uuid
 import json
-from django_tenants.models import TenantMixin
 
 
-class AgentTask(TenantMixin):
+class AgentTask(models.Model):
     """
     Model for storing agent task information.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE, related_name='agent_tasks')
     agent_type = models.CharField(
         max_length=50,
         choices=[

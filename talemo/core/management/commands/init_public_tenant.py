@@ -22,7 +22,7 @@ class Command(BaseCommand):
         email = options['email']
 
         # Check if public tenant already exists
-        if Tenant.objects.filter(schema_name='public').exists():
+        if Tenant.objects.filter(name='Public Tenant').exists():
             self.stdout.write(self.style.SUCCESS('Public tenant already exists'))
             return
 
@@ -35,7 +35,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Using existing admin user: {username}'))
 
         # Create public tenant
-        tenant = Tenant(schema_name='public', name='Public Tenant', owner=user)
+        tenant = Tenant(name='Public Tenant', type='institution')
         tenant.save()
         self.stdout.write(self.style.SUCCESS('Created public tenant'))
 
