@@ -62,12 +62,12 @@ Things marked as [N] are exlucded from POC.
 - [x] Set up agent communication via Redis
 
 ### Agent Implementation
-- [ ] Implement ModerationAgent
-- [ ] Implement TTSAgent with French voice packs
-- [ ] Implement IllustratorAgent
-- [ ] Implement QuotaAgent
-- [ ] Implement EmbeddingAgent
-- [ ] Implement StoryCompanion
+- [x] Implement ModerationAgent
+- [x] Implement TTSAgent with French voice packs
+- [x] Implement IllustratorAgent
+- [x] Implement QuotaAgent
+- [x] Implement EmbeddingAgent
+- [x] Implement StoryCompanion
 
 ### Cost Control Implementation
 - [ ] Set up model & voice caching
