@@ -2,10 +2,9 @@
 Services for the agents app.
 """
 import logging
-from datetime import datetime
 from django.utils import timezone
 from talemo.agents.models import AgentTask
-from talemo.agents.crew import StoryCreationCrew, StoryEnhancementCrew
+from talemo.agents.crew import StoryCreationCrew
 import redis
 from django.conf import settings
 import json

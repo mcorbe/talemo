@@ -11,7 +11,6 @@ class AgentTask(models.Model):
     Model for storing agent task information.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE, related_name='agent_tasks')
     agent_type = models.CharField(
         max_length=50,
         choices=[

@@ -23,11 +23,6 @@ DJANGO_APPS = [
     'django.contrib.staticfiles',
 ]
 
-# Project apps that are needed by all containers
-PROJECT_APPS = [
-    'talemo.core',
-]
-
 # Third-party apps
 THIRD_PARTY_APPS = [
     'rest_framework',
@@ -37,16 +32,13 @@ THIRD_PARTY_APPS = [
 ]
 
 # Web and Celery project apps
-WEB_PROJECT_APPS = [
+PROJECT_APPS = [
     'talemo.stories',
     'talemo.agents',
-    'talemo.assets',
-    'talemo.governance',
-    'talemo.subscriptions',
 ]
 
 # Base installed apps - include all apps needed by the project
-INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS + WEB_PROJECT_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -103,7 +95,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "frontend" / "static"]
 
 # Media files
 MEDIA_URL = "media/"

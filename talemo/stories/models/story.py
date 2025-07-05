@@ -10,32 +10,9 @@ class Story(models.Model):
     Model for storing stories.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey('core.Tenant', on_delete=models.CASCADE, related_name='stories')
     title = models.CharField(max_length=255)
     description = models.TextField()
     content = models.TextField(help_text="The story text")
-    image = models.ForeignKey(
-        'assets.Asset',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='story_images'
-    )
-    audio = models.ForeignKey(
-        'assets.Asset',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='story_audios'
-    )
-    user_audio = models.ForeignKey(
-        'assets.Asset',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='story_user_audios',
-        help_text="For record-your-own narration"
-    )
     language = models.CharField(
         max_length=10,
         default='fr-FR',
@@ -55,11 +32,6 @@ class Story(models.Model):
     duration = models.IntegerField(
         default=0,
         help_text="Duration in seconds"
-    )
-    tags = models.ManyToManyField(
-        'stories.Tag',
-        blank=True,
-        related_name='stories'
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

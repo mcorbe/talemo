@@ -1,3 +1,0 @@
-"""
-Frontend app for Talemo.
-"""

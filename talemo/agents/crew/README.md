@@ -44,7 +44,7 @@ narration_script = result["narration_script"]
 The agents are designed to be used with Celery for asynchronous processing. See `talemo/agents/tasks.py` for examples of how to use the agents with Celery.
 
 ```python
-from talemo.agents.tasks import generate_story
+from talemo.agents import generate_story
 
 # Start a Celery task to generate a story
 task = generate_story.delay(
@@ -74,12 +74,14 @@ To add a new agent:
 Example:
 
 ```python
-from talemo.agents.crew.base import BaseAgent
+from talemo.agents.crew import BaseAgent
+
 
 class EditorAgent(BaseAgent):
     """
     Agent responsible for editing and refining stories.
     """
+
     def __init__(self, verbose=True):
         super().__init__(
             name="Editor",
@@ -88,7 +90,7 @@ class EditorAgent(BaseAgent):
             backstory="You are an experienced editor with a keen eye for detail...",
             verbose=verbose
         )
-    
+
     def create_editing_task(self, story):
         """
         Create a task for editing a story.

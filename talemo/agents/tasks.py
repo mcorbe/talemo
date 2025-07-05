@@ -2,7 +2,6 @@
 Celery tasks for the agents app.
 """
 from talemo.agents.services import AgentBridge
-from talemo.core.models import Tenant
 
 from celery import shared_task
 from django.conf import settings
@@ -34,9 +33,6 @@ def generate_story(prompt, age_range="4-8", user_id=None, tenant_id=None):
     logger.info(f"Generating story with prompt: {prompt}, age range: {age_range}")
 
     try:
-        # Get the tenant
-        tenant = Tenant.objects.get(id=tenant_id)
-
         # Create the agent task
         task = AgentBridge.create_task(
             agent_type='StoryCompanion',
@@ -44,8 +40,7 @@ def generate_story(prompt, age_range="4-8", user_id=None, tenant_id=None):
                 'prompt': prompt,
                 'age_range': age_range,
                 'user_id': user_id
-            },
-            tenant=tenant
+            }
         )
 
         # Execute the task asynchronously
@@ -76,17 +71,13 @@ def enhance_story(story, user_id=None, tenant_id=None):
     logger.info(f"Enhancing story: {story[:100]}...")
 
     try:
-        # Get the tenant
-        tenant = Tenant.objects.get(id=tenant_id)
-
         # Create the agent task
         task = AgentBridge.create_task(
             agent_type='StoryEnhancement',
             input_data={
                 'story': story,
                 'user_id': user_id
-            },
-            tenant=tenant
+            }
         )
 
         # Execute the task asynchronously
