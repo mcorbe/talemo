@@ -15,8 +15,10 @@ class TenantMiddleware(MiddlewareMixin):
         """
         Process the request and set the tenant.
         """
+        print("TenantMiddleware.process_request called")
         # Get the hostname from the request
         hostname = request.get_host().split(':')[0]
+        print(f"Resolving tenant for hostname: {hostname}")
 
         # Check if we're using a custom header for tenant identification (useful for API requests)
         tenant_id = request.headers.get('X-Tenant-ID')
@@ -27,6 +29,9 @@ class TenantMiddleware(MiddlewareMixin):
                 from talemo.core.models import Tenant
                 tenant = Tenant.objects.get(schema_name=tenant_id)
                 connection.set_tenant(tenant)
+                if tenant.schema_name == 'public':
+                    request.urlconf = settings.PUBLIC_SCHEMA_URLCONF
+                    print(f"Using public schema urlconf: {settings.PUBLIC_SCHEMA_URLCONF}")
                 return None
             except Tenant.DoesNotExist:
                 raise Http404("Tenant does not exist")
@@ -36,6 +41,9 @@ class TenantMiddleware(MiddlewareMixin):
             from talemo.core.models import Domain
             domain = Domain.objects.get(domain=hostname)
             connection.set_tenant(domain.tenant)
+            if domain.tenant.schema_name == 'public':
+                request.urlconf = settings.PUBLIC_SCHEMA_URLCONF
+                print(f"Using public schema urlconf: {settings.PUBLIC_SCHEMA_URLCONF}")
             return None
         except Domain.DoesNotExist:
             # If we're in development, try to find any domain for the public tenant
@@ -58,6 +66,8 @@ class TenantMiddleware(MiddlewareMixin):
                             print(f"Created new domain record for {hostname}")
 
                     connection.set_tenant(tenant)
+                    request.urlconf = settings.PUBLIC_SCHEMA_URLCONF
+                    print(f"Using public schema urlconf: {settings.PUBLIC_SCHEMA_URLCONF}")
                     return None
                 except Tenant.DoesNotExist:
                     # If no public tenant exists, create one
@@ -77,6 +87,8 @@ class TenantMiddleware(MiddlewareMixin):
                         )
                         print(f"Created new tenant and domain record for {hostname}")
                         connection.set_tenant(tenant)
+                        request.urlconf = settings.PUBLIC_SCHEMA_URLCONF
+                        print(f"Using public schema urlconf: {settings.PUBLIC_SCHEMA_URLCONF}")
                         return None
 
             # If we're not in development or couldn't find/create a default tenant, raise 404
