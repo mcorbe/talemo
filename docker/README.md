@@ -128,6 +128,7 @@ make up
 - MinIO Console: http://localhost:9001 (login with minioadmin/minioadmin)
 - Flower Dashboard: http://localhost:5555
 - Mailhog: http://localhost:8025
+- Redis: localhost:6380 (mapped from internal port 6379)
 
 #### Running Commands
 

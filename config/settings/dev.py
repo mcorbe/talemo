@@ -51,7 +51,9 @@ DEFAULT_FROM_EMAIL = "noreply@talemo.local"
 # Debug Toolbar
 if DEBUG:
     INSTALLED_APPS += ["debug_toolbar"]
-    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE
+    # Ensure TenantMainMiddleware remains at the beginning
+    tenant_middleware = MIDDLEWARE[0]
+    MIDDLEWARE = [tenant_middleware, "debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE[1:]
     INTERNAL_IPS = ["127.0.0.1"]
 
 # Celery

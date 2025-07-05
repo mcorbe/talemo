@@ -72,6 +72,7 @@ The development environment is containerized using Docker to ensure consistency 
    - MinIO Console: http://localhost:9001
    - Flower Dashboard: http://localhost:5555
    - Mailhog: http://localhost:8025
+   - Redis: localhost:6380 (mapped from internal port 6379)
 
 ### 3.4 Environment Configuration
 
@@ -99,6 +100,7 @@ The development environment is containerized using Docker to ensure consistency 
    # Redis
    REDIS_HOST=redis
    REDIS_PORT=6379
+   # Note: Redis is mapped to port 6380 on the host machine
 
    # OAuth (for development)
    GOOGLE_CLIENT_ID=your-google-client-id
