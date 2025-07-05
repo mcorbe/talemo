@@ -189,7 +189,6 @@ talemo/
 - **Django**: Web framework
 - **Django REST Framework**: API framework
 - **django-allauth**: Authentication with SSO providers
-- **django-tenants**: Multi-tenant support
 - **django-storages**: Storage backends for MinIO/S3
 - **Celery**: Asynchronous task processing
 - **CrewAI**: Agent-based workflows

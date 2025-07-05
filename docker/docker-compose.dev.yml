@@ -23,7 +23,7 @@ services:
   web:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.web
+      dockerfile: docker/Dockerfile.dev
     image: talemo-web
     container_name: talemo-web
     restart: unless-stopped
@@ -38,8 +38,7 @@ services:
       - "${PORT:-8000}:${PORT:-8000}"
     volumes:
       - ../:/app
-    command: >
-      bash -c "PYTHONPATH=/app python manage.py runserver ${HOST:-0.0.0.0}:${PORT:-8000}"
+    command: bash -c "PYTHONPATH=/app python manage.py runserver ${HOST:-0.0.0.0}:${PORT:-8000}"
 
   # Redis for caching and message broker
   redis:
@@ -75,7 +74,7 @@ services:
   celery:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.celery
+      dockerfile: docker/Dockerfile.dev
     image: talemo-celery
     container_name: talemo-celery
     restart: unless-stopped
@@ -87,12 +86,13 @@ services:
       - ../.env
     volumes:
       - ../:/app
+    command: celery -A config worker --loglevel=info
 
   # Celery Beat for scheduled tasks
   celery-beat:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.celery-beat
+      dockerfile: docker/Dockerfile.dev
     image: talemo-celery-beat
     container_name: talemo-celery-beat
     restart: unless-stopped
@@ -105,12 +105,13 @@ services:
       - ../.env
     volumes:
       - ../:/app
+    command: celery -A config beat --loglevel=info
 
   # Flower for Celery monitoring
   flower:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.flower
+      dockerfile: docker/Dockerfile.dev
     image: talemo-flower
     container_name: talemo-flower
     restart: unless-stopped
@@ -124,6 +125,7 @@ services:
       - "${FLOWER_PORT:-5555}:5555"
     volumes:
       - ../:/app
+    command: celery -A config flower --port=5555
 
   # Mailhog for email testing
   mailhog:
@@ -133,25 +135,6 @@ services:
     ports:
       - "${EMAIL_PORT:-1025}:1025"
       - "${MAILHOG_WEB_PORT:-8025}:8025"
-
-  # AI service for AI-specific functionality
-  ai-service:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.ai
-    image: talemo-ai-service
-    container_name: talemo-ai-service
-    restart: unless-stopped
-    depends_on:
-      - redis
-      - db
-      - minio
-    env_file:
-      - ../.env
-    ports:
-      - "${AI_PORT:-8001}:8001"
-    volumes:
-      - ../:/app
 
 volumes:
   postgres_data:

@@ -15,12 +15,11 @@ urlpatterns = [
     # Admin
     path("admin/", admin.site.urls),
 
-
     # Simple home view for testing
     path('', home_view, name='home'),
 ]
 
-# Debug toolbar
+# Debug toolbar - only for web containers
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns += [

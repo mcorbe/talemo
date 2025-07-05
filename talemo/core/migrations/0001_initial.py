@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import django_tenants.postgresql_backend.base
+import django.core.validators
 
 
 class Migration(migrations.Migration):
@@ -33,7 +33,10 @@ class Migration(migrations.Migration):
                         max_length=63,
                         unique=True,
                         validators=[
-                            django_tenants.postgresql_backend.base._check_schema_name
+                            django.core.validators.RegexValidator(
+                                regex=r'^[a-z0-9_]+$',
+                                message='Schema name can only contain lowercase letters, numbers, and underscores'
+                            )
                         ],
                     ),
                 ),

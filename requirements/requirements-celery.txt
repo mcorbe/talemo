@@ -1,11 +1,3 @@
-# Celery-specific dependencies
--r requirements-base.txt
-
 # Celery
 celery>=5.3,<6.0
-
-# Storage
-minio>=7.1,<8.0
-
-# Monitoring (if enabled via environment variable)
--r requirements-monitoring.txt
+flower>=2.0,<3.0

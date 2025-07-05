@@ -19,6 +19,7 @@ help:
 	@echo ""
 	@echo "$(YELLOW)Docker Environment Commands:$(NC)"
 	@echo "$(GREEN)make up$(NC)                     - Build (if needed) and start all development containers"
+	@echo "$(GREEN)make up-<container>$(NC)         - Start a specific container (e.g., make up-celery)"
 	@echo "$(GREEN)make down$(NC)                   - Stop all development containers"
 	@echo "$(GREEN)make ps$(NC)                     - Check container status"
 	@echo "$(GREEN)make restart$(NC)                - Restart all development containers"
@@ -33,6 +34,7 @@ help:
 	@echo "$(GREEN)make build-ai$(NC)               - Build AI service container"
 	@echo "$(GREEN)make build-all$(NC)              - Build all containers including AI service"
 	@echo "$(GREEN)make build-monitoring$(NC)       - Build monitoring containers"
+	@echo "$(GREEN)make build-<container>$(NC)      - Build a specific container (e.g., make build-celery)"
 	@echo ""
 	@echo "$(YELLOW)Application Commands:$(NC)"
 	@echo "$(GREEN)make init$(NC)                   - Initialize the application (build, start, setup dev environment, create superuser)"
@@ -58,7 +60,7 @@ help:
 	@echo "$(GREEN)make test-monitoring$(NC)        - Run monitoring tests"
 
 # Development Docker commands
-.PHONY: up
+.PHONY: up up-%
 up:
 	@echo "$(YELLOW)Starting development environment...$(NC)"
 	@echo "$(YELLOW)Checking for containers with project name 'docker'...$(NC)"
@@ -73,6 +75,12 @@ up:
 	@echo "MinIO Console: http://localhost:$(MINIO_CONSOLE_PORT)"
 	@echo "Flower Dashboard: http://localhost:$(FLOWER_PORT)"
 	@echo "Mailhog: http://localhost:$(MAILHOG_WEB_PORT)"
+
+.PHONY: up-%
+up-%:
+	@echo "$(YELLOW)Starting $* container...$(NC)"
+	$(DOCKER_COMPOSE) up -d $*
+	@echo "$(GREEN)Container $* started!$(NC)"
 
 .PHONY: down
 down:
@@ -237,7 +245,12 @@ test-monitoring:
 
 
 # Build commands
-.PHONY: build-infrastructure build-monitoring build-application build-ai build-all
+.PHONY: build-infrastructure build-monitoring build-application build-ai build-all build-%
+
+build-%:
+	@echo "$(YELLOW)Building $* container...$(NC)"
+	$(DOCKER_COMPOSE) build $*
+	@echo "$(GREEN)$* container built!$(NC)"
 
 build-infrastructure:
 	@echo "$(YELLOW)Building infrastructure containers...$(NC)"
@@ -253,13 +266,3 @@ build-application:
 	@echo "$(YELLOW)Building application containers in parallel...$(NC)"
 	$(DOCKER_COMPOSE) build --parallel web celery celery-beat flower
 	@echo "$(GREEN)Application containers built!$(NC)"
-
-build-ai:
-	@echo "$(YELLOW)Building AI service container...$(NC)"
-	$(DOCKER_COMPOSE) build ai-service
-	@echo "$(GREEN)AI service container built!$(NC)"
-
-build-all:
-	@echo "$(YELLOW)Building all containers in parallel...$(NC)"
-	$(DOCKER_COMPOSE) build --parallel web celery celery-beat flower ai-service
-	@echo "$(GREEN)All containers built!$(NC)"

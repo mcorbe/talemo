@@ -1,14 +1,16 @@
 """
 Celery tasks for the agents app.
 """
-from celery import shared_task
 from talemo.agents.services import AgentBridge
+from talemo.core.models import Tenant
+
+from celery import shared_task
+from django.conf import settings
 from django.utils import timezone
-from django_tenants.utils import get_tenant_model
+
 import logging
 import json
 import redis
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +35,6 @@ def generate_story(prompt, age_range="4-8", user_id=None, tenant_id=None):
 
     try:
         # Get the tenant
-        Tenant = get_tenant_model()
         tenant = Tenant.objects.get(id=tenant_id)
 
         # Create the agent task
@@ -76,7 +77,6 @@ def enhance_story(story, user_id=None, tenant_id=None):
 
     try:
         # Get the tenant
-        Tenant = get_tenant_model()
         tenant = Tenant.objects.get(id=tenant_id)
 
         # Create the agent task

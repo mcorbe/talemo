@@ -3,5 +3,8 @@ Settings initialization.
 """
 import os
 
-# Use development settings by default
-from .dev import *
+if os.environ.get("DEBUG", "False") == "True":
+    from .dev import *
+
+else:
+    from .base import *

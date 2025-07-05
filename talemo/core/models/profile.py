@@ -2,8 +2,8 @@
 User profile models.
 """
 from django.db import models
+
 import uuid
-from django_tenants.models import TenantMixin
 
 
 class Profile(models.Model):

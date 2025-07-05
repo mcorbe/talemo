@@ -19,8 +19,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from frontend.views import service_worker, offline
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from frontend.views import service_worker, offline
 
 # API URL patterns
 api_patterns = [
@@ -40,12 +40,6 @@ urlpatterns = [
     # API
     path('api/v1/', include(api_patterns)),
 
-    # API Documentation
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-
-
     # App URLs
     path('stories/', include('talemo.stories.urls')),
     path('agents/', include('talemo.agents.urls')),
@@ -59,7 +53,15 @@ urlpatterns = [
     path('', RedirectView.as_view(url='/stories/', permanent=False)),
 ]
 
-# Debug toolbar
+# Add API Documentation URLs only in web containers
+urlpatterns += [
+    # API Documentation
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+]
+
+# Debug toolbar - only for web containers
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns += [
