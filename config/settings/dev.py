@@ -63,6 +63,7 @@ if DEBUG:
 
 # Celery
 CELERY_TASK_ALWAYS_EAGER = True
+REDIS_URL = f"redis://{os.environ.get('REDIS_HOST', 'localhost')}:{os.environ.get('REDIS_PORT', '6379')}/0"
 
 # AI Services
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")

@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 def story_player(request, story_id=None):
     """
     View for the story player page with Mode Conte feature.
-    
+
     If story_id is provided, it will load that specific story.
     Otherwise, it will show a demo player with placeholder content.
     """
@@ -20,7 +20,7 @@ def story_player(request, story_id=None):
     #     story = get_object_or_404(Story, id=story_id)
     # else:
     #     story = None
-    
+
     # For now, just render the template without a story object
     return render(request, 'stories/story_player.html', {
         'story': None,  # Replace with actual story when models are implemented

@@ -2,7 +2,7 @@
 Tenant models for multi-tenant functionality.
 """
 from django.db import models
-from django.contrib.auth.models import User
+import uuid
 from django_tenants.models import TenantMixin, DomainMixin
 
 
@@ -10,10 +10,18 @@ class Tenant(TenantMixin):
     """
     Tenant model for multi-tenant functionality.
     """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
-    created_on = models.DateTimeField(auto_now_add=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    is_active = models.BooleanField(default=True)
+    type = models.CharField(
+        max_length=20,
+        choices=[
+            ('family', 'Family'),
+            ('institution', 'Institution'),
+        ],
+        default='family'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     # default true, schema will be automatically created and synced when it is saved
     auto_create_schema = True

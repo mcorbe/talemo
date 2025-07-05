@@ -7,6 +7,50 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+class IllustratorAgent(BaseAgent):
+    """
+    Agent responsible for generating illustrations for stories.
+    """
+    def __init__(self, verbose=True):
+        super().__init__(
+            name="Illustrator",
+            role="Visual Artist and Image Generator",
+            goal="Create high-quality illustrations for stories",
+            backstory=(
+                "You are an AI-powered illustrator specialized in creating "
+                "beautiful and engaging images for children's stories. You can "
+                "generate illustrations in various styles, from cartoon to realistic, "
+                "always ensuring they are appropriate for the target age group."
+            ),
+            verbose=verbose
+        )
+
+    def create_illustration_task(self, story_text, style="cartoon", age_range="4-8"):
+        """
+        Create a task for generating an illustration.
+
+        Args:
+            story_text (str): The story text to illustrate
+            style (str, optional): The illustration style
+            age_range (str, optional): The target age range
+
+        Returns:
+            Task: A CrewAI task for illustration generation
+        """
+        return Task(
+            description=(
+                f"Create an illustration for a story with the following text: '{story_text}'. "
+                f"The illustration should be in {style} style and appropriate for children "
+                f"aged {age_range}. Ensure the illustration captures the key elements of the "
+                "story and is visually engaging."
+            ),
+            expected_output=(
+                "A high-quality illustration in the requested style that accurately "
+                "represents the story content and is appropriate for the target age group."
+            ),
+            agent=self.agent
+        )
+
 class ModerationAgent(BaseAgent):
     """
     Agent responsible for ensuring content safety and appropriateness.
@@ -26,15 +70,15 @@ class ModerationAgent(BaseAgent):
             ),
             verbose=verbose
         )
-    
+
     def create_moderation_task(self, content, age_range="4-8"):
         """
         Create a task for moderating content.
-        
+
         Args:
             content (str): The content to moderate
             age_range (str, optional): The target age range for the content
-            
+
         Returns:
             Task: A CrewAI task for content moderation
         """
@@ -72,22 +116,22 @@ class TTSAgent(BaseAgent):
             ),
             verbose=verbose
         )
-    
+
     def create_tts_task(self, text, voice_params=None):
         """
         Create a task for text-to-speech conversion.
-        
+
         Args:
             text (str): The text to convert to speech
             voice_params (dict, optional): Parameters for voice selection and configuration
-            
+
         Returns:
             Task: A CrewAI task for TTS conversion
         """
         voice_params = voice_params or {}
         voice_type = voice_params.get('voice_type', 'neutral')
         language = voice_params.get('language', 'fr-FR')
-        
+
         return Task(
             description=(
                 f"Convert the following text to speech using a {voice_type} voice in {language}: "
@@ -122,16 +166,16 @@ class QuotaAgent(BaseAgent):
             ),
             verbose=verbose
         )
-    
+
     def create_quota_check_task(self, tenant_id, resource_type, requested_amount):
         """
         Create a task for checking quota compliance.
-        
+
         Args:
             tenant_id (str): The ID of the tenant
             resource_type (str): The type of resource being requested
             requested_amount (int): The amount of the resource being requested
-            
+
         Returns:
             Task: A CrewAI task for quota checking
         """
@@ -170,15 +214,15 @@ class EmbeddingAgent(BaseAgent):
             ),
             verbose=verbose
         )
-    
+
     def create_embedding_task(self, content, embedding_type="story"):
         """
         Create a task for generating vector embeddings.
-        
+
         Args:
             content (str): The content to embed
             embedding_type (str, optional): The type of content being embedded
-            
+
         Returns:
             Task: A CrewAI task for embedding generation
         """
@@ -216,16 +260,16 @@ class StoryCompanion(BaseAgent):
             ),
             verbose=verbose
         )
-    
+
     def create_story_assistance_task(self, prompt=None, partial_story=None, assistance_type="ideation"):
         """
         Create a task for providing story creation assistance.
-        
+
         Args:
             prompt (str, optional): The initial story prompt or idea
             partial_story (str, optional): Partially completed story that needs assistance
             assistance_type (str, optional): Type of assistance needed (ideation, development, refinement)
-            
+
         Returns:
             Task: A CrewAI task for story assistance
         """
@@ -277,7 +321,7 @@ class StoryCompanion(BaseAgent):
                 "2) Creative ideas to inspire the user, 3) Constructive feedback if applicable, "
                 "4) Questions to guide further development, 5) Encouragement and support."
             )
-        
+
         return Task(
             description=description,
             expected_output=expected_output,

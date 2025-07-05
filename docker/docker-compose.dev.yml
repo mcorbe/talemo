@@ -39,7 +39,7 @@ services:
     volumes:
       - ../:/app
     command: >
-      bash -c "python manage.py runserver ${HOST:-0.0.0.0}:${PORT:-8000}"
+      bash -c "PYTHONPATH=/app python manage.py runserver ${HOST:-0.0.0.0}:${PORT:-8000}"
 
   # Redis for caching and message broker
   redis:
