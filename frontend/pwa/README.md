@@ -6,9 +6,9 @@ This directory contains configuration files for the Progressive Web App (PWA) fu
 
 Progressive Web Apps provide a native app-like experience on the web, allowing users to install the application on their devices, access it offline, and receive push notifications. This is particularly important for Talemo as a mobile-first platform for families.
 
-## Expected Files
+## Implemented Files
 
-The following files will be added to this directory during implementation:
+The following files have been implemented for the PWA functionality:
 
 - `manifest.json`: Web app manifest that defines how the app appears when installed on a device
 - `service-worker.js`: Service worker script for offline functionality and caching
