@@ -25,8 +25,8 @@ DATABASES = {
     }
 }
 
-# MinIO Storage
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+# MinIO Storage with tenant isolation
+DEFAULT_FILE_STORAGE = "talemo.assets.storage.default_storage"
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Ensure static files are properly served in development

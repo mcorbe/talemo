@@ -27,11 +27,11 @@ CREATE OR REPLACE FUNCTION create_vector_index(
 BEGIN
     EXECUTE format('ALTER TABLE %I ADD COLUMN IF NOT EXISTS %I vector(%s)', 
                   table_name, column_name, vector_dimensions);
-    
+
     -- Create an index on the vector column
     EXECUTE format('CREATE INDEX IF NOT EXISTS %I_%I_idx ON %I USING ivfflat (%I vector_l2_ops)', 
                   table_name, column_name, table_name, column_name);
-                  
+
     RAISE NOTICE 'Created vector column and index on %.%', table_name, column_name;
 END;
 $$ LANGUAGE plpgsql;
