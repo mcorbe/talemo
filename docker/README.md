@@ -257,15 +257,24 @@ The Makefile includes several commands for working with the monitoring stack:
 
 To add new dependencies:
 
-1. Add the dependency to `requirements.txt` or `requirements-dev.txt`
-2. Rebuild the containers:
+1. Add the dependency to the appropriate requirements file:
+   - `requirements-base.txt`: Common dependencies for all containers
+   - `requirements-web.txt`: Web-specific dependencies
+   - `requirements-celery.txt`: Celery-specific dependencies
+   - `requirements-celery-beat.txt`: Celery Beat-specific dependencies
+   - `requirements-flower.txt`: Flower-specific dependencies
+   - `requirements-monitoring.txt`: Monitoring-specific dependencies
+
+2. Rebuild the specific container:
    ```bash
-   docker-compose -f docker/docker-compose.dev.yml build
+   docker-compose -f docker/docker-compose.dev.yml build [service_name]
    ```
    Or using the Makefile:
    ```bash
-   make build
+   make build-application  # For web, celery, celery-beat, flower
    ```
+
+This approach ensures that each container only installs the dependencies it needs, which speeds up the build process.
 
 ### Modifying Service Configuration
 

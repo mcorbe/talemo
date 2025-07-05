@@ -17,9 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements-dev.txt .
+COPY requirements-base.txt requirements-monitoring.txt requirements-web.txt ./
 RUN pip install --upgrade pip \
-    && pip install -r requirements-dev.txt
+    && pip install -r requirements-web.txt
 
 # Copy project
 COPY . .

@@ -1,0 +1,17 @@
+# Celery-specific dependencies
+-r requirements-base.txt
+
+# Celery
+celery>=5.3,<6.0
+
+# AI and vector search (needed for async tasks)
+crewai>=0.28,<1.0
+llama-index>=0.8,<1.0
+pgvector>=0.2,<1.0
+langfuse>=2.0,<3.0
+
+# Storage
+minio>=7.1,<8.0
+
+# Monitoring (if enabled via environment variable)
+-r requirements-monitoring.txt
