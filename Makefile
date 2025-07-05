@@ -58,11 +58,11 @@ up:
 	@echo "$(YELLOW)Starting development environment...$(NC)"
 	$(DOCKER_COMPOSE) up -d
 	@echo "$(GREEN)Development environment started!$(NC)"
-	@echo "Django Web Server: http://localhost:8000"
-	@echo "Django Admin: http://localhost:8000/admin"
-	@echo "MinIO Console: http://localhost:9001 (login with minioadmin/minioadmin)"
-	@echo "Flower Dashboard: http://localhost:5555"
-	@echo "Mailhog: http://localhost:8025"
+	@echo "Django Web Server: http://localhost:$(PORT)"
+	@echo "Django Admin: http://localhost:$(PORT)/admin"
+	@echo "MinIO Console: http://localhost:$(MINIO_CONSOLE_PORT)"
+	@echo "Flower Dashboard: http://localhost:$(FLOWER_PORT)"
+	@echo "Mailhog: http://localhost:$(MAILHOG_WEB_PORT)"
 
 .PHONY: down
 down:
@@ -177,10 +177,10 @@ monitoring-up:
 	@echo "$(YELLOW)Starting monitoring stack...$(NC)"
 	$(DOCKER_COMPOSE_MONITORING) up -d
 	@echo "$(GREEN)Monitoring stack started!$(NC)"
-	@echo "Grafana: http://localhost:3000 (login with admin/admin)"
-	@echo "Kibana: http://localhost:5601"
-	@echo "Prometheus: http://localhost:9090"
-	@echo "APM: http://localhost:8200 (via Kibana)"
+	@echo "Grafana: http://localhost:$(GRAFANA_PORT) (login with admin/admin)"
+	@echo "Kibana: http://localhost:$(KIBANA_PORT)"
+	@echo "Prometheus: http://localhost:$(PROMETHEUS_PORT)"
+	@echo "APM: http://localhost:$(APM_SERVER_PORT) (via Kibana)"
 
 .PHONY: monitoring-down
 monitoring-down:
@@ -224,4 +224,3 @@ build-application:
 	@echo "$(YELLOW)Building application containers...$(NC)"
 	$(DOCKER_COMPOSE) build web celery celery-beat flower
 	@echo "$(GREEN)Application containers built!$(NC)"
-
