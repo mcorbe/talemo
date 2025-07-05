@@ -30,6 +30,7 @@ SHARED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.apple',
+    'drf_spectacular',
 
     # Project shared apps
     'talemo.core',
@@ -147,6 +148,24 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# drf-spectacular settings
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Talemo API",
+    "DESCRIPTION": "API documentation for Talemo - Family Audio-Stories Platform",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
+    "COMPONENT_SPLIT_REQUEST": True,
+    "TAGS": [
+        {"name": "stories", "description": "Operations related to stories"},
+        {"name": "assets", "description": "Operations related to assets (images, audio)"},
+        {"name": "agents", "description": "Operations related to AI agents"},
+        {"name": "governance", "description": "Operations related to parental controls and consent"},
+        {"name": "subscriptions", "description": "Operations related to subscriptions"},
+    ],
 }
 
 # Celery
