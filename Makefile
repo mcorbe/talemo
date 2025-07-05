@@ -30,6 +30,8 @@ help:
 	@echo "$(GREEN)make build$(NC)                  - Build all containers (infrastructure and application)"
 	@echo "$(GREEN)make build-infrastructure$(NC)   - Build infrastructure containers (db, redis, minio, mailhog)"
 	@echo "$(GREEN)make build-application$(NC)      - Build application containers (web, celery, celery-beat, flower)"
+	@echo "$(GREEN)make build-ai$(NC)               - Build AI service container"
+	@echo "$(GREEN)make build-all$(NC)              - Build all containers including AI service"
 	@echo "$(GREEN)make build-monitoring$(NC)       - Build monitoring containers"
 	@echo ""
 	@echo "$(YELLOW)Application Commands:$(NC)"
@@ -80,7 +82,7 @@ down:
 
 .PHONY: build
 build: build-infrastructure build-application
-	@echo "$(GREEN)All containers built!$(NC)"
+	@echo "$(GREEN)Basic containers built! Use 'make build-ai' to build AI service or 'make build-all' for everything.$(NC)"
 
 .PHONY: restart
 restart:
@@ -235,7 +237,7 @@ test-monitoring:
 
 
 # Build commands
-.PHONY: build-infrastructure build-monitoring build-application
+.PHONY: build-infrastructure build-monitoring build-application build-ai build-all
 
 build-infrastructure:
 	@echo "$(YELLOW)Building infrastructure containers...$(NC)"
@@ -248,6 +250,16 @@ build-monitoring:
 	@echo "$(GREEN)Monitoring containers built!$(NC)"
 
 build-application:
-	@echo "$(YELLOW)Building application containers...$(NC)"
+	@echo "$(YELLOW)Building application containers in parallel...$(NC)"
 	$(DOCKER_COMPOSE) build --parallel web celery celery-beat flower
 	@echo "$(GREEN)Application containers built!$(NC)"
+
+build-ai:
+	@echo "$(YELLOW)Building AI service container...$(NC)"
+	$(DOCKER_COMPOSE) build ai-service
+	@echo "$(GREEN)AI service container built!$(NC)"
+
+build-all:
+	@echo "$(YELLOW)Building all containers in parallel...$(NC)"
+	$(DOCKER_COMPOSE) build --parallel web celery celery-beat flower ai-service
+	@echo "$(GREEN)All containers built!$(NC)"

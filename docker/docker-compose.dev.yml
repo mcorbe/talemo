@@ -134,6 +134,25 @@ services:
       - "${EMAIL_PORT:-1025}:1025"
       - "${MAILHOG_WEB_PORT:-8025}:8025"
 
+  # AI service for AI-specific functionality
+  ai-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ai
+    image: talemo-ai-service
+    container_name: talemo-ai-service
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - db
+      - minio
+    env_file:
+      - ../.env
+    ports:
+      - "${AI_PORT:-8001}:8001"
+    volumes:
+      - ../:/app
+
 volumes:
   postgres_data:
   redis_data:
