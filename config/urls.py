@@ -21,6 +21,9 @@ from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
 urlpatterns = [
+    path('_manifest.json', RedirectView.as_view(url=static('stickymobile/_manifest.json'), permanent=True)),
+    path('_service-worker.js', RedirectView.as_view(url=static('stickymobile/_service-worker.js'), permanent=True)),
+
     # Admin
     path("admin/", admin.site.urls),
 
@@ -28,7 +31,7 @@ urlpatterns = [
     path('stories/', include('talemo.stories.urls')),
 
     # Redirect root to stories
-    path('', RedirectView.as_view(url='/stories/', permanent=False)),
+    path('', RedirectView.as_view(url='/stories/list/', permanent=False)),
 ]
 
 # Debug toolbar - only for web containers

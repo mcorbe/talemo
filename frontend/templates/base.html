@@ -1,12 +1,33 @@
-<!DOCTYPE html>
+{% load static %}
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Talemo{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'stickymobile/styles/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'stickymobile/styles/style.css' %}">
+    <link rel="stylesheet" class="page-highlight"
+          href="{% static 'stickymobile/styles/highlights/highlight_red.css' %}">
+    <link rel="manifest" href="{% static 'stickymobile/_manifest.json' %}">
+
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
-    {% block content %}
-    {% endblock %}
+
+<body class="theme-light" data-background="none" data-highlight="red2">
+
+<div id="page">
+
+    <div class="page-content header-clear-large">
+        {% block content %}{% endblock %}
+    </div>
+
+</div>
+
+<script src="{% static 'stickymobile/scripts/bootstrap.min.js' %}"></script>
+<script src="{% static 'stickymobile/scripts/custom.js' %}"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register("{% static 'stickymobile/_service-worker.js' %}", {scope: '/'});
+  }
+</script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

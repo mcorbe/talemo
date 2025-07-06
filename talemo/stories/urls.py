@@ -10,5 +10,6 @@ from . import views
 app_name = 'stories'
 
 urlpatterns = [
-    path('', views.story_list, name='index'),
+    path('create/', views.create_story, name='create'),
+    path('list/', views.story_list, name='list'),
 ]
