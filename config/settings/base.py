@@ -14,7 +14,7 @@ from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Monitoring is disabled
 MONITORING_ENABLED = False
@@ -92,8 +92,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    BASE_DIR / "static/stickymobile",
+    BASE_DIR / "static/",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
