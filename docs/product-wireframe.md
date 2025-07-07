@@ -189,3 +189,140 @@ Instrumentation from day one – every key action emits a deterministic, duplica
    - Test resume functionality when reconnected
 
 *This exercise often surfaces hidden states and missing components.*
+
+--- 
+
+# Appendix A — SyncManager
+
+*Offline orchestration, deduplication & versioning*
+
+> **Audience**: front‑end, back‑end, QA, Dev‑Ops.
+> **Status**: Draftv0.2 —awaiting backend review (ETA2025‑07‑10).
+
+---
+
+## Purpose
+
+Provide a **single façade** that batches and retries *all* client‑originated writes while the device is offline, flaky, or rate‑limited, guaranteeing:
+
+1. **Exactly‑once semantics** on the server
+2. **Deterministic conflict resolution** when two devices edit the same logical record
+3. **Predictable back‑off behaviour** shared across feature modules
+
+SyncManager frees individual services (Quota, Telemetry, OfflineQueue, Moderation flags) from hand‑rolled retry logic and unifies observability.
+
+## Scope
+
+| Included                                                                                  | Excluded / future                                                                          |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 🔹 Quota counters<br>🔹 Story JSON metadata<br>🔹 Telemetry events<br>🔹 Moderation flags | 🔸 Audio blob upload (handled by ChunkUploader)<br>🔸 Remote‑config fetch (idempotent GET) |
+
+## Responsibilities
+
+* **Queue** outbound envelopes to disk (IndexedDB) with durable ordering.
+* **Flush** envelopes in controlled batches with exponential back‑off + jitter.
+* **Dedupe** requests on both client and server via idempotency keys.
+* **Invoke conflict handlers** supplied by domain packages.
+* **Expose** `syncStatus`, `pendingCount`, `lastError` to UI (*NetworkAlert*).
+
+Non‑responsibilities: encryption at rest (delegated to Service Worker “crypto vault” TBD), feature flag gating, analytics sampling logic.
+
+## Envelope Schema
+
+```ts
+interface OutboundEnvelope {
+  id: string;          // ULID = time‑sortable idempotency key
+  domain: "quota" | "story" | "telemetry" | "moderation";
+  payload: unknown;    // JSON‑serialisable
+  rev: number;         // monotonically increasing per‑resource revision
+  ts_created: number;  // epoch ms (debug only)
+  attempts: number;    // retry count for back‑off
+}
+```
+
+*`id` + `domain` form the server de‑duplication tuple (24h TTL).*
+ULID keeps local queue chronologically sortable even after reboot.
+
+## Queue Storage & Durability
+
+* Stored in **IndexedDB** `talemo.sync.queue` object store.
+* Write‑ahead log style: append only, delete on ACK.
+* Corruption fallback: if IndexedDB throws, clear store & emit `sync_queue_reset` †.
+
+† QA team adds a chaos test that forcibly wipes the store mid‑session.
+
+## Flush Algorithm
+
+```text
+onOnline || onTimerTick -> flush()
+flush():
+  batch = first 50 envelopes ORDER BY ts_created
+  POST /sync/batch batch
+  switch (server response):
+    ok | dup      -> delete from store
+    conflict      -> merged = domain.merge(); save merged (rev++)
+    error 429/503 -> backOff *= 2, jitter ±20 %, re‑queue
+    error fatal   -> log + drop + emit operational_error
+```
+
+Back‑off capped at **120s**. `attempts` resets to0 after any success.
+
+## Versioning & ConflictRules
+
+| Domain    | Client field | Server field | Merge rule                                                                                                           |
+| --------- | ------------ | ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Story     | `rev`        | `server_rev` | Keep payload with **highest rev**.<br>If equal but hash diff → mark `conflict:true`, enqueue `story_conflict` event. |
+| Quota     | `day_seq`    | same         | Server keeps **MAX(used)** for that YYYY‑MM‑DD.                                                                      |
+| Telemetry | `id`         | –            | Fire & forget; server ignores duplicates.                                                                            |
+
+Server rejects any envelope where `rev < server_rev` for mutable resources.
+
+## Back‑off Formula
+
+```
+interval  = min( 2s * 2^attempts , 120s )
+interval += random(‑0.2 .. +0.2 * interval)
+```
+
+Shared across all domains to avoid “thundering herd” after network restore.
+
+## API Contract
+
+`POST /sync/batch` — accepts **1‑100** envelopes.
+
+Response example:
+
+```jsonc
+{
+  "ok":       ["01HB…"],
+  "dup":      ["01HB…"],
+  "conflict": ["01HB…"],
+  "error":    [{"id":"01HB…","code":503}]
+}
+```
+
+Headers: `X‑Device‑Id` (UUID), `Authorization` (JWT).
+Server guarantees idempotent processing keyed by `id` + `domain` for 24h.
+
+## Observability & Alerting
+
+| Metric            | Target          | Dashboard                |
+| ----------------- | --------------- | ------------------------ |
+| Sync success rate | ≥98% last7d | Kibana ➜ *SyncHealth*   |
+| Avg batch latency | ≤200ms p95    | same                     |
+| Conflict ratio    | <0.1%         | same (alert >0.5%)     |
+| Queue size > 500  | PagerDuty warn  | OpsGenie + Slack #alerts |
+
+Telemetry events emitted: `sync_batch_sent`, `sync_batch_result`, `sync_queue_reset`.
+
+## Security & Data Protection
+
+1. **Envelope payloads encrypted at rest** – AES‑GCM via WebCrypto (2025‑Q4 stretch).
+2. **JWT quota token** includes daily nonce to prevent replay (see QuotaService doc).
+3. **CSRF** not applicable — mobile app / PWA uses same‑origin fetch with JWT.
+
+## Open Questions
+
+1. Should story **audio blobs** piggy‑back on envelopes or stay with current S3 presign flow?
+2. Is 24h idempotency TTL sufficient for week‑long offline trips?
+3. Where to surface `story_conflict` in Parent Dashboard UI?
