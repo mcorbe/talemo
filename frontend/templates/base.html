@@ -21,8 +21,6 @@
 
 </div>
 
-<script src="{% static 'stickymobile/scripts/bootstrap.min.js' %}"></script>
-<script src="{% static 'stickymobile/scripts/custom.js' %}"></script>
 <script>
   if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register("{% static 'stickymobile/_service-worker.js' %}", {scope: '/'});
