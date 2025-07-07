@@ -37,34 +37,44 @@
     <div class="page-content header-clear-medium">
 
         <div class="card card-style">
-            <div data-card-height="250" class="card mb-0 preload-img" data-src="images/pictures/18w.jpg">
-                <div class="card-center text-center">
-                    <h1 class="color-white mb-0 font-40">Settings</h1>
-                    <p class="opacity-50 color-white mb-0">Android Styled Settings Page</p>
+            <a data-menu="settings-pane" href="#" class="d-flex m-3">
+                <div><img data-src="images/pictures/faces/1s.png" src="images/empty.png" class="me-3 rounded-circle shadow-l preload-img" width="60"></div>
+                <div>
+                    <h3 class="mt-2 mb-0 font-700">Johnatan Doe</h3>
+                    <p class="font-12 mt-n1 mb-0 pb-0">iOS Styled Settings Menu.</p>
                 </div>
-                <div class="card-overlay bg-black opacity-80"></div>
-            </div>
+                <div class="ms-auto mt-3 pt-1"><i class="fa fa-chevron-right color-theme opacity-30"></i></div>
+            </a>
         </div>
 
         <div class="card card-style">
-            <div class="content mt-0 mb-0">
-                <div class="list-group list-custom-large list-icon-0">
-                    <a data-menu="settings-pane" href="#">
-                        <i class="fa font-19 fa-wifi rounded-s color-blue-dark"></i>
-                        <span>Connections</span>
-                        <strong>Details about your Connections</strong>
-                        <i class="fa fa-chevron-right opacity-30 mt-1"></i>
+            <div class="content my-0">
+                <div class="list-group list-custom-small">
+                    <a data-trigger-switch="switch-1" href="#">
+                        <i class="fa font-14 fa-star rounded-s bg-yellow-dark"></i>
+                        <span>Airplane Mode</span>
+                        <div class="custom-control scale-switch ios-switch">
+                            <input type="checkbox" class="ios-input" id="switch-1">
+                            <label class="custom-control-label" for="switch-1"></label>
+                        </div>
+                        <i class="fa fa-chevron-right opacity-30"></i>
                     </a>
                     <a data-menu="settings-pane" href="#">
-                        <i class="fa font-19 fa-moon rounded-s color-gray-dark"></i>
-                        <span>Do Not Disturb</span>
-                        <strong>Turn on Do no Disturb Mode</strong>
-                        <i class="fa fa-chevron-right opacity-30 mt-1"></i>
+                        <i class="fa font-14 fa-wifi rounded-s bg-blue-dark"></i>
+                        <span>Wi-Fi</span>
+                        <span class="badge badge-text color-theme text-capitalize font-14 font-400 opacity-60">Enabled wi-Fi 1</span>
+                        <i class="fa fa-chevron-right opacity-30"></i>
                     </a>
                     <a data-menu="settings-pane" href="#">
-                        <i class="fa font-19 fa-broadcast-tower rounded-s color-green-dark"></i>
-                        <span>Celular Data</span>
-                        <strong>Turn off Conectons from Celluar</strong>
+                        <i class="fab font-14 fa-bluetooth rounded-s bg-blue-dark"></i>
+                        <span>Bluetooth</span>
+                        <span class="badge badge-text color-theme text-capitalize font-14 font-400 opacity-60">On</span>
+                        <i class="fa fa-chevron-right opacity-30"></i>
+                    </a>
+                    <a data-menu="settings-pane" href="#">
+                        <i class="fa font-14 fa-broadcast-tower rounded-s bg-green-dark"></i>
+                        <span>Cellular</span>
+                        <span class="badge badge-text color-theme text-capitalize font-14 font-400 opacity-60">On</span>
                         <i class="fa fa-chevron-right opacity-30"></i>
                     </a>
                 </div>
@@ -72,14 +82,13 @@
         </div>
 
         <div class="card card-style">
-            <div class="content mb-0 mt-0">
-                <div class="list-group list-custom-large list-icon-0">
+            <div class="content my-0">
+                <div class="list-group list-custom-small">
                     <a data-toggle-theme data-trigger-switch="switch-21" href="#">
-                        <i class="fa font-19 fa-lightbulb rounded-s color-yellow-dark"></i>
+                        <i class="fa font-14 fa-lightbulb rounded-s bg-yellow-dark"></i>
                         <span>Dark Mode</span>
-                        <strong>Turn off the Lights</strong>
-                        <div class="custom-control scale-switch android-switch mt-n1 pt-3">
-                            <input data-toggle-theme type="checkbox" class="android-input" id="switch-21">
+                        <div class="custom-control scale-switch ios-switch">
+                            <input data-toggle-theme type="checkbox" class="ios-input" id="switch-21">
                             <label class="custom-control-label" for="switch-21"></label>
                         </div>
                         <i class="fa fa-chevron-right opacity-30"></i>
@@ -89,24 +98,21 @@
         </div>
 
         <div class="card card-style">
-            <div class="content mb-0 mt-0">
-                <div class="list-group list-custom-large list-icon-0">
+            <div class="content my-0">
+                <div class="list-group list-custom-small">
                     <a data-menu="menu-settings" href="#">
-                        <i class="fa font-19 fa-cog rounded-s color-red-dark"></i>
+                        <i class="fa font-14 fa-cog rounded-s bg-red-dark"></i>
                         <span>Settings</span>
-                        <strong>Show Sticky Mobile Settings</strong>
                         <i class="fa fa-chevron-right opacity-30"></i>
                     </a>
                     <a data-menu="menu-highlights" href="#">
-                        <i class="fa font-19 fa-tint rounded-s color-blue-dark"></i>
+                        <i class="fa font-14 fa-tint rounded-s bg-blue-dark"></i>
                         <span>Color Scheme</span>
-                        <strong>Show Sticky Mobile Color Options</strong>
                         <i class="fa fa-chevron-right opacity-30"></i>
                     </a>
                     <a data-menu="menu-backgrounds" href="#">
-                        <i class="fa font-19 fa-brush rounded-s color-green-dark"></i>
+                        <i class="fa font-14 fa-brush rounded-s bg-green-dark"></i>
                         <span>Background Scheme</span>
-                        <strong>Show Sticky Mobile Color Options</strong>
                         <i class="fa fa-chevron-right opacity-30"></i>
                     </a>
                 </div>
@@ -127,11 +133,12 @@
             <p class="footer-links"><a href="#" class="color-highlight">Privacy Policy</a> | <a href="#" class="color-highlight">Terms and Conditions</a> | <a href="#" class="back-to-top color-highlight"> Back to Top</a></p>
             <div class="clear"></div>
         </div>
+
     </div>
     <!-- End of Page Content-->
 
     <!-- Duplicate this and create a unique ID to create more settings panels -->
-    <div id="settings-pane" class="menu menu-bg menu-box-bottom notch-clear" data-menu-width="cover" data-menu-height="cover">
+    <div id="settings-pane" class="menu menu-bg menu-box-right" data-menu-width="cover" data-menu-effect="menu-push-full">
 
         <div class="card card-style mt-3 pb-2">
             <div class="menu-title">
@@ -142,7 +149,7 @@
         </div>
 
         <div class="card card-style mt-4">
-            <div data-card-height="350" class="card bg-18">
+            <div data-card-height="350" class="card preload-img" data-src="images/pictures/18w.jpg">
                 <div class="card-center text-center">
                     <h1 class="color-white mb-0 font-30">Infinite Possibilities</h1>
                     <p class="color-white boxed-text-l mt-3 mb-0 opacity-60">
@@ -170,13 +177,13 @@
 
                 <div class="row">
                     <div class="col-4">
-                        <a href="images/pictures/9t.jpg"  class="external-link filtr-item" title="Sweet Creams"><img src="images/empty.png" data-src="images/pictures/21s.jpg" class="preload-img shadow-s img-fluid rounded-s" alt="img"></a>
+                        <a href="images/pictures/9t.jpg" class="external-link filtr-item" title="Sweet Creams"><img src="images/empty.png" data-src="images/pictures/21s.jpg" class="preload-img shadow-s img-fluid rounded-s" alt="img"></a>
                     </div>
                     <div class="col-4">
-                        <a href="images/pictures/14t.jpg"  class="external-link filtr-item" title="Sweet Creams"><img src="images/empty.png" data-src="images/pictures/14s.jpg" class="preload-img shadow-s img-fluid rounded-s" alt="img"></a>
+                        <a href="images/pictures/14t.jpg" class="external-link filtr-item" title="Sweet Creams"><img src="images/empty.png" data-src="images/pictures/14s.jpg" class="preload-img shadow-s img-fluid rounded-s" alt="img"></a>
                     </div>
                     <div class="col-4">
-                        <a href="images/pictures/18t.jpg"  class="external-link filtr-item" title="Sweet Creams"><img src="images/empty.png" data-src="images/pictures/18s.jpg" class="preload-img shadow-s img-fluid rounded-s" alt="img"></a>
+                        <a href="images/pictures/18t.jpg" class="external-link filtr-item" title="Sweet Creams"><img src="images/empty.png" data-src="images/pictures/18s.jpg" class="preload-img shadow-s img-fluid rounded-s" alt="img"></a>
                     </div>
                 </div>
 
@@ -218,7 +225,7 @@
                 <p class="mb-0 pb-3">
                     Select the thickness of your font with ease. Add a secondary class that will change weights.
                 </p>
-                <div class="row pb-1">
+                <div class="row mb-0">
                     <div class="col-4">
                         <ul class="icon-list">
                             <li><i class="fa fa-check color-green-dark"></i>List</li>
@@ -245,6 +252,7 @@
         </div>
         <a href="#" class="close-menu btn btn-full btn-m mt-4 me-3 ms-3 mb-4 bg-highlight font-900 text-uppercase rounded-s">Back to Settings</a>
     </div>
+
 
     <!-- All Menus, Action Sheets, Modals, Notifications, Toasts, Snackbars get Placed outside the <div class="page-content"> -->
     <div id="menu-settings" class="menu menu-box-bottom menu-box-detached">

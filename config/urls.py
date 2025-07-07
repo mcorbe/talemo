@@ -18,11 +18,22 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.decorators.vary import vary_on_headers
 from django.views.generic import RedirectView
+
+
+class ServiceWorkerView(RedirectView):
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        response['Service-Worker-Allowed'] = '/'
+        return response
+
 
 urlpatterns = [
     path('_manifest.json', RedirectView.as_view(url=static('stickymobile/_manifest.json'), permanent=True)),
-    path('_service-worker.js', RedirectView.as_view(url=static('stickymobile/_service-worker.js'), permanent=True)),
+    path('_service-worker.js', ServiceWorkerView.as_view(
+        url=static('stickymobile/_service-worker.js'), permanent=True
+    )),
 
     # Admin
     path("admin/", admin.site.urls),
