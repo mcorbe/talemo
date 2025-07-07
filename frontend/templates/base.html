@@ -20,12 +20,6 @@
     </div>
 
 </div>
-
-<script>
-  if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register("{% static 'stickymobile/_service-worker.js' %}", {scope: '/'});
-  }
-</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
