@@ -37,6 +37,17 @@ Zero P0 accessibility bugs (all a11y checklist items ticked).
 
 SyncManager exactly-once guarantee verified in offline smoke test #2.
 
+### Performance Budget
+
+| Metric | Target | Measurement Method |
+|--------|--------|-------------------|
+| Initial Load Time | < 2.5s | Lighthouse (3G, mid-tier device) |
+| Time to Interactive | < 3.5s | Lighthouse TTI metric |
+| Total Bundle Size | < 250KB (gzipped) | Webpack Bundle Analyzer |
+| Memory Usage | < 100MB | Chrome DevTools Memory Profile |
+| CPU Usage | < 15% sustained | Chrome DevTools Performance tab |
+| Battery Impact | < 2% per 10min active use | iOS/Android Battery API |
+
 ### Guiding principles
 Kids first – copy, visuals and flows assume an under-10 primary user.
 
@@ -68,6 +79,8 @@ Instrumentation from day one – every key action emits a deterministic, duplica
 | story_completed | duration_sec, rating, quota_remaining |
 | quota_exhausted | mode, quota_limit |
 | moderation_blocked | stage, reason_code |
+| operational_error | component, error_code, context |
+| lifecycle_transition | from_state, to_state, trigger_event |
 
 *Writing this now saves weeks of "hmm, which team logs what?" later.*
 
@@ -79,7 +92,7 @@ Instrumentation from day one – every key action emits a deterministic, duplica
 │   ├─ ErrorBoundary     (component bugs → mascot fallback)
 │   ├─ OperationalErrors (TTS fails, moderation blocked, network down → contextual toast/voice prompt)
 │   ├─ OfflineQueueMgr   (persist jobs, retry on reconnection)
-│   ├─ SyncManager       (orchestrates: batch outbound calls, exponential back-off, sync-in-progress flag)
+│   ├─ SyncManager       (orchestrates: batch outbound calls, exponential back-off, sync-in-progress flag) – details → [Appendix A](#appendix-a--syncmanager)
 │   ├─ ModeBanner        (mode status + switch CTA)
 │   ├─ HelpDrawer        (tour • FAQ • contact)
 │   ├─ AuthRouter        (guarded routes + RoleContext)
@@ -89,7 +102,10 @@ Instrumentation from day one – every key action emits a deterministic, duplica
 │   └─ Telemetry         (events • perf traces)
 │
 ├─ Resources
-│   └─ i18nPrompts.json  (wizard voice strings, easy locale add‑ons)
+│   ├─ i18nPrompts.json  (wizard voice strings, easy locale add‑ons)
+│   └─ ModerationRefusalCopy
+│       ├─ English: "I'm sorry, I can't tell that story. Let's try a different idea that's more appropriate for children."
+│       └─ French: "Désolé, je ne peux pas raconter cette histoire. Essayons une idée différente qui convient mieux aux enfants."
 │
 ├─ StoryLifecycle        (Idle → CollectingPrompts → Generating → Playing → Feedback → Done)
 │
@@ -158,35 +174,35 @@ Instrumentation from day one – every key action emits a deterministic, duplica
 ## User Journey Smoke Tests
 
 1. **Guest story → account-upgraded parent**
-   - Start in Copilot Mode
-   - Complete story creation and playback
-   - Respond to account creation banner
-   - Verify access to Parent Dashboard features
+   - Start in Copilot Mode [telemetry: app_mode_selected:copilot]
+   - Complete story creation and playback [telemetry: story_started, story_completed]
+   - Respond to account creation banner [telemetry: account_creation_initiated]
+   - Verify access to Parent Dashboard features [telemetry: parent_dashboard_accessed]
 
 2. **Child solo offline**
-   - Enter Child-Solo Mode
-   - Disconnect network
-   - Create and play story
-   - Verify OfflineQueueMgr captures events
-   - Reconnect and confirm sync via SyncManager
+   - Enter Child-Solo Mode [telemetry: app_mode_selected:child_solo]
+   - Disconnect network [telemetry: network_status_change:offline]
+   - Create and play story [telemetry: story_started, lifecycle_transition:Generating→Playing]
+   - Verify OfflineQueueMgr captures events [telemetry: sync_queue_updated]
+   - Reconnect and confirm sync via SyncManager [telemetry: network_status_change:online, sync_batch_sent, sync_batch_result]
 
 3. **Quota hit at bedtime**
-   - Use Child-Solo Mode until quota limit reached
-   - Verify LimitReachedOverlay appears
-   - Attempt ParentalGate access
-   - Confirm quota settings in Parent Dashboard
+   - Use Child-Solo Mode until quota limit reached [telemetry: story_completed, quota_updated]
+   - Verify LimitReachedOverlay appears [telemetry: quota_exhausted]
+   - Attempt ParentalGate access [telemetry: parental_gate_attempt]
+   - Confirm quota settings in Parent Dashboard [telemetry: quota_settings_viewed]
 
 4. **Parent bulk-deletes flagged story**
-   - Access Parent Dashboard
-   - Navigate to HistoryList
-   - Identify and select flagged stories
-   - Confirm deletion and verify telemetry events
+   - Access Parent Dashboard [telemetry: parent_dashboard_accessed]
+   - Navigate to HistoryList [telemetry: history_list_viewed]
+   - Identify and select flagged stories [telemetry: flagged_content_selected]
+   - Confirm deletion and verify telemetry events [telemetry: story_deleted, moderation_action:delete]
 
 5. **Network drop during playback**
-   - Begin story playback
-   - Disconnect network mid-playback
-   - Verify NetworkAlert appears
-   - Test resume functionality when reconnected
+   - Begin story playback [telemetry: story_playback_started]
+   - Disconnect network mid-playback [telemetry: network_status_change:offline]
+   - Verify NetworkAlert appears [telemetry: operational_error:network_unavailable]
+   - Test resume functionality when reconnected [telemetry: network_status_change:online, story_playback_resumed]
 
 *This exercise often surfaces hidden states and missing components.*
 
