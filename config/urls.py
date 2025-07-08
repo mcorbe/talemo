@@ -30,8 +30,8 @@ urlpatterns = [
     # App URLs
     path('stories/', include('talemo.stories.urls')),
 
-    # Redirect root to stories
-    path('', RedirectView.as_view(url='/stories/list/', permanent=False)),
+    # Redirect root to home_copilot
+    path('', RedirectView.as_view(url='/stories/home/', permanent=False)),
 ]
 
 # Debug toolbar - only for web containers

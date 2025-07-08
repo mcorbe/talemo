@@ -10,6 +10,13 @@ from . import views
 app_name = 'stories'
 
 urlpatterns = [
-    path('create/', views.create_story, name='create'),
-    path('list/', views.story_list, name='list'),
+    # User flow URLs
+    path('home/', views.home_copilot, name='home_copilot'),
+    path('wizard/step1/', views.wizard_step1, name='wizard_step1'),
+    path('wizard/step2/', views.wizard_step2, name='wizard_step2'),
+    path('wizard/step3/', views.wizard_step3, name='wizard_step3'),
+    path('wizard/step4/', views.wizard_step4, name='wizard_step4'),
+    path('generating/', views.generating, name='generating'),
+    path('playback/', views.playback, name='playback'),
+    path('end-of-story/', views.end_of_story, name='end_of_story'),
 ]

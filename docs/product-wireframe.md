@@ -83,7 +83,7 @@ Instrumentation from day one – every key action emits a deterministic, duplica
 | lifecycle_transition | from_state, to_state, trigger_event |
 
 *Writing this now saves weeks of "hmm, which team logs what?" later.*
-
+                                                                                                                                                
 ## Information Architecture 
 
 ```txt

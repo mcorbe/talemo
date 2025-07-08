@@ -1,0 +1,52 @@
+    {% extends 'base.html' %}
+{% block title %}Story Completed{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h2 class="mb-4">How did you like the story?</h2>
+
+    <!-- Feedback buttons -->
+    <div class="d-flex justify-content-center gap-5 mb-5">
+        <button id="thumbsUp" class="btn btn-outline-success btn-lg" style="font-size: 2rem;">
+            👍
+        </button>
+        <button id="thumbsDown" class="btn btn-outline-danger btn-lg" style="font-size: 2rem;">
+            👎
+        </button>
+    </div>
+
+    <!-- Start new story button -->
+    <a href="{% url 'stories:home_copilot' %}" class="btn btn-primary btn-lg">
+        Start New Story
+    </a>
+</div>
+
+{% block extra_js %}
+<script>
+    // Minimal JavaScript for demonstration
+    document.getElementById('thumbsUp').addEventListener('click', function() {
+        this.classList.remove('btn-outline-success');
+        this.classList.add('btn-success');
+        document.getElementById('thumbsDown').disabled = true;
+        // In a real implementation, this would send feedback to the server
+
+        // Add a small delay before redirecting to home_copilot
+        setTimeout(function() {
+            window.location.href = "{% url 'stories:home_copilot' %}";
+        }, 500); // 500ms delay
+    });
+
+    document.getElementById('thumbsDown').addEventListener('click', function() {
+        this.classList.remove('btn-outline-danger');
+        this.classList.add('btn-danger');
+        document.getElementById('thumbsUp').disabled = true;
+        // In a real implementation, this would send feedback to the server
+
+        // Add a small delay before redirecting to home_copilot
+        setTimeout(function() {
+            window.location.href = "{% url 'stories:home_copilot' %}";
+        }, 500); // 500ms delay
+    });
+</script>
+{% endblock %}
+{% endblock %}
