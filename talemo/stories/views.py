@@ -11,38 +11,77 @@ def home_copilot(request):
     return render(request, 'stories/home_copilot.html')
 
 def wizard_step1(request):
+    # Clear previous wizard session data when starting a new wizard
+    keys_to_clear = ['topic', 'hero', 'place', 'tool', 'story_id', 'chapter_number']
+    for key in keys_to_clear:
+        if key in request.session:
+            del request.session[key]
+
     return render(request, 'stories/wizard_step1_select_topic.html')
 
 def wizard_step2(request):
     if request.method == 'POST':
-        context = {
-            'topic': request.POST.get('topic', '')
-        }
-        return render(request, 'stories/wizard_step2_select_hero.html', context)
-    return redirect('stories:wizard_step1')
+        # Store data in session
+        request.session['topic'] = request.POST.get('topic', '')
+
+    # For both GET and POST, render the form with data from session
+    context = {
+        'topic': request.session.get('topic', '')
+    }
+
+    # If we don't have a topic yet, redirect to step 1
+    if not context['topic']:
+        return redirect('stories:wizard_step1')
+
+    return render(request, 'stories/wizard_step2_select_hero.html', context)
 
 def wizard_step3(request):
     if request.method == 'POST':
-        context = {
-            'topic': request.POST.get('topic', ''),
-            'hero': request.POST.get('hero', ''),
-            'story_id': request.POST.get('story_id', ''),
-            'chapter_number': request.POST.get('chapter_number', '1')
-        }
-        return render(request, 'stories/wizard_step3_select_place.html', context)
-    return redirect('stories:wizard_step2')
+        # Store data in session
+        request.session['topic'] = request.POST.get('topic', '')
+        request.session['hero'] = request.POST.get('hero', '')
+        if request.POST.get('story_id'):
+            request.session['story_id'] = request.POST.get('story_id')
+            request.session['chapter_number'] = request.POST.get('chapter_number', '1')
+
+    # For both GET and POST, render the form with data from session
+    context = {
+        'topic': request.session.get('topic', ''),
+        'hero': request.session.get('hero', ''),
+        'story_id': request.session.get('story_id', ''),
+        'chapter_number': request.session.get('chapter_number', '1')
+    }
+
+    # If we don't have required data yet, redirect to step 2
+    if not context['topic'] or not context['hero']:
+        return redirect('stories:wizard_step2')
+
+    return render(request, 'stories/wizard_step3_select_place.html', context)
 
 def wizard_step4(request):
     if request.method == 'POST':
-        context = {
-            'topic': request.POST.get('topic', ''),
-            'hero': request.POST.get('hero', ''),
-            'place': request.POST.get('place', ''),
-            'story_id': request.POST.get('story_id', ''),
-            'chapter_number': request.POST.get('chapter_number', '1')
-        }
-        return render(request, 'stories/wizard_step4_select_tool.html', context)
-    return redirect('stories:wizard_step3')
+        # Store data in session
+        request.session['topic'] = request.POST.get('topic', '')
+        request.session['hero'] = request.POST.get('hero', '')
+        request.session['place'] = request.POST.get('place', '')
+        if request.POST.get('story_id'):
+            request.session['story_id'] = request.POST.get('story_id')
+            request.session['chapter_number'] = request.POST.get('chapter_number', '1')
+
+    # For both GET and POST, render the form with data from session
+    context = {
+        'topic': request.session.get('topic', ''),
+        'hero': request.session.get('hero', ''),
+        'place': request.session.get('place', ''),
+        'story_id': request.session.get('story_id', ''),
+        'chapter_number': request.session.get('chapter_number', '1')
+    }
+
+    # If we don't have required data yet, redirect to step 3
+    if not context['topic'] or not context['hero'] or not context['place']:
+        return redirect('stories:wizard_step3')
+
+    return render(request, 'stories/wizard_step4_select_tool.html', context)
 
 def generating(request):
     if request.method == 'POST':
@@ -62,16 +101,21 @@ def generating(request):
             request.session['story_id'] = None
             request.session['chapter_number'] = 1
 
-        context = {
-            'topic': request.session['topic'],
-            'hero': request.session['hero'],
-            'place': request.session['place'],
-            'tool': request.session['tool'],
-            'story_id': request.session.get('story_id'),
-            'chapter_number': request.session.get('chapter_number')
-        }
-        return render(request, 'stories/generating.html', context)
-    return redirect('stories:wizard_step4')
+    # For both GET and POST, prepare context from session
+    context = {
+        'topic': request.session.get('topic', ''),
+        'hero': request.session.get('hero', ''),
+        'place': request.session.get('place', ''),
+        'tool': request.session.get('tool', ''),
+        'story_id': request.session.get('story_id'),
+        'chapter_number': request.session.get('chapter_number')
+    }
+
+    # If we don't have required data yet, redirect to step 4
+    if not context['topic'] or not context['hero'] or not context['place'] or not context['tool']:
+        return redirect('stories:wizard_step4')
+
+    return render(request, 'stories/generating.html', context)
 
 def playback(request):
     # In a real implementation, this would retrieve the generated story
@@ -154,13 +198,13 @@ def end_of_chapter(request):
         if 'next_action' in request.POST:
             next_action = request.POST.get('next_action')
             if next_action == 'new_chapter':
-                # Pass the necessary data to wizard_step3
-                return render(request, 'stories/wizard_step3_select_place.html', {
-                    'topic': request.POST.get('topic', ''),
-                    'hero': request.POST.get('hero', ''),
-                    'story_id': request.POST.get('story_id', ''),
-                    'chapter_number': request.POST.get('chapter_number', '1')
-                })
+                # Store data in session for wizard_step3
+                request.session['topic'] = request.POST.get('topic', '')
+                request.session['hero'] = request.POST.get('hero', '')
+                request.session['story_id'] = request.POST.get('story_id', '')
+                request.session['chapter_number'] = request.POST.get('chapter_number', '1')
+                # Redirect to wizard_step3
+                return redirect('stories:wizard_step3')
             elif next_action == 'new_story':
                 return redirect('stories:wizard_step1')
             elif next_action == 'end_story':
