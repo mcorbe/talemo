@@ -7,9 +7,9 @@
         <span class="visually-hidden">Loading...</span>
     </div>
     <h2 class="mb-3">Imagining...</h2>
-    <p class="lead">Creating your story about {{ topic }} with {{ hero }} in {{ place }} using {{ tool }}.</p>
+    <p class="lead">Creating your story about {{ topic }} with {{ hero }} in {{ place }} using {{ tool }} ({{ age_group }} years old).</p>
     
-    <!-- This would normally be handled by JavaScript, but for the minimal version we'll use a meta refresh -->
+    <!-- This would normally be handled by JavaScript, but for the minimal version we'll use a meta-refresh -->
     <meta http-equiv="refresh" content="3;url={% url 'stories:playback' %}">
 </div>
 {% endblock %}

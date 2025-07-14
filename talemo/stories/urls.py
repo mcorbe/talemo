@@ -16,11 +16,8 @@ urlpatterns = [
     path('wizard/step2/', views.wizard_step2, name='wizard_step2'),
     path('wizard/step3/', views.wizard_step3, name='wizard_step3'),
     path('wizard/step4/', views.wizard_step4, name='wizard_step4'),
+    path('wizard/step5/', views.wizard_step5, name='wizard_step5'),
     path('generating/', views.generating, name='generating'),
     path('playback/', views.playback, name='playback'),
-    path('end-of-chapter/', views.end_of_chapter, name='end_of_chapter'),
     path('end-of-story/', views.end_of_story, name='end_of_story'),
-
-    # Age groups
-    path('age-groups/', views.age_groups, name='age_groups'),
 ]

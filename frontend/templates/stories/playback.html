@@ -35,7 +35,7 @@
         <a href="{% url 'stories:end_of_story' %}" class="btn btn-outline-secondary">
             Create a new Story
         </a>
-        <a href="{% url 'stories:end_of_chapter' %}" class="btn btn-outline-primary">
+        <a href="{% url 'stories:wizard_step4' %}" class="btn btn-outline-primary">
             Add a new Chapter
         </a>
     </div>
@@ -76,7 +76,7 @@
 
                 if (progress >= 100) {
                     clearInterval(interval);
-                    window.location.href = "{% url 'stories:end_of_chapter' %}";
+                    window.location.href = "{% url 'stories:wizard_step4' %}";
                 }
             }, 200); // Speed up for demo
         } else {
