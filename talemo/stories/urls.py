@@ -20,4 +20,7 @@ urlpatterns = [
     path('generating/', views.generating, name='generating'),
     path('playback/', views.playback, name='playback'),
     path('end-of-story/', views.end_of_story, name='end_of_story'),
+
+    # API endpoints
+    path('api/check-task-status/', views.check_task_status, name='check_task_status'),
 ]

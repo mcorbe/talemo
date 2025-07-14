@@ -1,7 +1,10 @@
 """
 Views for the stories app.
 """
+import json
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from celery.result import AsyncResult
 from .models.story import Story
 from .models.chapter import Chapter
 
@@ -150,11 +153,43 @@ def generating(request):
     if not context['tool']:
         return redirect('stories:wizard_step5')
 
+    # Check if we already have a task_id in the session
+    task_id = request.session.get('story_task_id')
+
+    # If this is a new request or we don't have a task_id, start a new task
+    if request.method == 'POST' or not task_id:
+        from .services import generate_story_chapter
+
+        # Prepare the JSON input for the story generation task
+        json_input = {
+            "story": {
+                "title": f"{context['hero']} in {context['place']}",
+                "description": f"A story about {context['hero']} using {context['tool']} in {context['place']}",
+                "age_group": context['age_group'],
+                "topic": context['topic'],
+                "hero": context['hero'],
+                "chapters": [
+                    {
+                        "title": "Chapter 1",
+                        "place": context['place'],
+                        "tool": context['tool'],
+                        "order": 1
+                    }
+                ]
+            }
+        }
+
+        # Start the Celery task
+        task_result = generate_story_chapter(json_input)
+
+        # Store the task ID in the session
+        request.session['story_task_id'] = task_result.id
+        context['task_id'] = task_result.id
+
     return render(request, 'stories/generating.html', context)
 
 def playback(request):
-    # In a real implementation, this would retrieve the generated story
-    # For now, we'll just pass along the context from the session or a dummy story
+    # Retrieve the generated story using the story_id and chapter_number from the session
 
     # For both GET and POST, prepare context from session
     context = {
@@ -179,19 +214,31 @@ def playback(request):
     if not context['tool']:
         return redirect('stories:wizard_step5')
 
+    # Check if we have a task_id in the session
+    task_id = request.session.get('story_task_id')
+
+    # If we have a task_id, check if the task is complete
+    if task_id:
+        from celery.result import AsyncResult
+        task_result = AsyncResult(task_id)
+
+        # If the task is still running, redirect back to the generating page
+        if not task_result.ready():
+            return redirect('stories:generating')
 
     story = None
 
-
+    # Try to retrieve the existing story
     if context['story_id']:
         try:
-            # Retrieve the existing story
             story = Story.objects.get(id=context['story_id'])
         except Story.DoesNotExist:
-            # If the story doesn't exist, create a new one
+            # If the story doesn't exist, clear the story_id
             context['story_id'] = None
+            request.session['story_id'] = None
 
-    if not context['story_id']:
+    # If we don't have a story yet, create one
+    if not story:
         # Create a new story
         story = Story(
             title=f"{context['hero']} in {context['place']}",
@@ -205,19 +252,31 @@ def playback(request):
         request.session['story_id'] = str(story.id)
         context['story_id'] = request.session['story_id']
 
-    # Create a new chapter
-    if not context['chapter_number']:
+    # Get the chapter
+    chapter = None
+    chapter_number = context.get('chapter_number', 1)
+
+    try:
+        # Try to retrieve the existing chapter
+        chapter = Chapter.objects.get(story=story, order=chapter_number)
+    except Chapter.DoesNotExist:
+        # If the chapter doesn't exist, create a new one
         chapter = Chapter(
             story=story,
+            title=f"Chapter {chapter_number}",
             content=f"A chapter about {context['hero']} using {context['tool']} in {context['place']}",
             place=context['place'],
             tool=context['tool'],
-            order=context['chapter_number'] if context['chapter_number'] else 1,
+            order=int(chapter_number) if chapter_number else 1,
         )
         chapter.save()
 
-        request.session['chapter_number'] = str(chapter.order)
-        context['chapter_number'] = request.session['chapter_number']
+    # Add the chapter to the context
+    context['chapter'] = chapter
+
+    # Clear the task_id from the session
+    if 'story_task_id' in request.session:
+        del request.session['story_task_id']
 
     return render(request, 'stories/playback.html', context)
 
@@ -236,3 +295,53 @@ def end_of_story(request):
         'age_group': request.session.get('age_group', '')
     }
     return render(request, 'stories/end_of_story.html', context)
+
+def check_task_status(request):
+    """
+    Check the status of a Celery task and return it as JSON.
+    """
+    task_id = request.GET.get('task_id')
+    if not task_id:
+        return JsonResponse({'status': 'error', 'message': 'No task ID provided'})
+
+    # Get the task result
+    task_result = AsyncResult(task_id)
+
+    # Check the task status
+    if task_result.ready():
+        # Task is complete
+        if task_result.successful():
+            # Task completed successfully
+            result = task_result.get()
+
+            # Store the story and chapter IDs in the session
+            if result and isinstance(result, dict):
+                # The task result contains the chapter data and story ID
+                # We'll store them in the session so the playback view can use them
+
+                # Store the story ID in the session
+                if 'story_id' in result:
+                    request.session['story_id'] = result['story_id']
+
+                # Store the chapter number in the session
+                if 'order' in result:
+                    request.session['chapter_number'] = result['order']
+
+            return JsonResponse({
+                'status': 'complete',
+                'result': 'success',
+                'redirect': '/stories/playback/'
+            })
+        else:
+            # Task failed
+            return JsonResponse({
+                'status': 'complete',
+                'result': 'error',
+                'error': str(task_result.result)
+            })
+    else:
+        # Task is still running
+        return JsonResponse({
+            'status': 'pending',
+            'progress': 'Story generation in progress...'
+        })

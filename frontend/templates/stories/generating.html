@@ -8,8 +8,51 @@
     </div>
     <h2 class="mb-3">Imagining...</h2>
     <p class="lead">Creating your story about {{ topic }} with {{ hero }} in {{ place }} using {{ tool }} ({{ age_group }} years old).</p>
-    
-    <!-- This would normally be handled by JavaScript, but for the minimal version we'll use a meta-refresh -->
-    <meta http-equiv="refresh" content="3;url={% url 'stories:playback' %}">
+    <p id="progress-message">Story generation in progress...</p>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the task ID from the context
+        const taskId = "{{ task_id }}";
+
+        if (!taskId) {
+            console.error("No task ID provided");
+            return;
+        }
+
+        // Function to check the task status
+        function checkTaskStatus() {
+            fetch(`/stories/api/check-task-status/?task_id=${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update the progress message
+                    if (data.progress) {
+                        document.getElementById('progress-message').textContent = data.progress;
+                    }
+
+                    // Check if the task is complete
+                    if (data.status === 'complete') {
+                        if (data.result === 'success') {
+                            // Redirect to the playback page
+                            window.location.href = data.redirect;
+                        } else {
+                            // Show error message
+                            document.getElementById('progress-message').textContent = 'Error: ' + data.error;
+                        }
+                    } else {
+                        // If the task is still running, check again in 1 second
+                        setTimeout(checkTaskStatus, 1000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking task status:', error);
+                    document.getElementById('progress-message').textContent = 'Error checking task status. Please try again.';
+                });
+        }
+
+        // Start checking the task status
+        checkTaskStatus();
+    });
+</script>
 {% endblock %}
