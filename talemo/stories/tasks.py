@@ -149,7 +149,7 @@ def generate_story_chapter(json_input):
         )
         # If it exists and has content, return it
         if existing_chapter.content:
-            time.sleep(10)
+            print(f"Chapter {existing_chapter.title} already exists and has content, returning it...")
             return {
                 'title': existing_chapter.title,
                 'place': existing_chapter.place,
@@ -171,12 +171,29 @@ def generate_story_chapter(json_input):
         'hero': story.hero
     }
 
+    # Check if this is the first chapter and if we need to generate a story title
+    generate_story_title = False
+    if chapter_to_generate['order'] == 1:
+        # If the story title is empty or a placeholder, generate a new one
+        if not story.title or story.title == "Untitled Story":
+            generate_story_title = True
+
     # Generate the chapter content and title using CrewAI
-    generated_chapter = create_story_generation_crew(story_data, chapter_to_generate)
+    print(json.dumps({
+        'story_data': story_data,
+        'chapter_to_generate': chapter_to_generate,
+        'generate_story_title': generate_story_title
+    }))
+    generated_chapter = create_story_generation_crew(story_data, chapter_to_generate, generate_story_title)
 
     # Extract the title and content
     generated_title = generated_chapter['title']
     generated_content = generated_chapter['content']
+
+    # Update the story title if a new one was generated
+    if generate_story_title and 'story_title' in generated_chapter:
+        story.title = generated_chapter['story_title']
+        story.save()
 
     print(f"Generated title: {generated_title}")
     print(f"Generated content: {generated_content}")

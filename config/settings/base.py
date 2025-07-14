@@ -182,7 +182,11 @@ EMAIL_USE_TLS = False
 DEFAULT_FROM_EMAIL = "noreply@talemo.local"
 
 # AI Services
+OPENAI_API_BASE = os.environ.get("OPENAI_API_BASE", "")
+OPENAI_MODEL_NAME = os.environ.get("OPENAI_MODEL_NAME",  "")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+
+
 STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY", "")
 
 # Observability

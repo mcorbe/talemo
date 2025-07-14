@@ -133,3 +133,45 @@ class StoryChapterGenerationTest(TestCase):
         # Call the function in synchronous mode and expect a ValueError
         with self.assertRaises(ValueError):
             generate_story_chapter(test_data, async_mode=False)
+
+    @patch('talemo.stories.ai_crew.create_story_generation_crew')
+    def test_generate_story_title_for_first_chapter(self, mock_create_crew):
+        # Mock the create_story_generation_crew function to return a story title
+        mock_create_crew.return_value = {
+            "title": "The First Adventure",
+            "content": "Once upon a time, in a small village, there lived a brave child named Max...",
+            "story_title": "The Magical Journey of Max"
+        }
+
+        # Test data with a placeholder story title and first chapter
+        test_data = {
+            "story": {
+                "title": "Untitled Story",
+                "description": "A tale of adventure and discovery",
+                "age_group": "8-10 years",
+                "topic": "Adventure",
+                "hero": "Max",
+                "chapters": [
+                    {
+                        "place": "Small Village",
+                        "tool": "Magic Map",
+                        "order": 1
+                    }
+                ]
+            }
+        }
+
+        # Call the function in synchronous mode
+        result = generate_story_chapter(test_data, async_mode=False)
+
+        # Verify that the story title was updated
+        story = Story.objects.get(hero="Max")
+        self.assertEqual(story.title, "The Magical Journey of Max")
+
+        # Verify that the chapter was created correctly
+        chapter = Chapter.objects.get(story=story)
+        self.assertEqual(chapter.title, "The First Adventure")
+        self.assertEqual(chapter.place, "Small Village")
+        self.assertEqual(chapter.tool, "Magic Map")
+        self.assertEqual(chapter.order, 1)
+        self.assertTrue(chapter.content)  # Content should not be empty
