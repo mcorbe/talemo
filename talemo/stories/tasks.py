@@ -6,6 +6,7 @@ import time
 from celery import shared_task
 from .models.story import Story
 from .models.chapter import Chapter
+from .ai_crew import create_story_generation_crew
 
 @shared_task
 def test_task(x, y):
@@ -160,22 +161,25 @@ def generate_story_chapter(json_input):
     except Chapter.DoesNotExist:
         existing_chapter = None
 
-    # Generate content for the chapter
-    # In a real implementation, this would call an LLM API
-    # For now, we'll create a placeholder content
-    generated_content = (
-        f"In this chapter, {story.hero} finds themselves in {chapter_to_generate['place']}. "
-        f"Using {chapter_to_generate['tool']}, they embark on an adventure related to {story.topic}. "
-        f"This story is suitable for children in the {story.age_group} age group."
-    )
+    # Generate content for the chapter using CrewAI
+    # Prepare story data for the crew
+    story_data = {
+        'title': story.title,
+        'description': story.description,
+        'age_group': story.age_group,
+        'topic': story.topic,
+        'hero': story.hero
+    }
 
-    generated_title = (
-        f"This is the chapter title."
-    )
+    # Generate the chapter content and title using CrewAI
+    generated_chapter = create_story_generation_crew(story_data, chapter_to_generate)
 
-    time.sleep(10)
+    # Extract the title and content
+    generated_title = generated_chapter['title']
+    generated_content = generated_chapter['content']
 
-    print({generated_title, generated_content})
+    print(f"Generated title: {generated_title}")
+    print(f"Generated content: {generated_content}")
 
     # Create or update the chapter
     if existing_chapter:

@@ -2,13 +2,21 @@
 Tests for the stories app.
 """
 import json
+from unittest.mock import patch
 from django.test import TestCase
 from .models.story import Story
 from .models.chapter import Chapter
 from .services import generate_story_chapter
 
 class StoryChapterGenerationTest(TestCase):
-    def test_generate_story_chapter(self):
+    @patch('talemo.stories.ai_crew.create_story_generation_crew')
+    def test_generate_story_chapter(self, mock_create_crew):
+        # Mock the create_story_generation_crew function
+        mock_create_crew.return_value = {
+            "title": "The First Painting",
+            "content": "Lucy took the paintbrush to her room and started to paint..."
+        }
+
         # Test data
         test_data = {
             "story": {
