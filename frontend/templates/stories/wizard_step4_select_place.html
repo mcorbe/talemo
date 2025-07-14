@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Story Wizard - Place{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <h2 class="mb-4 text-center">Choose a place</h2>
+  
+    <form action="{% url 'stories:wizard_step5' %}" method="post">
+        {% csrf_token %}
+
+        <div class="mb-4">
+            <!-- Suggestions -->
+            <div class="d-flex gap-2 mb-3">
+                <button type="button" class="btn btn-outline-primary flex-grow-1" 
+                        onclick="document.getElementById('id_place').value='A mysterious castle'">
+                    A mysterious castle
+                </button>
+                <button type="button" class="btn btn-outline-primary flex-grow-1"
+                        onclick="document.getElementById('id_place').value='An enchanted forest'">
+                    An enchanted forest
+                </button>
+            </div>
+
+            <!-- Free input -->
+            <input type="text" class="form-control form-control-lg" name="place" id="id_place" 
+                   required placeholder="Where does your story take place?">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Next Step
+        </button>
+    </form>
+</div>
+{% endblock %}

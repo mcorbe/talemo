@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Story Wizard - Hero{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <h2 class="mb-4 text-center">Choose a hero</h2>
+
+    <form action="{% url 'stories:wizard_step4' %}" method="post">
+        {% csrf_token %}
+        
+        <div class="mb-4">
+            <!-- Suggestions -->
+            <div class="d-flex gap-2 mb-3">
+                <button type="button" class="btn btn-outline-primary flex-grow-1" 
+                        onclick="document.getElementById('id_hero').value='A brave knight'">
+                    A brave knight
+                </button>
+                <button type="button" class="btn btn-outline-primary flex-grow-1"
+                        onclick="document.getElementById('id_hero').value='A curious fox'">
+                    A curious fox
+                </button>
+            </div>
+            
+            <!-- Free input -->
+            <input type="text" class="form-control form-control-lg" name="hero" id="id_hero" 
+                   required placeholder="Who is your story about?">
+        </div>
+        
+        <button type="submit" class="btn btn-primary w-100">
+            Next Step
+        </button>
+    </form>
+</div>
+{% endblock %}

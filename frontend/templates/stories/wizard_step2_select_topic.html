@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Story Wizard - Topic{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <h2 class="mb-4 text-center">Choose a topic</h2>
+
+    <form action="{% url 'stories:wizard_step3' %}" method="post">
+        {% csrf_token %}
+
+        <div class="mb-4">
+            <!-- Suggestions -->
+            <div class="d-flex gap-2 mb-3">
+                <button type="button" class="btn btn-outline-primary flex-grow-1"
+                        onclick="document.getElementById('id_topic').value='A space adventure'">
+                    Space adventure
+                </button>
+                <button type="button" class="btn btn-outline-primary flex-grow-1"
+                        onclick="document.getElementById('id_topic').value='A magical forest'">
+                    A magical forest
+                </button>
+            </div>
+
+            <!-- Free input -->
+            <input type="text" class="form-control form-control-lg" name="topic" id="id_topic"
+                   required placeholder="What's your story about?">
+        </div>
+        
+        <button type="submit" class="btn btn-primary w-100">
+            Next Step
+        </button>
+    </form>
+</div>
+{% endblock %}

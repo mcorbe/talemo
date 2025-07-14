@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Story Wizard - Age Group{% endblock %}
+
+{% block content %}
+<div class="container-lg py-4 text-light">
+    <h2 class="mb-4 text-center">Select an Age Group for Your Story</h2>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div class="col">
+            <div class="card bg-dark bg-opacity-25 text-light border-light">
+                <form action="{% url 'stories:wizard_step2' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="age_group" value="3 - 5">
+                    <div class="card-header">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Age Range: 3 - 5
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Very good storie for 3 - 5 years old.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
