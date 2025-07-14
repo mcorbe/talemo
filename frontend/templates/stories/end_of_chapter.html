@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Chapter Completed{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h2 class="mb-4">Chapter {{ chapter_number }} Completed!</h2>
+
+    <!-- Story details -->
+    <div class="mb-4">
+        <p>Story: {{ story.title }}</p>
+        <p>Hero: {{ story.hero }}</p>
+    </div>
+
+    <!-- Feedback section -->
+    <h3 class="mb-4">How did you like this chapter?</h3>
+
+    <div class="d-flex justify-content-center gap-5 mb-5">
+        <button id="thumbsUp" class="btn btn-outline-success btn-lg" style="font-size: 2rem;">
+            👍
+        </button>
+        <button id="thumbsDown" class="btn btn-outline-danger btn-lg" style="font-size: 2rem;">
+            👎
+        </button>
+    </div>
+
+    <h3 class="mb-4">What would you like to do next?</h3>
+
+    <!-- Options -->
+    <div class="d-flex flex-column align-items-center gap-3 mb-5">
+        <form id="feedbackForm" action="{% url 'stories:end_of_chapter' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="feedback" id="feedbackValue" value="">
+            <input type="hidden" name="next_action" id="nextAction" value="">
+
+            <!-- These hidden inputs will be used if the user chooses to create a new chapter -->
+            <input type="hidden" name="topic" value="{{ story.topic }}">
+            <input type="hidden" name="hero" value="{{ story.hero }}">
+            <input type="hidden" name="story_id" value="{{ story.id }}">
+            <input type="hidden" name="chapter_number" value="{{ chapter_number|add:1 }}">
+        </form>
+
+        <button id="newChapterBtn" class="btn btn-primary btn-lg w-100">
+            Create New Chapter (keep hero, change place and tool)
+        </button>
+
+        <button id="newStoryBtn" class="btn btn-outline-primary btn-lg w-100">
+            Create New Story
+        </button>
+
+        <button id="endStoryBtn" class="btn btn-outline-secondary btn-lg w-100">
+            End Story & Rate
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Variables to track user selections
+    let feedbackGiven = false;
+    let feedbackValue = '';
+
+    // Feedback buttons
+    document.getElementById('thumbsUp').addEventListener('click', function() {
+        this.classList.remove('btn-outline-success');
+        this.classList.add('btn-success');
+        document.getElementById('thumbsDown').disabled = true;
+        feedbackGiven = true;
+        feedbackValue = 'positive';
+        document.getElementById('feedbackValue').value = 'positive';
+    });
+
+    document.getElementById('thumbsDown').addEventListener('click', function() {
+        this.classList.remove('btn-outline-danger');
+        this.classList.add('btn-danger');
+        document.getElementById('thumbsUp').disabled = true;
+        feedbackGiven = true;
+        feedbackValue = 'negative';
+        document.getElementById('feedbackValue').value = 'negative';
+    });
+
+    // Action buttons
+    document.getElementById('newChapterBtn').addEventListener('click', function() {
+        if (!feedbackGiven) {
+            alert('Please provide feedback on the chapter first!');
+            return;
+        }
+        document.getElementById('nextAction').value = 'new_chapter';
+        document.getElementById('feedbackForm').submit();
+    });
+
+    document.getElementById('newStoryBtn').addEventListener('click', function() {
+        if (!feedbackGiven) {
+            alert('Please provide feedback on the chapter first!');
+            return;
+        }
+        document.getElementById('nextAction').value = 'new_story';
+        document.getElementById('feedbackForm').submit();
+    });
+
+    document.getElementById('endStoryBtn').addEventListener('click', function() {
+        if (!feedbackGiven) {
+            alert('Please provide feedback on the chapter first!');
+            return;
+        }
+        document.getElementById('nextAction').value = 'end_story';
+        document.getElementById('feedbackForm').submit();
+    });
+</script>
+{% endblock %}

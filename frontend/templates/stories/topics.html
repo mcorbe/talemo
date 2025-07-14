@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Topics{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5 text-light">
+  <h1 class="mb-4">Story Topics</h1>
+  
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for topic in topics %}
+      <div class="col">
+        <div class="card h-100 bg-dark bg-opacity-25 text-light border-light">
+          <div class="card-header">
+            <h5 class="card-title mb-0">{{ topic.title }}</h5>
+          </div>
+          <div class="card-body">
+            <h6 class="card-subtitle mb-3 text-info">Age Group: {{ topic.age_group }}</h6>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Theme:</h6>
+              <p class="card-text">{{ topic.theme }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Genre:</h6>
+              <p class="card-text">{{ topic.genre }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Learning Goal:</h6>
+              <p class="card-text">{{ topic.learning_goal }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Tone:</h6>
+              <p class="card-text">{{ topic.tone }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Runtime Target:</h6>
+              <p class="card-text">{{ topic.runtime_sec_target }} seconds</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Complexity Score:</h6>
+              <p class="card-text">{{ topic.complexity_score }} / 5</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Keywords:</h6>
+              <p class="card-text">
+                {% for keyword in topic.keywords %}
+                  <span class="badge bg-secondary me-1">{{ keyword }}</span>
+                {% endfor %}
+              </p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Soundscape Tags:</h6>
+              <p class="card-text">
+                {% for tag in topic.soundscape_tags %}
+                  <span class="badge bg-info me-1">{{ tag }}</span>
+                {% endfor %}
+              </p>
+            </div>
+            
+            <div>
+              <h6 class="text-light-emphasis">Moral Summary:</h6>
+              <p class="card-text">{{ topic.moral_summary }}</p>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            <small>Created: {{ topic.created_at|date:"F j, Y" }} | Version: {{ topic.version }}</small>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          No topics have been defined yet.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <div class="text-center mt-5">
+    <a href="{% url 'stories:home_copilot' %}" class="btn btn-primary">Back to Home</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+# Set work directory
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements/requirements-ai.txt requirements/requirements-ai.txt
+COPY requirements/requirements-base.txt  requirements/requirements-base.txt
+COPY requirements/requirements-celery.txt requirements/requirements-celery.txt
+COPY requirements/requirements-dev.txt requirements/requirements-dev.txt
+COPY requirements/requirements-web.txt requirements/requirements-web.txt
+
+RUN pip install --no-cache-dir -r requirements/requirements-ai.txt
+RUN pip install --no-cache-dir -r requirements/requirements-base.txt
+RUN pip install --no-cache-dir -r requirements/requirements-celery.txt
+RUN pip install --no-cache-dir -r requirements/requirements-dev.txt
+RUN pip install --no-cache-dir -r requirements/requirements-web.txt

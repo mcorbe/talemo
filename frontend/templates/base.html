@@ -1,0 +1,54 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover" />
+
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'stickymobile/styles/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'stickymobile/styles/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'stickymobile/fonts/css/fontawesome-all.min.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="theme-dark" data-highlight="highlight-red" data-gradient="body-default">
+
+<!-- Preloader will be added here-->
+<div id="preloader"><div class="spinner-border color-dark" role="status"></div></div>
+
+
+<div id="page">
+
+    <!-- Header Bar will be added here -->
+
+    <!-- Footer Bar will be added here -->
+
+    <div class="page-content">
+
+        <div class="card header-clear-large" style="background-image: url({% static 'images/background/bg_copilot_night_wave_750x1000.png' %});" data-card-height="cover">
+            <div class="card-top m-3">
+                {% block header %}{% endblock %}
+            </div>
+
+            <div class="card-center m-3">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Off Canvas Elements Here -->
+
+</div>
+
+
+<script type="text/javascript" src="{% static 'stickymobile/scripts/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'stickymobile/scripts/custom.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

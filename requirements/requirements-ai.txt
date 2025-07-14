@@ -1,0 +1,5 @@
+# AI and vector search dependencies
+crewai>=0.28,<1.0
+llama-index>=0.8,<1.0
+pgvector>=0.2,<1.0
+langfuse>=2.0,<3.0

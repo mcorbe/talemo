@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Heroes{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5 text-light">
+  <h1 class="mb-4">Story Heroes</h1>
+  
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for hero in heroes %}
+      <div class="col">
+        <div class="card h-100 bg-dark bg-opacity-25 text-light border-light">
+          <div class="card-header">
+            <h5 class="card-title mb-0">{{ hero.display_name }}</h5>
+          </div>
+          <div class="card-body">
+            <h6 class="card-subtitle mb-3 text-info">Age Group: {{ hero.age_group }}</h6>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Name:</h6>
+              <p class="card-text">{{ hero.name }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Species Type:</h6>
+              <p class="card-text">{{ hero.species_type }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Personality Traits:</h6>
+              <p class="card-text">
+                {% for trait in hero.personality_traits %}
+                  <span class="badge bg-secondary me-1">{{ trait }}</span>
+                {% endfor %}
+              </p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Signature Color:</h6>
+              <p class="card-text">{{ hero.signature_color }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Quirk or Ability:</h6>
+              <p class="card-text">{{ hero.quirk_or_ability }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">SEL Strength:</h6>
+              <p class="card-text">{{ hero.sel_strength }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Voice Style:</h6>
+              <p class="card-text">{{ hero.voice_style }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Complexity Score:</h6>
+              <p class="card-text">{{ hero.complexity_score }} / 5</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Keywords:</h6>
+              <p class="card-text">
+                {% for keyword in hero.keywords %}
+                  <span class="badge bg-secondary me-1">{{ keyword }}</span>
+                {% endfor %}
+              </p>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            <small>Created: {{ hero.created_at|date:"F j, Y" }}</small>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          No heroes have been defined yet.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <div class="text-center mt-5">
+    <a href="{% url 'stories:home_copilot' %}" class="btn btn-primary">Back to Home</a>
+  </div>
+</div>
+{% endblock %}

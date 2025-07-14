@@ -1,0 +1,76 @@
+    {% extends 'base.html' %}
+{% block title %}Story Completed{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5 text-light">
+
+  <!-- Story summary -->
+  <div class="card">
+    <div class="card-header">{{ story.title }}</div>
+    <div class="card-center">Story Completed!</div>
+  </div>
+
+  <!-- Chapters -->
+  <div>
+    {{ chapters.count }} chapters
+  </div>
+
+  <div id="chaptersPane" class="collapse mb-4">
+    <ul class="list-group list-group-flush bg-dark bg-opacity-25 rounded-3">
+      {% for chapter in chapters %}
+        <li class="list-group-item bg-transparent text-light border-light">
+          <strong>#{{ chapter.order }}</strong> {{ chapter.title }} <span class="text-muted">with {{ chapter.tool }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div>
+    <button class="btn btn-sm btn-outline-light ms-2" data-bs-toggle="collapse"
+            data-bs-target="#chaptersPane" aria-expanded="false">
+      Show chapters
+    </button>
+  </div>
+
+  <!-- Feedback buttons -->
+  <div class="d-flex justify-content-center gap-4 my-4">
+    <button id="thumbsUp" class="btn btn-outline-success btn-lg rounded-circle p-3"
+            aria-label="I liked it">
+      <i class="fa fa-thumbs-up fs-3"></i>
+    </button>
+    <button id="thumbsDown" class="btn btn-outline-danger btn-lg rounded-circle p-3"
+            aria-label="I didn't like it">
+      <i class="fa fa-thumbs-down fs-3"></i>
+    </button>
+  </div>
+
+  <!-- Primary call to action -->
+  <div class="text-center mt-4">
+    <a href="{% url 'stories:wizard_step1' %}"
+       class="btn btn-primary btn-lg w-100 w-md-auto">
+       Start New Story
+    </a>
+  </div>
+
+</div>
+
+{% block extra_js %}
+<style>
+  .btn-lg.rounded-circle:hover {
+    transform: scale(1.05);
+    transition: transform .15s ease-in-out;
+  }
+</style>
+<script>
+  ['thumbsUp', 'thumbsDown'].forEach(id => {
+    const btn = document.getElementById(id);
+    btn.addEventListener('click', () => {
+      btn.classList.replace('btn-outline-' + (id === 'thumbsUp' ? 'success' : 'danger'),
+                           'btn-'         + (id === 'thumbsUp' ? 'success' : 'danger'));
+      btn.disabled = true;
+      setTimeout(() => location.assign("{% url 'stories:home_copilot' %}"), 400);
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

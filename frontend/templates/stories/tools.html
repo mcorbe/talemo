@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Tools{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5 text-light">
+  <h1 class="mb-4">Story Tools</h1>
+  
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for tool in tools %}
+      <div class="col">
+        <div class="card h-100 bg-dark bg-opacity-25 text-light border-light">
+          <div class="card-header">
+            <h5 class="card-title mb-0">{{ tool.display_name }}</h5>
+          </div>
+          <div class="card-body">
+            <h6 class="card-subtitle mb-3 text-info">Age Group: {{ tool.age_group }}</h6>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Object Category:</h6>
+              <p class="card-text">{{ tool.object_category }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Primary Power:</h6>
+              <p class="card-text">{{ tool.primary_power }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Activation Rule:</h6>
+              <p class="card-text">{{ tool.activation_rule }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Sensory Traits:</h6>
+              <p class="card-text">{{ tool.sensory_traits }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">SEL Support:</h6>
+              <p class="card-text">{{ tool.sel_support }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Complexity Score:</h6>
+              <p class="card-text">{{ tool.complexity_score }} / 5</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Keywords:</h6>
+              <p class="card-text">
+                {% for keyword in tool.keywords %}
+                  <span class="badge bg-secondary me-1">{{ keyword }}</span>
+                {% endfor %}
+              </p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Soundscape Tag:</h6>
+              <p class="card-text">{{ tool.soundscape_tag }}</p>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            <small>Created: {{ tool.created_at|date:"F j, Y" }}</small>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          No tools have been defined yet.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <div class="text-center mt-5">
+    <a href="{% url 'stories:home_copilot' %}" class="btn btn-primary">Back to Home</a>
+  </div>
+</div>
+{% endblock %}
