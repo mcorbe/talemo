@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Talemo - AI Storytelling{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Welcome to Talemo</h1>
+<p class="lead mb-4">Your AI storytelling companion for children</p>
+<a href="{% url 'stories:wizard_step1' %}" class="btn btn-primary btn-lg">
+    Start Story
+</a>
+{% endblock %}

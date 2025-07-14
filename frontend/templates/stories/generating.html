@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Creating Your Story{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <div class="spinner-border mb-4" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <h2 class="mb-3">Imagining...</h2>
+    <p class="lead">Creating your story about {{ topic }} with {{ hero }} in {{ place }} using {{ tool }}.</p>
+    
+    <!-- This would normally be handled by JavaScript, but for the minimal version we'll use a meta refresh -->
+    <meta http-equiv="refresh" content="3;url={% url 'stories:playback' %}">
+</div>
+{% endblock %}

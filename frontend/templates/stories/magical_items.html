@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Magical Items{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5 text-light">
+  <h1 class="mb-4">Story Magical Items</h1>
+  
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for magical_item in magical_items %}
+      <div class="col">
+        <div class="card h-100 bg-dark bg-opacity-25 text-light border-light">
+          <div class="card-header">
+            <h5 class="card-title mb-0">{{ magical_item.display_name }}</h5>
+          </div>
+          <div class="card-body">
+            <h6 class="card-subtitle mb-3 text-info">Age Group: {{ magical_item.age_group }}</h6>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Object Category:</h6>
+              <p class="card-text">{{ magical_item.object_category }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Primary Power:</h6>
+              <p class="card-text">{{ magical_item.primary_power }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Activation Rule:</h6>
+              <p class="card-text">{{ magical_item.activation_rule }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Sensory Traits:</h6>
+              <p class="card-text">{{ magical_item.sensory_traits }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">SEL Support:</h6>
+              <p class="card-text">{{ magical_item.sel_support }}</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Complexity Score:</h6>
+              <p class="card-text">{{ magical_item.complexity_score }} / 5</p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Keywords:</h6>
+              <p class="card-text">
+                {% for keyword in magical_item.keywords %}
+                  <span class="badge bg-secondary me-1">{{ keyword }}</span>
+                {% endfor %}
+              </p>
+            </div>
+            
+            <div class="mb-3">
+              <h6 class="text-light-emphasis">Soundscape Tag:</h6>
+              <p class="card-text">{{ magical_item.soundscape_tag }}</p>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            <small>Created: {{ magical_item.created_at|date:"F j, Y" }}</small>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          No magical items have been defined yet.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <div class="text-center mt-5">
+    <a href="{% url 'stories:home_copilot' %}" class="btn btn-primary">Back to Home</a>
+  </div>
+</div>
+{% endblock %}

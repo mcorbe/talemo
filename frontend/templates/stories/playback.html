@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Your Story{% endblock %}
+
+{% block content %}
+<div class="text-center py-4">
+    <h2 class="mb-4">Your Story</h2>
+
+    <!-- Playback controls -->
+    <div class="mb-4">
+        <!-- Play/Pause button -->
+        <button id="playPauseBtn" class="btn btn-primary rounded-circle" style="width: 80px; height: 80px;">
+            <span id="playIcon">▶</span>
+            <span id="pauseIcon" style="display: none;">⏸</span>
+        </button>
+    </div>
+
+    <!-- Progress ring (simplified version) -->
+    <div class="mb-4">
+        <div class="progress" style="height: 10px;">
+            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" 
+                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p class="mt-2"><span id="timeRemaining">2:00</span> remaining</p>
+    </div>
+
+    <!-- Story details -->
+    <div class="mb-4">
+        <h3>{{ story.title }}</h3>
+        <h4>{{ chapter.title }}</h4>
+        <p>A story about {{ topic }} with {{ hero }} in {{ place }} using {{ tool }}.</p>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="d-flex justify-content-between">
+        <a href="{% url 'stories:end_of_story' %}" class="btn btn-outline-secondary">
+            Create a new Story
+        </a>
+        <a href="{% url 'stories:end_of_chapter' %}" class="btn btn-outline-primary">
+            Add a new Chapter
+        </a>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Minimal JavaScript for demonstration
+    let playing = false;
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const progressBar = document.getElementById('progressBar');
+    const timeRemaining = document.getElementById('timeRemaining');
+
+    // Simulate progress
+    let progress = 0;
+    let interval;
+
+    playPauseBtn.addEventListener('click', function() {
+        playing = !playing;
+
+        if (playing) {
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'inline';
+
+            // Start progress simulation
+            interval = setInterval(function() {
+                progress += 1;
+                progressBar.style.width = progress + '%';
+                progressBar.setAttribute('aria-valuenow', progress);
+
+                // Update time remaining (simplified)
+                const remaining = Math.floor(120 * (100 - progress) / 100);
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                timeRemaining.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    window.location.href = "{% url 'stories:end_of_chapter' %}";
+                }
+            }, 200); // Speed up for demo
+        } else {
+            playIcon.style.display = 'inline';
+            pauseIcon.style.display = 'none';
+            clearInterval(interval);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}
