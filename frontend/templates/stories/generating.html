@@ -23,9 +23,11 @@
 
         // Function to check the task status
         function checkTaskStatus() {
+            console.log(`Checking task status for task ${taskId} ...`);
             fetch(`/stories/api/check-task-status/?task_id=${taskId}`)
                 .then(response => response.json())
                 .then(data => {
+                    console.log(data)
                     // Update the progress message
                     if (data.progress) {
                         document.getElementById('progress-message').textContent = data.progress;

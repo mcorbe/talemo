@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from celery.result import AsyncResult
 from .models.story import Story
 from .models.chapter import Chapter
+from .tasks import test_task
 
 # User flow views
 def home_copilot(request):
@@ -307,41 +308,41 @@ def check_task_status(request):
     # Get the task result
     task_result = AsyncResult(task_id)
 
-    # Check the task status
-    if task_result.ready():
-        # Task is complete
-        if task_result.successful():
-            # Task completed successfully
-            result = task_result.get()
-
-            # Store the story and chapter IDs in the session
-            if result and isinstance(result, dict):
-                # The task result contains the chapter data and story ID
-                # We'll store them in the session so the playback view can use them
-
-                # Store the story ID in the session
-                if 'story_id' in result:
-                    request.session['story_id'] = result['story_id']
-
-                # Store the chapter number in the session
-                if 'order' in result:
-                    request.session['chapter_number'] = result['order']
-
-            return JsonResponse({
-                'status': 'complete',
-                'result': 'success',
-                'redirect': '/stories/playback/'
-            })
-        else:
-            # Task failed
-            return JsonResponse({
-                'status': 'complete',
-                'result': 'error',
-                'error': str(task_result.result)
-            })
-    else:
+    # Check if task is ready
+    if not task_result.ready():
         # Task is still running
         return JsonResponse({
             'status': 'pending',
             'progress': 'Story generation in progress...'
         })
+
+    # Check if task is in success
+    if not task_result.successful():
+        # Task failed
+        return JsonResponse({
+            'status': 'complete',
+            'result': 'error',
+            'error': str(task_result.result)
+        })
+
+    # Task completed successfully
+    result = task_result.get()
+
+    # Store the story and chapter IDs in the session
+    if result and isinstance(result, dict):
+        # The task result contains the chapter data and story ID
+        # We'll store them in the session so the playback view can use them
+
+        # Store the story ID in the session
+        if 'story_id' in result:
+            request.session['story_id'] = result['story_id']
+
+        # Store the chapter number in the session
+        if 'order' in result:
+            request.session['chapter_number'] = result['order']
+
+    return JsonResponse({
+        'status': 'complete',
+        'result': 'success',
+        'redirect': '/stories/playback/'
+    })

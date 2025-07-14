@@ -2,9 +2,37 @@
 Celery tasks for the stories app.
 """
 import json
+import time
 from celery import shared_task
 from .models.story import Story
 from .models.chapter import Chapter
+
+@shared_task
+def test_task(x, y):
+    """
+    A simple test task that adds two numbers.
+
+    This task is used to verify that the Celery worker is processing tasks.
+    It includes a small delay to simulate processing time.
+
+    Args:
+        x (int): First number
+        y (int): Second number
+
+    Returns:
+        dict: A dictionary containing the result and a timestamp
+    """
+    # Simulate processing time
+    time.sleep(5)
+
+    # Perform the calculation
+    result = x + y
+
+    # Return the result with a timestamp
+    return {
+        'result': result,
+        'timestamp': time.time()
+    }
 
 @shared_task
 def generate_story_chapter(json_input):
@@ -77,11 +105,11 @@ def generate_story_chapter(json_input):
     # Find or create the story
     story, created = Story.objects.get_or_create(
         title=story_data['title'],
+        topic=story_data['topic'],
+        hero=story_data['hero'],
         defaults={
             'description': story_data['description'],
             'age_group': story_data['age_group'],
-            'topic': story_data['topic'],
-            'hero': story_data['hero']
         }
     )
 
@@ -107,7 +135,7 @@ def generate_story_chapter(json_input):
         raise ValueError("All chapters already have content")
 
     # Validate the chapter to generate
-    required_chapter_fields = ['title', 'place', 'tool', 'order']
+    required_chapter_fields = ['place', 'tool', 'order']
     for field in required_chapter_fields:
         if field not in chapter_to_generate:
             raise ValueError(f"Chapter to generate is missing required field: {field}")
@@ -120,6 +148,7 @@ def generate_story_chapter(json_input):
         )
         # If it exists and has content, return it
         if existing_chapter.content:
+            time.sleep(10)
             return {
                 'title': existing_chapter.title,
                 'place': existing_chapter.place,
@@ -140,9 +169,17 @@ def generate_story_chapter(json_input):
         f"This story is suitable for children in the {story.age_group} age group."
     )
 
+    generated_title = (
+        f"This is the chapter title."
+    )
+
+    time.sleep(10)
+
+    print({generated_title, generated_content})
+
     # Create or update the chapter
     if existing_chapter:
-        existing_chapter.title = chapter_to_generate['title']
+        existing_chapter.title = generated_title
         existing_chapter.place = chapter_to_generate['place']
         existing_chapter.tool = chapter_to_generate['tool']
         existing_chapter.content = generated_content
@@ -151,7 +188,7 @@ def generate_story_chapter(json_input):
     else:
         chapter = Chapter.objects.create(
             story=story,
-            title=chapter_to_generate['title'],
+            title=generated_title,
             place=chapter_to_generate['place'],
             tool=chapter_to_generate['tool'],
             order=chapter_to_generate['order'],

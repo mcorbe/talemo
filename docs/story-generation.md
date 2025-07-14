@@ -102,7 +102,6 @@ json_input = {
         "content": "Lucy was exploring her grandmother's attic when she found an old wooden chest..."
       },
       {
-        "title": "The First Painting",
         "place": "Lucy's Room",
         "tool": "Magic Paintbrush",
         "order": 2
