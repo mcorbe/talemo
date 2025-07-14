@@ -456,3 +456,4 @@ For more detailed information, please refer to the following documentation:
 - [Development Setup Guide](docs/development-setup.md): Comprehensive guide to setting up the development environment
 - [Monitoring Setup Guide](docs/monitoring.md): Detailed information about the monitoring stack
 - [Docker Configuration](docker/README.md): Information about the Docker setup, including both development and monitoring environments
+- [Story Generation](docs/story-generation.md): Guide to using the story generation functionality
