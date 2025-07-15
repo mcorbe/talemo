@@ -95,7 +95,7 @@ def generate_story_chapter(json_input):
         raise ValueError("Input must contain a 'story' object")
 
     story_data = data['story']
-    required_story_fields = ['title', 'description', 'age_group', 'topic', 'hero', 'chapters']
+    required_story_fields = ['age_group', 'topic', 'hero', 'chapters']
     for field in required_story_fields:
         if field not in story_data:
             raise ValueError(f"Story is missing required field: {field}")
@@ -105,22 +105,10 @@ def generate_story_chapter(json_input):
 
     # Find or create the story
     story, created = Story.objects.get_or_create(
-        title=story_data['title'],
+        age_group=story_data['age_group'],
         topic=story_data['topic'],
         hero=story_data['hero'],
-        defaults={
-            'description': story_data['description'],
-            'age_group': story_data['age_group'],
-        }
     )
-
-    # If the story exists but wasn't created just now, update its fields
-    if not created:
-        story.description = story_data['description']
-        story.age_group = story_data['age_group']
-        story.topic = story_data['topic']
-        story.hero = story_data['hero']
-        story.save()
 
     # Process existing chapters
     chapters = story_data['chapters']

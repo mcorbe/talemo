@@ -164,14 +164,11 @@ def generating(request):
         # Prepare the JSON input for the story generation task
         json_input = {
             "story": {
-                "title": f"{context['hero']} in {context['place']}",
-                "description": f"A story about {context['hero']} using {context['tool']} in {context['place']}",
                 "age_group": context['age_group'],
                 "topic": context['topic'],
                 "hero": context['hero'],
                 "chapters": [
                     {
-                        "title": "Chapter 1",
                         "place": context['place'],
                         "tool": context['tool'],
                         "order": 1
