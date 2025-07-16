@@ -129,9 +129,9 @@ class StreamingTextToHLS:
         Convert text to speech using Google Text-to-Speech (gTTS).
 
         This function:
-        1. Uses gTTS to convert text to speech and save it as MP3 file
-        2. Uses ffmpeg to convert the MP3 to PCM format
-        3. Cleans up the temporary MP3 file
+        1. Uses gTTS to convert text to speech
+        2. Streams the audio data directly to ffmpeg for PCM conversion
+        3. No temporary MP3 file is created
 
         Args:
             text_chunk (str): Text to convert to speech
@@ -146,19 +146,13 @@ class StreamingTextToHLS:
 
         logger.info(f"Converting text to speech using gTTS: {text_chunk[:50]}...")
 
-        # Create a temporary MP3 file
-        mp3_file = output_file + ".mp3"
-
-        # Convert text to speech using gTTS
+        # Create gTTS object
         tts = gTTS(text=text_chunk, lang=language, slow=False)
-        tts.save(mp3_file)
 
-        logger.info(f"Speech saved to temporary MP3 file: {mp3_file}")
-
-        # Convert MP3 to PCM using ffmpeg
+        # Set up the ffmpeg command to read from stdin
         ffmpeg_cmd = [
             'ffmpeg',
-            '-i', mp3_file,  # Input MP3 file
+            '-i', 'pipe:0',  # Read from stdin
             '-f', 's16le',  # Output format: signed 16-bit little-endian
             '-acodec', 'pcm_s16le',  # Audio codec
             '-ar', '24000',  # Sample rate: 24kHz
@@ -167,7 +161,36 @@ class StreamingTextToHLS:
             output_file  # Output PCM file
         ]
 
-        subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # Start the ffmpeg process
+        logger.info(f"Starting ffmpeg process to convert speech to PCM format")
+        ffmpeg_process = subprocess.Popen(
+            ffmpeg_cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+        # Stream audio data to ffmpeg
+        try:
+            for audio_chunk in tts.stream():
+                ffmpeg_process.stdin.write(audio_chunk)
+
+            # Close stdin to signal end of input
+            ffmpeg_process.stdin.close()
+
+            # Wait for ffmpeg to finish
+            ffmpeg_process.wait()
+
+            if ffmpeg_process.returncode != 0:
+                logger.error(f"ffmpeg process returned non-zero exit code: {ffmpeg_process.returncode}")
+                raise subprocess.CalledProcessError(ffmpeg_process.returncode, ffmpeg_cmd)
+
+        except Exception as e:
+            logger.error(f"Error streaming audio to ffmpeg: {e}")
+            # Kill ffmpeg process if it's still running
+            if ffmpeg_process.poll() is None:
+                ffmpeg_process.kill()
+            raise
 
         logger.info(f"Converted speech to PCM format at {output_file}")
         return output_file
@@ -315,35 +338,22 @@ class StreamingTextToHLS:
 
         # Create a combined MP3 file if there are PCM files
         if self.pcm_files:
-            # Create a file with list of PCM files for concatenation
-            concat_list_file = os.path.join(self.pcm_dir, "concat_list.txt")
-            with open(concat_list_file, 'w') as f:
-                for pcm_file in self.pcm_files:
-                    f.write(f"file '{os.path.abspath(pcm_file)}'\n")
-
-            # Concatenate PCM files and create MP3
+            # Concatenate PCM files directly (PCM is a headerless format)
             concat_pcm = os.path.join(self.pcm_dir, "combined_audio.pcm")
 
-            # Build ffmpeg command for concatenation
-            concat_cmd = [
-                'ffmpeg',
-                '-f', 'concat',
-                '-safe', '0',
-                '-i', concat_list_file,
-                '-f', 's16le',  # Output format: signed 16-bit little-endian
-                '-acodec', 'pcm_s16le',  # Audio codec
-                '-ar', '24000',  # Sample rate: 24kHz
-                '-ac', '1',  # Channels: mono
-                '-y',
-                concat_pcm
-            ]
-
-            # Run ffmpeg for concatenation
-            logger.info("Concatenating PCM files")
+            logger.info("Concatenating PCM files directly")
             try:
-                subprocess.run(concat_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Error concatenating PCM files: {e}")
+                with open(concat_pcm, 'wb') as outfile:
+                    for pcm_file in self.pcm_files:
+                        with open(pcm_file, 'rb') as infile:
+                            # Copy the content of each PCM file to the output file
+                            shutil.copyfileobj(infile, outfile)
+
+                # Create an MP3 file from the concatenated PCM
+                create_mp3_file(concat_pcm, self.mp3_file)
+
+            except Exception as e:
+                logger.error(f"Error concatenating PCM files or creating MP3: {e}")
 
         return {
             'playlist_path': self.playlist_path,
