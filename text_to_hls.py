@@ -15,9 +15,8 @@ import tempfile
 import subprocess
 import logging
 import argparse
-from pathlib import Path
 import nltk
-import time
+import shutil
 import uuid
 from gtts import gTTS
 
@@ -34,7 +33,8 @@ try:
 except LookupError:
     nltk.download('punkt')
 
-def text_to_speech(text, output_file, duration=2, language="en", speaker_embedding=None):
+
+def text_to_speech(text, output_file, language="en"):
     """
     Convert text to speech using Google Text-to-Speech (gTTS).
 
@@ -46,9 +46,7 @@ def text_to_speech(text, output_file, duration=2, language="en", speaker_embeddi
     Args:
         text (str): Text to convert to speech
         output_file (str): Path to output PCM file
-        duration (int): Duration parameter (not used with gTTS)
         language (str): Language code for speech synthesis
-        speaker_embedding (str): Path to speaker embedding file (not used with gTTS)
 
     Returns:
         str: Path to output PCM file
@@ -68,12 +66,12 @@ def text_to_speech(text, output_file, duration=2, language="en", speaker_embeddi
     ffmpeg_cmd = [
         'ffmpeg',
         '-i', mp3_file,  # Input MP3 file
-        '-f', 's16le',   # Output format: signed 16-bit little-endian
+        '-f', 's16le',  # Output format: signed 16-bit little-endian
         '-acodec', 'pcm_s16le',  # Audio codec
         '-ar', '24000',  # Sample rate: 24kHz
-        '-ac', '1',      # Channels: mono
-        '-y',            # Overwrite output file if it exists
-        output_file      # Output PCM file
+        '-ac', '1',  # Channels: mono
+        '-y',  # Overwrite an output file if it exists
+        output_file  # Output PCM file
     ]
 
     subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -83,6 +81,7 @@ def text_to_speech(text, output_file, duration=2, language="en", speaker_embeddi
 
     logger.info(f"Converted speech to PCM format at {output_file}")
     return output_file
+
 
 def create_hls_playlist(input_file, output_dir, segment_duration=2):
     """
@@ -98,7 +97,7 @@ def create_hls_playlist(input_file, output_dir, segment_duration=2):
     """
     logger.info(f"Creating HLS playlist from {input_file}")
 
-    # Create output directory
+    # Create an output directory
     os.makedirs(output_dir, exist_ok=True)
 
     # Set paths
@@ -110,13 +109,13 @@ def create_hls_playlist(input_file, output_dir, segment_duration=2):
         'ffmpeg',
         '-f', 's16le',  # Input format: signed 16-bit little-endian
         '-ar', '24000',  # Sample rate: 24kHz (XTTS-v2 output rate)
-        '-ac', '1',      # Channels: mono
+        '-ac', '1',  # Channels: mono
         '-i', input_file,  # Input file
 
         # HLS output
-        '-c:a', 'aac',   # Audio codec: AAC
+        '-c:a', 'aac',  # Audio codec: AAC
         '-b:a', '128k',  # Bitrate: 128kbps
-        '-f', 'hls',     # Format: HLS
+        '-f', 'hls',  # Format: HLS
         '-hls_time', str(segment_duration),  # Segment duration
         '-hls_list_size', '0',  # Include all segments in playlist
         '-hls_segment_type', 'mpegts',  # Segment type: MPEG-TS
@@ -130,6 +129,7 @@ def create_hls_playlist(input_file, output_dir, segment_duration=2):
 
     logger.info(f"HLS playlist created at {playlist_path}")
     return playlist_path
+
 
 def create_mp3_file(input_file, output_file):
     """
@@ -149,15 +149,15 @@ def create_mp3_file(input_file, output_file):
         'ffmpeg',
         '-f', 's16le',  # Input format: signed 16-bit little-endian
         '-ar', '24000',  # Sample rate: 24kHz
-        '-ac', '1',      # Channels: mono
+        '-ac', '1',  # Channels: mono
         '-i', input_file,  # Input file
 
         # MP3 output
         '-c:a', 'libmp3lame',  # Audio codec: MP3
         '-b:a', '128k',  # Bitrate: 128kbps
-        '-f', 'mp3',     # Format: MP3
-        '-y',            # Overwrite output file if it exists
-        output_file      # Output file
+        '-f', 'mp3',  # Format: MP3
+        '-y',  # Overwrite output file if it exists
+        output_file  # Output file
     ]
 
     # Run ffmpeg
@@ -191,7 +191,11 @@ def create_mp3_file(input_file, output_file):
 
     return output_file
 
-def process_text_to_hls(text, output_dir=None, segment_duration=2, language="en", speaker_embedding=None):
+
+def process_chunks_to_hls(text: list,
+                          output_dir: str = None,
+                          segment_duration: int = 2,
+                          language: str = "en") -> dict:
     """
     Process text to HLS audio and MP3 file.
 
@@ -201,7 +205,7 @@ def process_text_to_hls(text, output_dir=None, segment_duration=2, language="en"
     3. Creates an MP3 file from the audio
 
     Args:
-        text (str): Text to convert to speech
+        text (str or list): Text to convert to speech. Can be a single string or a list of text chunks.
         output_dir (str): Path to output directory
         segment_duration (int): Duration of each segment in seconds
         language (str): Language code for speech synthesis
@@ -210,61 +214,25 @@ def process_text_to_hls(text, output_dir=None, segment_duration=2, language="en"
     Returns:
         dict: Information about the generated HLS stream and MP3 file
     """
-    # Create temporary directory if output_dir is not provided
-    temp_dir = None
-    if output_dir is None:
-        temp_dir = tempfile.mkdtemp(prefix="text_to_hls_")
-        output_dir = temp_dir
 
-    try:
-        # Create subdirectories
-        pcm_dir = os.path.join(output_dir, "pcm")
-        hls_dir = os.path.join(output_dir, "hls")
-        mp3_dir = os.path.join(output_dir, "mp3")
-        os.makedirs(pcm_dir, exist_ok=True)
-        os.makedirs(hls_dir, exist_ok=True)
-        os.makedirs(mp3_dir, exist_ok=True)
+    # Process as chunks using StreamingTextToHLS
+    tts = StreamingTextToHLS(
+        output_dir=output_dir,
+        segment_duration=segment_duration,
+        language=language,
+    )
 
-        # Log the text processing
-        logger.info(f"Processing text with {len(text.split())} words")
+    if isinstance(text, str):
+        text = [text]
 
-        # Create a single PCM file for the entire text
-        concat_pcm = os.path.join(pcm_dir, "audio.pcm")
-        text_to_speech(
-            text, 
-            concat_pcm, 
-            language=language, 
-            speaker_embedding=speaker_embedding
-        )
+    # Process each chunk
+    for i, chunk in enumerate(text):
+        logger.info(f"Processing chunk {i + 1}/{len(text)}")
+        tts.process_chunk(chunk)
 
-        # Create HLS playlist
-        playlist_path = create_hls_playlist(
-            concat_pcm, 
-            hls_dir, 
-            segment_duration=segment_duration
-        )
+    # Finalize and return result
+    return tts.finalize()
 
-        # Create MP3 file
-        mp3_file = os.path.join(mp3_dir, "audio.mp3")
-        create_mp3_file(concat_pcm, mp3_file)
-
-        # Count segments
-        segment_count = len([f for f in os.listdir(hls_dir) if f.endswith('.ts')])
-
-        return {
-            'playlist_path': playlist_path,
-            'hls_dir': hls_dir,
-            'segment_count': segment_count,
-            'mp3_file': mp3_file
-        }
-
-    finally:
-        # Clean up temporary directory if created
-        if temp_dir and os.path.exists(temp_dir):
-            logger.info(f"Cleaning up temporary directory: {temp_dir}")
-            # Uncomment to enable cleanup
-            # shutil.rmtree(temp_dir)
-            pass
 
 class StreamingTextToHLS:
     """
@@ -274,7 +242,7 @@ class StreamingTextToHLS:
     as new chunks arrive.
     """
 
-    def __init__(self, output_dir=None, segment_duration=2, language="en", speaker_embedding=None):
+    def __init__(self, output_dir=None, segment_duration=2, language="en"):
         """
         Initialize the StreamingTextToHLS instance.
 
@@ -293,7 +261,6 @@ class StreamingTextToHLS:
         self.output_dir = output_dir
         self.segment_duration = segment_duration
         self.language = language
-        self.speaker_embedding = speaker_embedding
 
         # Create subdirectories
         self.pcm_dir = os.path.join(output_dir, "pcm")
@@ -343,10 +310,9 @@ class StreamingTextToHLS:
             text_chunk,
             pcm_file,
             language=self.language,
-            speaker_embedding=self.speaker_embedding
         )
 
-        # Add to list of PCM files
+        # Add to a list of PCM files
         self.pcm_files.append(pcm_file)
 
         # Create HLS segments for this chunk
@@ -357,17 +323,17 @@ class StreamingTextToHLS:
             'ffmpeg',
             '-f', 's16le',  # Input format: signed 16-bit little-endian
             '-ar', '24000',  # Sample rate: 24kHz
-            '-ac', '1',      # Channels: mono
+            '-ac', '1',  # Channels: mono
             '-i', pcm_file,  # Input file
 
             # HLS output
-            '-c:a', 'aac',   # Audio codec: AAC
+            '-c:a', 'aac',  # Audio codec: AAC
             '-b:a', '128k',  # Bitrate: 128kbps
-            '-f', 'segment', # Format: segment
+            '-f', 'segment',  # Format: segment
             '-segment_time', str(self.segment_duration),  # Segment duration
             '-segment_format', 'mpegts',  # Segment format: MPEG-TS
             '-segment_list', f"{self.hls_dir}/{chunk_id}_segments.m3u8",  # Temporary segment list
-            '-y',            # Overwrite output files if they exist
+            '-y',  # Overwrite output files if they exist
             segment_pattern  # Segment filename pattern
         ]
 
@@ -376,7 +342,8 @@ class StreamingTextToHLS:
         subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # Count new segments
-        new_segments = [f for f in os.listdir(self.hls_dir) if f.startswith(f"{chunk_id}_segment_") and f.endswith('.ts')]
+        new_segments = [f for f in os.listdir(self.hls_dir) if
+                        f.startswith(f"{chunk_id}_segment_") and f.endswith('.ts')]
         new_segments.sort()
 
         # Update main playlist
@@ -426,10 +393,10 @@ class StreamingTextToHLS:
                 '-f', 'concat',
                 '-safe', '0',
                 '-i', concat_list_file,
-                '-f', 's16le',   # Output format: signed 16-bit little-endian
+                '-f', 's16le',  # Output format: signed 16-bit little-endian
                 '-acodec', 'pcm_s16le',  # Audio codec
                 '-ar', '24000',  # Sample rate: 24kHz
-                '-ac', '1',      # Channels: mono
+                '-ac', '1',  # Channels: mono
                 '-y',
                 concat_pcm
             ]
@@ -464,37 +431,6 @@ class StreamingTextToHLS:
             # shutil.rmtree(self.temp_dir)
             pass
 
-def process_text_chunks_to_hls(text_chunks, output_dir=None, segment_duration=2, language="en", speaker_embedding=None):
-    """
-    Process a list of text chunks to HLS audio.
-
-    This function demonstrates how to use the StreamingTextToHLS class with a list of text chunks.
-
-    Args:
-        text_chunks (list): List of text chunks to process
-        output_dir (str): Path to output directory
-        segment_duration (int): Duration of each segment in seconds
-        language (str): Language code for speech synthesis
-        speaker_embedding (str): Path to speaker embedding file (not used with gTTS)
-
-    Returns:
-        dict: Information about the generated HLS stream and MP3 file
-    """
-    # Create StreamingTextToHLS instance
-    streaming_tts = StreamingTextToHLS(
-        output_dir=output_dir,
-        segment_duration=segment_duration,
-        language=language,
-        speaker_embedding=speaker_embedding
-    )
-
-    # Process each chunk
-    for i, chunk in enumerate(text_chunks):
-        logger.info(f"Processing chunk {i+1}/{len(text_chunks)}")
-        streaming_tts.process_chunk(chunk)
-
-    # Finalize and return result
-    return streaming_tts.finalize()
 
 def main():
     """Main function."""
@@ -503,13 +439,12 @@ def main():
     parser.add_argument('--output-dir', '-o', type=str, help='Output directory')
     parser.add_argument('--segment-duration', '-d', type=int, default=2, help='Segment duration in seconds')
     parser.add_argument('--language', '-l', type=str, default='en', help='Language code (e.g., en, fr, es)')
-    parser.add_argument('--speaker-embedding', '-s', type=str, help='Path to speaker embedding file (not used with gTTS)')
     parser.add_argument('--text-file', '-t', type=str, help='Path to text file')
     parser.add_argument('--streaming', action='store_true', help='Use streaming mode to process text in chunks')
     parser.add_argument('--chunk-size', type=int, default=200, help='Number of words per chunk in streaming mode')
     args = parser.parse_args()
 
-    # Get text from file or use default
+    # Get text from a file or use default
     if args.text_file:
         with open(args.text_file, 'r') as f:
             text = f.read()
@@ -530,6 +465,8 @@ L’enthousiasme de Freddy déborda lorsqu’il ouvrit fébrilement ce tome anci
 Freddy jeta un dernier regard au château flottant avant de se mettre en route, prêt à découvrir non seulement de lointaines planètes, mais aussi des histoires méconnues pouvant nous instruire tous. Son cœur débordait d’émerveillement tandis qu’il s’élançait dans l’espace, emportant avec lui ce rappel précieux : peu importe jusqu’où l’on s’aventure loin de chez soi ou l’audace de nos rêves, des amis et le savoir attendent ceux qui ont le courage de les chercher !
         """
 
+    chunks = [text]
+
     # Process text to HLS
     if args.streaming:
         # Split text into chunks based on chunk_size
@@ -541,28 +478,18 @@ Freddy jeta un dernier regard au château flottant avant de se mettre en route, 
 
         logger.info(f"Processing text in streaming mode with {len(chunks)} chunks")
 
-        # Process chunks
-        result = process_text_chunks_to_hls(
-            chunks,
-            output_dir=args.output_dir,
-            segment_duration=args.segment_duration,
-            language=args.language,
-            speaker_embedding=args.speaker_embedding
-        )
-    else:
-        # Process entire text at once
-        result = process_text_to_hls(
-            text,
-            output_dir=args.output_dir,
-            segment_duration=args.segment_duration,
-            language=args.language,
-            speaker_embedding=args.speaker_embedding
-        )
+    result = process_chunks_to_hls(
+        chunks,
+        output_dir=args.output_dir,
+        segment_duration=args.segment_duration,
+        language=args.language,
+    )
 
     logger.info(f"HLS playlist created at {result['playlist_path']}")
     logger.info(f"Created {result['segment_count']} segments")
     logger.info(f"HLS directory: {result['hls_dir']}")
     logger.info(f"MP3 file created at {result['mp3_file']}")
+
 
 if __name__ == "__main__":
     main()
