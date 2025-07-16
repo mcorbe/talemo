@@ -34,102 +34,6 @@ except LookupError:
     nltk.download('punkt')
 
 
-def text_to_speech(text, output_file, language="en"):
-    """
-    Convert text to speech using Google Text-to-Speech (gTTS).
-
-    This function:
-    1. Uses gTTS to convert text to speech and save it as an MP3 file
-    2. Uses ffmpeg to convert the MP3 to PCM format
-    3. Cleans up the temporary MP3 file
-
-    Args:
-        text (str): Text to convert to speech
-        output_file (str): Path to output PCM file
-        language (str): Language code for speech synthesis
-
-    Returns:
-        str: Path to output PCM file
-    """
-    logger.info(f"Converting text to speech using gTTS: {text[:50]}...")
-
-    # Create a temporary MP3 file
-    mp3_file = output_file + ".mp3"
-
-    # Convert text to speech using gTTS
-    tts = gTTS(text=text, lang=language, slow=False)
-    tts.save(mp3_file)
-
-    logger.info(f"Speech saved to temporary MP3 file: {mp3_file}")
-
-    # Convert MP3 to PCM using ffmpeg
-    ffmpeg_cmd = [
-        'ffmpeg',
-        '-i', mp3_file,  # Input MP3 file
-        '-f', 's16le',  # Output format: signed 16-bit little-endian
-        '-acodec', 'pcm_s16le',  # Audio codec
-        '-ar', '24000',  # Sample rate: 24kHz
-        '-ac', '1',  # Channels: mono
-        '-y',  # Overwrite an output file if it exists
-        output_file  # Output PCM file
-    ]
-
-    subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    # Clean up the temporary MP3 file
-    os.remove(mp3_file)
-
-    logger.info(f"Converted speech to PCM format at {output_file}")
-    return output_file
-
-
-def create_hls_playlist(input_file, output_dir, segment_duration=2):
-    """
-    Create HLS playlist from PCM audio file using ffmpeg.
-
-    Args:
-        input_file (str): Path to input PCM file
-        output_dir (str): Path to output directory
-        segment_duration (int): Duration of each segment in seconds
-
-    Returns:
-        str: Path to HLS playlist
-    """
-    logger.info(f"Creating HLS playlist from {input_file}")
-
-    # Create an output directory
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Set paths
-    playlist_path = os.path.join(output_dir, "playlist.m3u8")
-    segment_pattern = os.path.join(output_dir, "segment_%03d.ts")
-
-    # Build ffmpeg command
-    ffmpeg_cmd = [
-        'ffmpeg',
-        '-f', 's16le',  # Input format: signed 16-bit little-endian
-        '-ar', '24000',  # Sample rate: 24kHz (XTTS-v2 output rate)
-        '-ac', '1',  # Channels: mono
-        '-i', input_file,  # Input file
-
-        # HLS output
-        '-c:a', 'aac',  # Audio codec: AAC
-        '-b:a', '128k',  # Bitrate: 128kbps
-        '-f', 'hls',  # Format: HLS
-        '-hls_time', str(segment_duration),  # Segment duration
-        '-hls_list_size', '0',  # Include all segments in playlist
-        '-hls_segment_type', 'mpegts',  # Segment type: MPEG-TS
-        '-hls_segment_filename', segment_pattern,  # Segment filename pattern
-        playlist_path  # Playlist path
-    ]
-
-    # Run ffmpeg
-    logger.info(f"Running ffmpeg command: {' '.join(ffmpeg_cmd)}")
-    subprocess.run(ffmpeg_cmd, check=True)
-
-    logger.info(f"HLS playlist created at {playlist_path}")
-    return playlist_path
-
 
 def create_mp3_file(input_file, output_file):
     """
@@ -156,7 +60,7 @@ def create_mp3_file(input_file, output_file):
         '-c:a', 'libmp3lame',  # Audio codec: MP3
         '-b:a', '128k',  # Bitrate: 128kbps
         '-f', 'mp3',  # Format: MP3
-        '-y',  # Overwrite output file if it exists
+        '-y',  # Overwrite an output file if it exists
         output_file  # Output file
     ]
 
@@ -167,71 +71,6 @@ def create_mp3_file(input_file, output_file):
         logger.info(f"MP3 file created at {output_file}")
     except subprocess.CalledProcessError as e:
         logger.error(f"Error creating MP3 file: {e}")
-        # Create a silent MP3 file as fallback
-        silent_cmd = [
-            'ffmpeg',
-            '-f', 'lavfi',  # Use libavfilter
-            '-i', 'anullsrc=r=24000:cl=mono',  # Generate silent audio
-            '-t', '1',  # 1 second duration
-            '-c:a', 'libmp3lame',  # Audio codec: MP3
-            '-b:a', '128k',  # Bitrate: 128kbps
-            '-f', 'mp3',  # Format: MP3
-            '-y',  # Overwrite output file if it exists
-            output_file  # Output file
-        ]
-        try:
-            logger.warning("Creating silent MP3 file as fallback")
-            subprocess.run(silent_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-        except subprocess.CalledProcessError as e2:
-            logger.error(f"Error creating silent MP3 file: {e2}")
-            # Create an empty file as last resort
-            with open(output_file, 'wb') as f:
-                pass
-            logger.warning("Created empty MP3 file as last resort")
-
-    return output_file
-
-
-def process_chunks_to_hls(text: list,
-                          output_dir: str = None,
-                          segment_duration: int = 2,
-                          language: str = "en") -> dict:
-    """
-    Process text to HLS audio and MP3 file.
-
-    This function:
-    1. Converts text to speech using Google Text-to-Speech (gTTS)
-    2. Creates an HLS playlist from the audio
-    3. Creates an MP3 file from the audio
-
-    Args:
-        text (str or list): Text to convert to speech. Can be a single string or a list of text chunks.
-        output_dir (str): Path to output directory
-        segment_duration (int): Duration of each segment in seconds
-        language (str): Language code for speech synthesis
-        speaker_embedding (str): Path to speaker embedding file (not used with gTTS)
-
-    Returns:
-        dict: Information about the generated HLS stream and MP3 file
-    """
-
-    # Process as chunks using StreamingTextToHLS
-    tts = StreamingTextToHLS(
-        output_dir=output_dir,
-        segment_duration=segment_duration,
-        language=language,
-    )
-
-    if isinstance(text, str):
-        text = [text]
-
-    # Process each chunk
-    for i, chunk in enumerate(text):
-        logger.info(f"Processing chunk {i + 1}/{len(text)}")
-        tts.process_chunk(chunk)
-
-    # Finalize and return result
-    return tts.finalize()
 
 
 class StreamingTextToHLS:
@@ -285,6 +124,104 @@ class StreamingTextToHLS:
                 f.write(f"#EXT-X-TARGETDURATION:{segment_duration}\n")
                 f.write("#EXT-X-MEDIA-SEQUENCE:0\n")
 
+    def text_chunk_to_speech(self, text_chunk, output_file, language=None):
+        """
+        Convert text to speech using Google Text-to-Speech (gTTS).
+
+        This function:
+        1. Uses gTTS to convert text to speech and save it as MP3 file
+        2. Uses ffmpeg to convert the MP3 to PCM format
+        3. Cleans up the temporary MP3 file
+
+        Args:
+            text_chunk (str): Text to convert to speech
+            output_file (str): Path to output PCM file
+            language (str): Language code for speech synthesis
+
+        Returns:
+            str: Path to output a PCM file
+        """
+        if language is None:
+            language = self.language
+
+        logger.info(f"Converting text to speech using gTTS: {text_chunk[:50]}...")
+
+        # Create a temporary MP3 file
+        mp3_file = output_file + ".mp3"
+
+        # Convert text to speech using gTTS
+        tts = gTTS(text=text_chunk, lang=language, slow=False)
+        tts.save(mp3_file)
+
+        logger.info(f"Speech saved to temporary MP3 file: {mp3_file}")
+
+        # Convert MP3 to PCM using ffmpeg
+        ffmpeg_cmd = [
+            'ffmpeg',
+            '-i', mp3_file,  # Input MP3 file
+            '-f', 's16le',  # Output format: signed 16-bit little-endian
+            '-acodec', 'pcm_s16le',  # Audio codec
+            '-ar', '24000',  # Sample rate: 24kHz
+            '-ac', '1',  # Channels: mono
+            '-y',  # Overwrite an output file if it exists
+            output_file  # Output PCM file
+        ]
+
+        subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        logger.info(f"Converted speech to PCM format at {output_file}")
+        return output_file
+
+    # def create_hls_playlist(self, input_file, output_dir, segment_duration=None):
+    #     """
+    #     Create HLS playlist from PCM audio file using ffmpeg.
+    #
+    #     Args:
+    #         input_file (str): Path to input PCM file
+    #         output_dir (str): Path to output directory
+    #         segment_duration (int): Duration of each segment in seconds
+    #
+    #     Returns:
+    #         str: Path to HLS playlist
+    #     """
+    #     if segment_duration is None:
+    #         segment_duration = self.segment_duration
+    #
+    #     logger.info(f"Creating HLS playlist from {input_file}")
+    #
+    #     # Create an output directory
+    #     os.makedirs(output_dir, exist_ok=True)
+    #
+    #     # Set paths
+    #     playlist_path = os.path.join(output_dir, "playlist.m3u8")
+    #     segment_pattern = os.path.join(output_dir, "segment_%03d.ts")
+    #
+    #     # Build ffmpeg command
+    #     ffmpeg_cmd = [
+    #         'ffmpeg',
+    #         '-f', 's16le',  # Input format: signed 16-bit little-endian
+    #         '-ar', '24000',  # Sample rate: 24kHz (XTTS-v2 output rate)
+    #         '-ac', '1',  # Channels: mono
+    #         '-i', input_file,  # Input file
+    #
+    #         # HLS output
+    #         '-c:a', 'aac',  # Audio codec: AAC
+    #         '-b:a', '128k',  # Bitrate: 128kbps
+    #         '-f', 'hls',  # Format: HLS
+    #         '-hls_time', str(segment_duration),  # Segment duration
+    #         '-hls_list_size', '0',  # Include all segments in playlist
+    #         '-hls_segment_type', 'mpegts',  # Segment type: MPEG-TS
+    #         '-hls_segment_filename', segment_pattern,  # Segment filename pattern
+    #         playlist_path  # Playlist path
+    #     ]
+    #
+    #     # Run ffmpeg
+    #     logger.info(f"Running ffmpeg command: {' '.join(ffmpeg_cmd)}")
+    #     subprocess.run(ffmpeg_cmd, check=True)
+    #
+    #     logger.info(f"HLS playlist created at {playlist_path}")
+    #     return playlist_path
+
     def process_chunk(self, text_chunk):
         """
         Process a single text chunk and add it to the HLS playlist.
@@ -306,7 +243,7 @@ class StreamingTextToHLS:
         pcm_file = os.path.join(self.pcm_dir, f"{chunk_id}.pcm")
 
         # Convert text chunk to speech
-        text_to_speech(
+        self.text_chunk_to_speech(
             text_chunk,
             pcm_file,
             language=self.language,
@@ -346,7 +283,7 @@ class StreamingTextToHLS:
                         f.startswith(f"{chunk_id}_segment_") and f.endswith('.ts')]
         new_segments.sort()
 
-        # Update main playlist
+        # Update the main playlist
         with open(self.playlist_path, 'a') as main_playlist:
             for segment in new_segments:
                 main_playlist.write(f"#EXTINF:{self.segment_duration}.0,\n")
@@ -372,7 +309,7 @@ class StreamingTextToHLS:
         """
         logger.info("Finalizing HLS playlist and creating MP3 file")
 
-        # Add end marker to playlist
+        # Add end marker to the playlist
         with open(self.playlist_path, 'a') as f:
             f.write("#EXT-X-ENDLIST\n")
 
@@ -407,13 +344,6 @@ class StreamingTextToHLS:
                 subprocess.run(concat_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
             except subprocess.CalledProcessError as e:
                 logger.error(f"Error concatenating PCM files: {e}")
-                # Create an empty PCM file as fallback
-                with open(concat_pcm, 'wb') as f:
-                    pass
-                logger.warning("Created empty PCM file as fallback")
-
-            # Create MP3 file from concatenated PCM
-            create_mp3_file(concat_pcm, self.mp3_file)
 
         return {
             'playlist_path': self.playlist_path,
@@ -430,6 +360,47 @@ class StreamingTextToHLS:
             # Uncomment to enable cleanup
             # shutil.rmtree(self.temp_dir)
             pass
+
+
+def process_chunks_to_hls(text: list,
+                          output_dir: str = None,
+                          segment_duration: int = 2,
+                          language: str = "en") -> dict:
+    """
+    Process text to HLS audio and MP3 file.
+
+    This function:
+    1. Converts text to speech using Google Text-to-Speech (gTTS)
+    2. Creates an HLS playlist from the audio
+    3. Creates an MP3 file from the audio
+
+    Args:
+        text (str or list): Text to convert to speech. Can be a single string or a list of text chunks.
+        output_dir (str): Path to output directory
+        segment_duration (int): Duration of each segment in seconds
+        language (str): Language code for speech synthesis
+
+    Returns:
+        dict: Information about the generated HLS stream and MP3 file
+    """
+
+    # Process as chunks using StreamingTextToHLS
+    tts = StreamingTextToHLS(
+        output_dir=output_dir,
+        segment_duration=segment_duration,
+        language=language,
+    )
+
+    if isinstance(text, str):
+        text = [text]
+
+    # Process each chunk
+    for i, chunk in enumerate(text):
+        logger.info(f"Processing chunk {i + 1}/{len(text)}")
+        tts.process_chunk(chunk)
+
+    # Finalize and return result
+    return tts.finalize()
 
 
 def main():
