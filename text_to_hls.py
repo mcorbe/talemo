@@ -91,13 +91,12 @@ class StreamingTextToHLS:
             language (str): Language code for speech synthesis
             speaker_embedding (str): Path to speaker embedding file (not used with gTTS)
         """
-        # Create temporary directory if output_dir is not provided
+        # Create a temporary directory if output_dir is not provided
         self.temp_dir = None
         if output_dir is None:
             self.temp_dir = tempfile.mkdtemp(prefix="text_to_hls_streaming_")
             output_dir = self.temp_dir
 
-        self.output_dir = output_dir
         self.segment_duration = segment_duration
         self.language = language
 
@@ -175,11 +174,11 @@ class StreamingTextToHLS:
             for audio_chunk in tts.stream():
                 ffmpeg_process.stdin.write(audio_chunk)
 
-            # Close stdin to signal end of input
+            # Close stdin to the signal end of input
             ffmpeg_process.stdin.close()
 
             # Wait for ffmpeg to finish
-            ffmpeg_process.wait()
+            ffmpeg_process.wait(timeout=10)
 
             if ffmpeg_process.returncode != 0:
                 logger.error(f"ffmpeg process returned non-zero exit code: {ffmpeg_process.returncode}")
@@ -187,7 +186,7 @@ class StreamingTextToHLS:
 
         except Exception as e:
             logger.error(f"Error streaming audio to ffmpeg: {e}")
-            # Kill ffmpeg process if it's still running
+            # Kill the ffmpeg process if it's still running
             if ffmpeg_process.poll() is None:
                 ffmpeg_process.kill()
             raise
@@ -195,55 +194,6 @@ class StreamingTextToHLS:
         logger.info(f"Converted speech to PCM format at {output_file}")
         return output_file
 
-    # def create_hls_playlist(self, input_file, output_dir, segment_duration=None):
-    #     """
-    #     Create HLS playlist from PCM audio file using ffmpeg.
-    #
-    #     Args:
-    #         input_file (str): Path to input PCM file
-    #         output_dir (str): Path to output directory
-    #         segment_duration (int): Duration of each segment in seconds
-    #
-    #     Returns:
-    #         str: Path to HLS playlist
-    #     """
-    #     if segment_duration is None:
-    #         segment_duration = self.segment_duration
-    #
-    #     logger.info(f"Creating HLS playlist from {input_file}")
-    #
-    #     # Create an output directory
-    #     os.makedirs(output_dir, exist_ok=True)
-    #
-    #     # Set paths
-    #     playlist_path = os.path.join(output_dir, "playlist.m3u8")
-    #     segment_pattern = os.path.join(output_dir, "segment_%03d.ts")
-    #
-    #     # Build ffmpeg command
-    #     ffmpeg_cmd = [
-    #         'ffmpeg',
-    #         '-f', 's16le',  # Input format: signed 16-bit little-endian
-    #         '-ar', '24000',  # Sample rate: 24kHz (XTTS-v2 output rate)
-    #         '-ac', '1',  # Channels: mono
-    #         '-i', input_file,  # Input file
-    #
-    #         # HLS output
-    #         '-c:a', 'aac',  # Audio codec: AAC
-    #         '-b:a', '128k',  # Bitrate: 128kbps
-    #         '-f', 'hls',  # Format: HLS
-    #         '-hls_time', str(segment_duration),  # Segment duration
-    #         '-hls_list_size', '0',  # Include all segments in playlist
-    #         '-hls_segment_type', 'mpegts',  # Segment type: MPEG-TS
-    #         '-hls_segment_filename', segment_pattern,  # Segment filename pattern
-    #         playlist_path  # Playlist path
-    #     ]
-    #
-    #     # Run ffmpeg
-    #     logger.info(f"Running ffmpeg command: {' '.join(ffmpeg_cmd)}")
-    #     subprocess.run(ffmpeg_cmd, check=True)
-    #
-    #     logger.info(f"HLS playlist created at {playlist_path}")
-    #     return playlist_path
 
     def process_chunk(self, text_chunk):
         """
