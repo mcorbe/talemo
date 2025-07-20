@@ -56,6 +56,23 @@ class StreamingHLSWriter:
         Start a single long-lived ffmpeg process for HLS streaming.
         """
         logger.info("Starting ffmpeg process for HLS streaming")
+        
+        ffmpeg_cmd = [
+            "ffmpeg", "-hide_banner", "-loglevel", "info",
+            "-f", "mp3", "-i", "pipe:0",
+            "-c:a", "aac", "-b:a", "128k",
+            "-f", "hls",
+            "-hls_time", "2",
+            "-hls_list_size", "10",
+            "-hls_flags", 
+              "delete_segments+append_list+independent_segments+program_date_time",
+            "-hls_segment_type", "fmp4",
+            "-hls_init_time", "0.5",
+            "-hls_allow_cache", "1",
+            "-hls_playlist_type", "event",
+            "-hls_segment_filename", os.path.join(self.hls_dir, "segment_%03d.m4s"),
+            os.path.join(self.hls_dir, "audio.m3u8"),  # Removed master playlist
+        ]
 
         # Ensure the output directory exists
         os.makedirs(self.hls_dir, exist_ok=True)
@@ -65,23 +82,7 @@ class StreamingHLSWriter:
             logger.error(f"Output directory {self.hls_dir} is not writable")
             raise RuntimeError(f"Output directory {self.hls_dir} is not writable")
 
-        ffmpeg_cmd = [
-            "ffmpeg", "-hide_banner", "-loglevel", "info",
-            "-f", "mp3", "-i", "pipe:0",
-            "-c:a", "aac", "-b:a", "128k",
-            "-f", "hls",
-            "-hls_time", "2",             # Increased from 0.5 to 2 seconds for better buffering
-            "-hls_list_size", "10",       # Increased from 6 to 10 segments
-            "-hls_flags", 
-              "delete_segments+append_list+independent_segments+program_date_time",
-            "-hls_segment_type", "fmp4",
-            "-hls_init_time", "0.5",      # Increased from 0.01 to 0.5 for better initial buffer
-            "-hls_allow_cache", "1",      # Enable caching
-            "-hls_playlist_type", "event",
-            "-hls_segment_filename", os.path.join(self.hls_dir, "segment_%03d.m4s"),
-            "-master_pl_name", "master.m3u8",
-            os.path.join(self.hls_dir, "audio.m3u8"),
-        ]
+        
 
         # Start the ffmpeg process and capture stderr
         logger.info(f"Running ffmpeg command: {' '.join(ffmpeg_cmd)}")
@@ -410,19 +411,6 @@ class StreamingHLSWriter:
                 f.write("#EXT-X-ENDLIST\n")
 
             logger.info(f"Created minimal valid HLS playlist at {playlist_path}")
-
-            # Also create a master playlist if it doesn't exist
-            master_path = os.path.join(self.hls_dir, "master.m3u8")
-            if not os.path.exists(master_path):
-                try:
-                    with open(master_path, 'w') as f:
-                        f.write("#EXTM3U\n")
-                        f.write("#EXT-X-VERSION:7\n")
-                        f.write(f"#EXT-X-STREAM-INF:BANDWIDTH=128000,CODECS=\"mp4a.40.2\"\n")
-                        f.write("audio.m3u8\n")
-                    logger.info(f"Created master playlist at {master_path}")
-                except Exception as e:
-                    logger.error(f"Error creating master playlist: {str(e)}")
 
         except Exception as e:
             logger.error(f"Error creating minimal playlist: {str(e)}")

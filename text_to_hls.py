@@ -130,7 +130,6 @@ class StreamingTextToHLS:
             "-hls_init_time", "0.1",
             "-hls_list_size", "6",
             "-hls_allow_cache", "0",
-            "-master_pl_name", "master.m3u8",
             os.path.join(self.hls_dir, "audio.m3u8"),
         ]
         
