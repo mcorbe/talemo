@@ -188,13 +188,6 @@ class StreamingHLSWriter:
         """
         logger.info("Finalizing HLS playlist")
 
-        # Check if the ffmpeg process was recently restarted
-        if self.ffmpeg_process and self.ffmpeg_process.poll() is None:
-            # If the process is running, give it some time to create the playlist file
-            import time
-            logger.info("Giving ffmpeg process some time to create the playlist file and segments")
-            time.sleep(3.0)  # Wait for 3 seconds to allow ffmpeg to create the playlist file and segments
-
         if self.ffmpeg_process:
             # Close stdin to the signal end of input
             if self.ffmpeg_stdin:
