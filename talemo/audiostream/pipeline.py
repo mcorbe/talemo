@@ -20,19 +20,32 @@ def run_audio_session(prompt, playlist_path, lang="en", chunk_words=40,
                 # Use a smaller chunk size for the first chunk to start audio faster
                 if tok.endswith(('.', '!', '?')) or (first_chunk and len(buf) >= 10) or len(buf) >= chunk_words:
                     try:
-                        # Check if ffmpeg process is still running
-                        if writer.ffmpeg_process is None or writer.ffmpeg_process.poll() is not None:
-                            logger.warning("ffmpeg process is not running, restarting it")
+                        # Check if ffmpeg process is still running or stdin is closed
+                        if (writer.ffmpeg_process is None or 
+                            writer.ffmpeg_process.poll() is not None or 
+                            writer.ffmpeg_stdin is None or 
+                            writer.ffmpeg_stdin.closed):
+                            logger.warning("ffmpeg process is not running or stdin is closed, restarting it")
                             writer._start_ffmpeg_process()
 
+                            # Double-check that the process started successfully
+                            if (writer.ffmpeg_process is None or 
+                                writer.ffmpeg_process.poll() is not None or 
+                                writer.ffmpeg_stdin is None or 
+                                writer.ffmpeg_stdin.closed):
+                                logger.error("Failed to restart ffmpeg process")
+                                continue
+
                         # Process the text chunk
-                        if writer.ffmpeg_stdin and not writer.ffmpeg_stdin.closed:
+                        try:
                             tts.speak_chunk_to_ffmpeg(' '.join(buf), lang, writer.ffmpeg_stdin)
                             buf.clear()
                             progress_cb("chunk")
                             first_chunk = False
-                        else:
-                            logger.warning("Cannot process chunk: ffmpeg stdin is closed or None")
+                        except Exception as e:
+                            logger.error(f"Error in speak_chunk_to_ffmpeg: {str(e)}")
+                            # Try to restart ffmpeg if there was an error
+                            writer._start_ffmpeg_process()
                     except Exception as e:
                         logger.error(f"Error processing chunk: {str(e)}")
                         # Continue with the next chunk
@@ -40,16 +53,31 @@ def run_audio_session(prompt, playlist_path, lang="en", chunk_words=40,
             # Process any remaining text
             if buf:
                 try:
-                    # Check if ffmpeg process is still running
-                    if writer.ffmpeg_process is None or writer.ffmpeg_process.poll() is not None:
-                        logger.warning("ffmpeg process is not running, restarting it")
+                    # Check if ffmpeg process is still running or stdin is closed
+                    if (writer.ffmpeg_process is None or 
+                        writer.ffmpeg_process.poll() is not None or 
+                        writer.ffmpeg_stdin is None or 
+                        writer.ffmpeg_stdin.closed):
+                        logger.warning("ffmpeg process is not running or stdin is closed, restarting it")
                         writer._start_ffmpeg_process()
 
+                        # Double-check that the process started successfully
+                        if (writer.ffmpeg_process is None or 
+                            writer.ffmpeg_process.poll() is not None or 
+                            writer.ffmpeg_stdin is None or 
+                            writer.ffmpeg_stdin.closed):
+                            logger.error("Failed to restart ffmpeg process for final chunk")
+                            # Skip processing the final chunk
+                            buf.clear()
+
                     # Process the remaining text
-                    if writer.ffmpeg_stdin and not writer.ffmpeg_stdin.closed:
+                    try:
                         tts.speak_chunk_to_ffmpeg(' '.join(buf), lang, writer.ffmpeg_stdin)
-                    else:
-                        logger.warning("Cannot process final chunk: ffmpeg stdin is closed or None")
+                        buf.clear()
+                    except Exception as e:
+                        logger.error(f"Error in speak_chunk_to_ffmpeg for final chunk: {str(e)}")
+                        # Try to restart ffmpeg if there was an error
+                        writer._start_ffmpeg_process()
                 except Exception as e:
                     logger.error(f"Error processing final chunk: {str(e)}")
         except Exception as e:

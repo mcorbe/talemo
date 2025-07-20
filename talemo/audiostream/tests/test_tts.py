@@ -1,61 +1,16 @@
-from gtts import gTTS
-import logging
-import io
-import time
 import os
 import sys
+import logging
 import subprocess
 import tempfile
+from audiostream import tts
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-def speak_chunk_to_ffmpeg(text: str, lang: str, ffmpeg_stdin):
-    if not text.strip():
-        logger.warning("Empty text received, skipping TTS")
-        return
-
-    if ffmpeg_stdin.closed:
-        logger.error("Cannot write to ffmpeg: stdin is closed")
-        return
-
-    try:
-        logger.info(f"Converting text to speech: '{text[:50]}{'...' if len(text) > 50 else ''}'")
-
-        # Create a gTTS object
-        tts = gTTS(text=text, lang=lang, slow=False)
-
-        # First, try to get the full MP3 data to validate it
-        mp3_data = io.BytesIO()
-        tts.write_to_fp(mp3_data)
-        mp3_data.seek(0)
-        data = mp3_data.read()
-
-        if not data:
-            logger.error("gTTS generated empty MP3 data")
-            return
-
-        logger.info(f"Generated {len(data)} bytes of MP3 data")
-
-        # Write the data to ffmpeg's stdin
-        ffmpeg_stdin.write(data)
-        ffmpeg_stdin.flush()
-
-        # Small delay to allow ffmpeg to process the data
-        time.sleep(0.1)
-
-        logger.info("Successfully wrote MP3 data to ffmpeg")
-    except BrokenPipeError:
-        logger.error("BrokenPipeError: ffmpeg process may have terminated unexpectedly")
-        # Don't re-raise the exception, just log it and continue
-    except Exception as e:
-        logger.error(f"Error in speak_chunk_to_ffmpeg: {str(e)}")
-        # Don't re-raise other exceptions either, just log them
 
 def test_speak_chunk_to_ffmpeg():
     """Test that the speak_chunk_to_ffmpeg function works correctly."""
-    # Set up logging
-    logging.basicConfig(level=logging.INFO)
-
     # Create a temporary directory for the output
     with tempfile.TemporaryDirectory() as temp_dir:
         # Set up ffmpeg command to create an MP3 file
@@ -81,7 +36,7 @@ def test_speak_chunk_to_ffmpeg():
 
         # Call the speak_chunk_to_ffmpeg function
         logger.info(f"Converting text to speech: '{test_text}'")
-        speak_chunk_to_ffmpeg(test_text, "en", ffmpeg_process.stdin)
+        tts.speak_chunk_to_ffmpeg(test_text, "en", ffmpeg_process.stdin)
 
         # Close stdin to signal end of input
         ffmpeg_process.stdin.close()

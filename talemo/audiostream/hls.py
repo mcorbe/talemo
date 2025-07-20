@@ -60,19 +60,25 @@ class StreamingHLSWriter:
         # Ensure the output directory exists
         os.makedirs(self.hls_dir, exist_ok=True)
 
+        # Check if the directory is writable
+        if not os.access(self.hls_dir, os.W_OK):
+            logger.error(f"Output directory {self.hls_dir} is not writable")
+            raise RuntimeError(f"Output directory {self.hls_dir} is not writable")
+
         ffmpeg_cmd = [
             "ffmpeg", "-hide_banner", "-loglevel", "info",  # Changed to info for more debug info
             "-f", "mp3", "-i", "pipe:0",
             "-c:a", "aac", "-b:a", "128k",
             "-f", "hls",
-            "-hls_time", "1",
+            "-hls_time", "0.5",  # Shorter segments for faster creation
             "-hls_flags",
-              "delete_segments+append_list+independent_segments+program_date_time+low_latency",
+              "delete_segments+append_list+independent_segments+program_date_time",  # Removed low_latency flag which might cause issues
             "-hls_segment_type", "fmp4",
             "-hls_init_time", "0.01",
             "-hls_list_size", "6",
             "-hls_allow_cache", "0",
             "-hls_playlist_type", "event",
+            "-hls_segment_filename", os.path.join(self.hls_dir, "segment_%03d.m4s"),  # Explicitly specify segment filename pattern
             "-master_pl_name", "master.m3u8",
             os.path.join(self.hls_dir, "audio.m3u8"),
         ]
@@ -186,8 +192,8 @@ class StreamingHLSWriter:
         if self.ffmpeg_process and self.ffmpeg_process.poll() is None:
             # If the process is running, give it some time to create the playlist file
             import time
-            logger.info("Giving ffmpeg process some time to create the playlist file")
-            time.sleep(1.0)  # Wait for 1 second to allow ffmpeg to create the playlist file
+            logger.info("Giving ffmpeg process some time to create the playlist file and segments")
+            time.sleep(3.0)  # Wait for 3 seconds to allow ffmpeg to create the playlist file and segments
 
         if self.ffmpeg_process:
             # Close stdin to the signal end of input
@@ -206,10 +212,20 @@ class StreamingHLSWriter:
             logger.warning(f"Playlist file not found at {playlist_path}, creating a minimal valid playlist")
             self._create_minimal_playlist(playlist_path)
 
+        # Check for segment files and log them
+        segment_files = [f for f in os.listdir(self.hls_dir) if f.endswith('.m4s') or f.startswith('segment_')]
+        if segment_files:
+            logger.info(f"Found {len(segment_files)} segment files: {', '.join(segment_files)}")
+        else:
+            logger.warning(f"No segment files found in {self.hls_dir}")
+            # List all files in the directory for debugging
+            all_files = os.listdir(self.hls_dir)
+            logger.info(f"Files in directory: {', '.join(all_files) if all_files else 'none'}")
+
         return {
             'playlist_path': playlist_path,
             'hls_dir': self.hls_dir,
-            'segment_count': len([f for f in os.listdir(self.hls_dir) if f.endswith('.m4s')]),
+            'segment_count': len(segment_files),
             'chunk_count': self.chunk_count
         }
 
@@ -237,7 +253,7 @@ class StreamingHLSWriter:
 
                 # Check if we have any segment files
                 try:
-                    segment_files = [f for f in os.listdir(self.hls_dir) if f.endswith('.m4s')]
+                    segment_files = [f for f in os.listdir(self.hls_dir) if f.endswith('.m4s') or f.startswith('segment_')]
                 except Exception as e:
                     logger.error(f"Error listing directory {self.hls_dir}: {str(e)}")
                     segment_files = []
