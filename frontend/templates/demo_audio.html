@@ -144,7 +144,6 @@ async function checkTaskStatus(taskId) {
   }
 }
 
-// Function to initialize player with playlist URL
 function initializePlayer(playlistUrl) {
   const video = document.getElementById('player');
 
@@ -155,19 +154,23 @@ function initializePlayer(playlistUrl) {
   // Use HLS.js if it's supported
   if (Hls.isSupported()) {
     const hls = new Hls({
-      // Low latency mode configuration
-      lowLatencyMode: true,
-      // Reduce initial buffering time
-      maxBufferLength: 1,
-      maxMaxBufferLength: 2,
-      // Faster segment loading
-      maxBufferHole: 0.1,
-      // Faster startup
-      maxFragLookUpTolerance: 0.1,
-      // Start playing as soon as possible
-      startLevel: 0,
-      // Faster segment switching
-      liveSyncDurationCount: 1
+      debug: false,
+      enableWorker: true,
+      lowLatencyMode: false,         // Disable low latency mode for better buffering
+      maxBufferLength: 30,           // Maximum buffer length in seconds
+      maxMaxBufferLength: 600,       // Maximum buffer length limit
+      maxBufferSize: 60 * 1000000,  // Maximum buffer size in bytes
+      maxBufferHole: 0.5,           // Maximum buffer holes to jump
+      highBufferWatchdogPeriod: 2,  // Increased watchdog period
+      nudgeOffset: 0.2,             // Reduced nudge offset
+      startFragPrefetch: true,      // Enable fragment prefetching
+      manifestLoadingTimeOut: 10000, // Increased timeout for manifest loading
+      manifestLoadingMaxRetry: 4,    // Increased retry attempts
+      manifestLoadingRetryDelay: 500, // Initial retry delay
+      levelLoadingTimeOut: 10000,    // Increased timeout for level loading
+      fragLoadingTimeOut: 20000,     // Increased timeout for fragment loading
+      backBufferLength: 90,          // Length of back buffer in seconds
+      abrEwmaDefaultEstimate: 500000 // Default bandwidth estimate
     });
 
     hls.loadSource(absolutePlaylistUrl);
@@ -179,7 +182,10 @@ function initializePlayer(playlistUrl) {
     hls.on(Hls.Events.MANIFEST_PARSED, function() {
       const manifestTime = performance.now();
       updateStatus(`Manifest loaded. Starting playback...`, 'loading');
-      video.play();
+      video.play().catch(error => {
+        console.warn('Playback failed to start:', error);
+        updateStatus(`Playback failed to start: ${error.message}`, 'error');
+      });
     });
 
     hls.on(Hls.Events.FRAG_LOADED, function() {
@@ -197,8 +203,11 @@ function initializePlayer(playlistUrl) {
 
     // Handle errors
     hls.on(Hls.Events.ERROR, function(event, data) {
-      updateStatus(`Error: ${data.details}`, 'error');
       console.error('HLS error:', data);
+      // Only update status for fatal errors or after multiple non-fatal errors
+      if (data.fatal || data.type === 'mediaError') {
+        updateStatus(`HLS error: ${data.details}`, 'error');
+      }
     });
   }
   // Fallback to native HLS support if available

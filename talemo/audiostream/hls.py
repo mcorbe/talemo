@@ -66,19 +66,19 @@ class StreamingHLSWriter:
             raise RuntimeError(f"Output directory {self.hls_dir} is not writable")
 
         ffmpeg_cmd = [
-            "ffmpeg", "-hide_banner", "-loglevel", "info",  # Changed to info for more debug info
+            "ffmpeg", "-hide_banner", "-loglevel", "info",
             "-f", "mp3", "-i", "pipe:0",
             "-c:a", "aac", "-b:a", "128k",
             "-f", "hls",
-            "-hls_time", "0.5",  # Shorter segments for faster creation
-            "-hls_flags",
-              "delete_segments+append_list+independent_segments+program_date_time",  # Removed low_latency flag which might cause issues
+            "-hls_time", "2",             # Increased from 0.5 to 2 seconds for better buffering
+            "-hls_list_size", "10",       # Increased from 6 to 10 segments
+            "-hls_flags", 
+              "delete_segments+append_list+independent_segments+program_date_time",
             "-hls_segment_type", "fmp4",
-            "-hls_init_time", "0.01",
-            "-hls_list_size", "6",
-            "-hls_allow_cache", "0",
+            "-hls_init_time", "0.5",      # Increased from 0.01 to 0.5 for better initial buffer
+            "-hls_allow_cache", "1",      # Enable caching
             "-hls_playlist_type", "event",
-            "-hls_segment_filename", os.path.join(self.hls_dir, "segment_%03d.m4s"),  # Explicitly specify segment filename pattern
+            "-hls_segment_filename", os.path.join(self.hls_dir, "segment_%03d.m4s"),
             "-master_pl_name", "master.m3u8",
             os.path.join(self.hls_dir, "audio.m3u8"),
         ]
@@ -88,8 +88,8 @@ class StreamingHLSWriter:
         self.ffmpeg_process = subprocess.Popen(
             ffmpeg_cmd,
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,  # Capture stdout
-            stderr=subprocess.PIPE   # Capture stderr for debugging
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
         self.ffmpeg_stdin = self.ffmpeg_process.stdin
 
