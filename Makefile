@@ -53,7 +53,7 @@ help:
 	@echo "$(GREEN)make build-<container>$(NC)      - Build a specific container (e.g., make build-celery)"
 	@echo ""
 	@echo "$(YELLOW)Application Commands:$(NC)"
-	@echo "$(GREEN)make init$(NC)                   - Initialize the application (build, start, setup dev environment, create superuser)"
+	@echo "$(GREEN)make init$(NC)                   - Initialize the application (build, start, setup dev environment)"
 	@echo "$(GREEN)make migrate$(NC)                - Apply database migrations"
 	@echo "$(GREEN)make migrations$(NC)             - Create database migrations"
 	@echo "$(GREEN)make superuser$(NC)              - Create a superuser"
@@ -132,7 +132,7 @@ pgvector:
 
 # Django commands
 .PHONY: init
-init: build up setup-dev superuser
+init: build up setup-dev
 	@echo "$(GREEN)Application initialized!$(NC)"
 
 .PHONY: migrate

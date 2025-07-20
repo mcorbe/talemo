@@ -3,6 +3,15 @@ FROM python:3.11-slim
 # Set work directory
 WORKDIR /app
 
+# Install system dependencies including ffmpeg
+RUN apt-get update
+RUN apt-get install -y ffmpeg
+RUN rm -rf /var/lib/apt/lists/*
+
+
+# Create media/hls directory and set permissions
+RUN mkdir -p /app/media/hls && chmod -R 777 /app/media
+
 # Install Python dependencies
 COPY requirements/requirements-ai.txt requirements/requirements-ai.txt
 COPY requirements/requirements-base.txt  requirements/requirements-base.txt

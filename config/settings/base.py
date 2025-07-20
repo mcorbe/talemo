@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     # Local apps
     "talemo.stories",
     "talemo.agents",
+    "talemo.audiostream.apps.AudiostreamConfig",
 ]
 
 MIDDLEWARE = [
@@ -144,6 +145,7 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_ALWAYS_EAGER = False
+CELERY_TASK_ROUTES = {"talemo.audiostream.tasks.*": {"queue": "celery"}}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -182,9 +184,17 @@ EMAIL_USE_TLS = False
 DEFAULT_FROM_EMAIL = "noreply@talemo.local"
 
 # AI Services
-OPENAI_API_BASE = os.environ.get("OPENAI_API_BASE", "")
-OPENAI_MODEL_NAME = os.environ.get("OPENAI_MODEL_NAME",  "")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+LLM_API_BASE = os.environ.get("LLM_API_BASE", "")
+LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME",  "")
+LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
+
+# Media files
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL  = "/media/"
+
+# HLS Streaming
+HLS_ROOT = os.path.join(BASE_DIR, "media", "hls")
+HLS_URL = "/media/hls/"
 
 
 STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY", "")

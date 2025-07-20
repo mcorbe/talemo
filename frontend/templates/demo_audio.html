@@ -1,0 +1,293 @@
+<!doctype html><html><body>
+<style>
+  /* Style the video element to look like an audio player */
+  #player {
+    width: 100%;
+    height: 50px;
+    background-color: #f0f0f0;
+  }
+
+  /* Status indicator styles */
+  #status {
+    margin-top: 10px;
+    padding: 5px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  .loading {
+    display: block !important;
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .playing {
+    display: block !important;
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .error {
+    display: block !important;
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  /* Progress indicator styles */
+  .progress-container {
+    margin-top: 15px;
+    width: 100%;
+    display: none;
+  }
+
+  .progress-bar {
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-indicator {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .progress-text {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #555;
+  }
+</style>
+
+<textarea id="prompt" rows="6" cols="60">Hello!</textarea>
+<button id="go">Start</button>
+<video id="player" controls></video>
+<div id="status"></div>
+<div id="progress" class="progress-container">
+  <div class="progress-bar">
+    <div id="progress-indicator" class="progress-indicator"></div>
+  </div>
+  <div id="progress-text" class="progress-text">Waiting to start...</div>
+</div>
+
+<!-- Include HLS.js for better browser compatibility and low-latency options -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+// Function to update status with timing information
+function updateStatus(message, className) {
+  const statusEl = document.getElementById('status');
+  statusEl.textContent = message;
+  statusEl.className = className;
+}
+
+// Function to update progress indicator
+function updateProgress(percent, message) {
+  const progressContainer = document.getElementById('progress');
+  const progressIndicator = document.getElementById('progress-indicator');
+  const progressText = document.getElementById('progress-text');
+
+  // Show progress container
+  progressContainer.style.display = 'block';
+
+  // Update progress indicator width
+  progressIndicator.style.width = `${percent}%`;
+
+  // Update progress text
+  progressText.textContent = message;
+}
+
+// Function to check task status
+async function checkTaskStatus(taskId) {
+  try {
+    const response = await fetch(`/audiostream/task-status/${taskId}/`);
+    const data = await response.json();
+
+    // Log the response for debugging
+    console.log('Task status:', data);
+
+    // Handle different states
+    if (data.state === 'PENDING') {
+      updateProgress(10, 'Task is pending...');
+      return false; // Not complete
+    } else if (data.state === 'PROGRESS') {
+      // Calculate progress based on number of chunks processed
+      // This is a simple approximation, you might want to adjust based on your needs
+      const event = data.event || 'unknown';
+      if (event === 'chunk') {
+        // Increment progress for each chunk, max 90%
+        const chunkCount = data.chunk_count || 1;
+        const percent = Math.min(10 + (chunkCount * 5), 90);
+        updateProgress(percent, `Processing chunk ${chunkCount}...`);
+      } else {
+        updateProgress(50, 'Task is in progress...');
+      }
+      return false; // Not complete
+    } else if (data.state === 'SUCCESS') {
+      updateProgress(100, 'Task completed successfully!');
+      return data; // Complete with data
+    } else if (data.state === 'FAILURE') {
+      updateProgress(100, `Task failed: ${data.error}`);
+      updateStatus(`Error: ${data.error}`, 'error');
+      return false; // Not complete, but failed
+    } else {
+      updateProgress(50, `Unknown state: ${data.state}`);
+      return false; // Not complete
+    }
+  } catch (error) {
+    console.error('Error checking task status:', error);
+    updateStatus(`Error checking task status: ${error.message}`, 'error');
+    return false; // Not complete
+  }
+}
+
+// Function to initialize player with playlist URL
+function initializePlayer(playlistUrl) {
+  const video = document.getElementById('player');
+
+  // Convert relative URL to absolute URL using origin as base
+  const absolutePlaylistUrl = new URL(playlistUrl, window.location.origin).href;
+  console.log('Playlist URL:', absolutePlaylistUrl);
+
+  // Use HLS.js if it's supported
+  if (Hls.isSupported()) {
+    const hls = new Hls({
+      // Low latency mode configuration
+      lowLatencyMode: true,
+      // Reduce initial buffering time
+      maxBufferLength: 1,
+      maxMaxBufferLength: 2,
+      // Faster segment loading
+      maxBufferHole: 0.1,
+      // Faster startup
+      maxFragLookUpTolerance: 0.1,
+      // Start playing as soon as possible
+      startLevel: 0,
+      // Faster segment switching
+      liveSyncDurationCount: 1
+    });
+
+    hls.loadSource(absolutePlaylistUrl);
+    hls.attachMedia(video);
+
+    // Track when playback actually starts
+    let playbackStarted = false;
+
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      const manifestTime = performance.now();
+      updateStatus(`Manifest loaded. Starting playback...`, 'loading');
+      video.play();
+    });
+
+    hls.on(Hls.Events.FRAG_LOADED, function() {
+      if (!playbackStarted) {
+        updateStatus(`First fragment loaded`, 'loading');
+      }
+    });
+
+    video.addEventListener('playing', function() {
+      if (!playbackStarted) {
+        playbackStarted = true;
+        updateStatus(`Audio playing`, 'playing');
+      }
+    });
+
+    // Handle errors
+    hls.on(Hls.Events.ERROR, function(event, data) {
+      updateStatus(`Error: ${data.details}`, 'error');
+      console.error('HLS error:', data);
+    });
+  }
+  // Fallback to native HLS support if available
+  else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = absolutePlaylistUrl;
+
+    video.addEventListener('loadedmetadata', function() {
+      updateStatus(`Metadata loaded. Starting playback...`, 'loading');
+      video.play();
+    });
+
+    video.addEventListener('playing', function() {
+      updateStatus(`Audio playing`, 'playing');
+    });
+
+    video.addEventListener('error', function() {
+      updateStatus(`Error: ${video.error.message || 'Unknown error'}`, 'error');
+    });
+  }
+}
+
+document.getElementById('go').onclick = async () => {
+  const startTime = performance.now();
+  updateStatus('Sending request...', 'loading');
+
+  try {
+    const r = await fetch('/audiostream/start/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json',
+               'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || ['', ''])[1]},
+      body:JSON.stringify({prompt:document.getElementById('prompt').value})
+    });
+
+    const requestEndTime = performance.now();
+    updateStatus(`Request completed in ${Math.round(requestEndTime - startTime)}ms. Processing audio...`, 'loading');
+
+    const response = await r.json();
+
+    // Check if task_id property exists in the response
+    if (!response.task_id) {
+      updateStatus('Error: No task ID in response', 'error');
+      console.error('Response does not contain task ID:', response);
+      return;
+    }
+
+    // Show initial progress
+    updateProgress(5, 'Starting audio generation...');
+
+    // Poll for task status every second
+    const taskId = response.task_id;
+    const pollInterval = setInterval(async () => {
+      const taskResult = await checkTaskStatus(taskId);
+
+      // If task is complete and successful
+      if (taskResult && taskResult.state === 'SUCCESS') {
+        clearInterval(pollInterval);
+
+        // Get the playlist URL from the task result
+        let playlistUrl;
+        if (taskResult.playlist) {
+          playlistUrl = taskResult.playlist;
+        } else if (taskResult.result && taskResult.result.playlist) {
+          playlistUrl = taskResult.result.playlist;
+        } else if (response.playlist) {
+          // Fallback to the playlist URL from the initial response
+          playlistUrl = response.playlist;
+        }
+
+        if (!playlistUrl) {
+          updateStatus('Error: No playlist URL available', 'error');
+          console.error('No playlist URL in task result or initial response:', taskResult, response);
+          return;
+        }
+
+        // Initialize the player with the playlist URL
+        initializePlayer(playlistUrl);
+      } 
+      // If task failed
+      else if (taskResult && taskResult.state === 'FAILURE') {
+        clearInterval(pollInterval);
+        // Error is already handled in checkTaskStatus
+      }
+      // Otherwise continue polling
+    }, 1000);
+
+  } catch (error) {
+    updateStatus(`Error: ${error.message}`, 'error');
+    console.error('Error:', error);
+  }
+};
+</script>
+</body></html>
