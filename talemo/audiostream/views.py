@@ -2,6 +2,7 @@ import os
 import logging
 import traceback
 import sys
+import uuid
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -47,12 +48,15 @@ def start_audio_session(request):
 
     if run_async:
         try:
-            logger.info(f"Calling generate_audio_stream.delay with prompt: {prompt}, lang: {lang}")
-            async_res = generate_audio_stream.delay(prompt, lang)
+            # Use the task ID as the session ID to ensure they match
+            session_id = uuid.uuid4().hex
+            logger.info(f"Generated session ID: {session_id}")
+
+            logger.info(f"Calling generate_audio_stream.delay with prompt: {prompt}, lang: {lang}, session_id: {session_id}")
+            async_res = generate_audio_stream.delay(prompt, lang, session_id)
             logger.info(f"generate_audio_stream.delay returned: {async_res}")
 
             # If we get here, Celery is working
-            session_id = async_res.id
         except Exception as e:
             # If there's an error, fall back to synchronous execution
             logger.warning(f"Error calling generate_audio_stream.delay: {str(e)}")
@@ -67,49 +71,42 @@ def start_audio_session(request):
 
         # Run the task synchronously
         try:
-            result = repr((prompt, lang, session_id))
+            # Call the task directly with the session ID
+            result = generate_audio_stream(prompt, lang, session_id)
             logger.info(f"Synchronous execution result: {result}")
         except Exception as e:
             logger.error(f"Error in synchronous execution: {str(e)}")
             # Return an error response
             return Response({"error": str(e)}, status=500)
 
-    # Construct the playlist URL
-    playlist_url = f"{settings.HLS_URL}{session_id}/audio.m3u8"
+    # For async execution, we need to get the actual HLS session ID from the task result
+    if run_async:
+        if async_res.ready():                       # ← cheap, non-blocking
+            try:
+                task_result = async_res.get(timeout=0)
+                if isinstance(task_result, dict) and "playlist" in task_result:
+                    playlist_url = task_result["playlist"]
+                    logger.info(f"Got playlist URL from task result: {playlist_url}")
+                else:
+                    # fall back – same as before
+                    playlist_url = f"{settings.HLS_URL}{session_id}/audio.m3u8"
+                    logger.warning(f"Task result doesn't contain playlist URL, using fallback: {playlist_url}")
+            except Exception as exc:
+                logger.warning(f"Could not read result: {exc}")
+                playlist_url = f"{settings.HLS_URL}{session_id}/audio.m3u8"
+                logger.warning(f"Using fallback playlist URL due to error: {playlist_url}")
+        else:
+            # Task still running → fall back to deterministic URL
+            playlist_url = f"{settings.HLS_URL}{session_id}/audio.m3u8"
+            logger.info(f"Task still running, using deterministic playlist URL: {playlist_url}")
+    else:
+        # For synchronous execution, we need to construct the URL ourselves
+        # This is not ideal, but it's better than nothing
+        playlist_url = f"{settings.HLS_URL}{session_id}/audio.m3u8"
+        logger.warning(f"Using fallback playlist URL for synchronous execution: {playlist_url}")
 
     # Log the playlist URL for debugging
-    logger.info(f"Generated playlist URL: {playlist_url}")
-
-    # Check if we need to use an alternative URL
-    try:
-        # First, check if the Docker container path exists and is accessible
-        docker_hls_dir = f"/app/media/hls/{session_id}"
-        if os.path.exists(docker_hls_dir) and os.access(docker_hls_dir, os.R_OK):
-            logger.info(f"Docker container HLS directory exists and is readable: {docker_hls_dir}")
-            # Use the standard URL, which should work with the Docker container path
-            playlist_url = f"{settings.HLS_URL}{session_id}/audio.m3u8"
-            logger.info(f"Using standard playlist URL for Docker container: {playlist_url}")
-        else:
-            # Check if the media directory exists and is accessible
-            media_dir = os.path.join(settings.MEDIA_ROOT, 'hls')
-            if not os.path.exists(media_dir) or not os.access(media_dir, os.R_OK):
-                logger.warning(f"Media directory {media_dir} does not exist or is not readable")
-
-                # Check if there's a temporary directory being used
-                import tempfile
-                temp_dir = tempfile.gettempdir()
-                for dir_name in os.listdir(temp_dir):
-                    if dir_name.startswith('hls_'):
-                        # Found a temporary HLS directory, use it for the URL
-                        temp_hls_dir = os.path.join(temp_dir, dir_name)
-                        if os.path.isdir(temp_hls_dir):
-                            # Use a URL that will be handled by the static file server
-                            # Use session_id instead of async_res.id to handle both async and sync cases
-                            playlist_url = f"/temp_hls/{dir_name}/{session_id}/audio.m3u8"
-                            logger.info(f"Using alternative playlist URL: {playlist_url}")
-                            break
-    except Exception as e:
-        logger.error(f"Error checking for alternative URL: {str(e)}")
+    logger.info(f"Final playlist URL: {playlist_url}")
 
     return Response({
         "session_id": session_id,

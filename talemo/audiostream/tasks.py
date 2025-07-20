@@ -71,8 +71,20 @@ def generate_audio_stream(self, prompt, lang="en", session_id=None,
     else:
         logger.warning(f"Playlist file not created by FFmpeg yet: {playlist_path}, which is unexpected with temp_file flag")
 
+    from .utils import safe_update_state          #  add
+
     def progress(evt, meta=None):
-        self.update_state(state="PROGRESS", meta={"event":evt, **(meta or {})})
+        """
+        Forward progress information to Celery from the HLS-writer thread.
+        We *must* pass the current task id because in the background
+        thread celery.current_task is not set.
+        """
+        merged_meta = {"event": evt, **(meta or {})}
+        safe_update_state(
+            task_id=self.request.id,   # <-- critical!
+            state="PROGRESS",
+            meta=merged_meta,
+        )
 
     # 2. Start the actual rendering pipeline in the background
     import threading
