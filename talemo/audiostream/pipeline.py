@@ -91,22 +91,16 @@ def run_audio_session(prompt, playlist_path, lang="en", chunk_words=40,
             # Verify that the playlist file exists
             local_playlist_path = os.path.join(output_dir, "audio.m3u8")
             if not os.path.exists(local_playlist_path):
-                logger.warning(f"Playlist file still not created after finalize: {local_playlist_path}")
-                # Create a minimal playlist as a last resort
-                writer._create_minimal_playlist(local_playlist_path)
+                logger.warning(f"Playlist file still not created after finalize: {local_playlist_path}, which is unexpected with FFmpeg temp_file flag")
 
             return info
         except Exception as e:
             logger.error(f"Error finalizing HLS playlist: {str(e)}")
 
-            # Try to create a minimal playlist even if finalize fails
-            try:
-                local_playlist_path = os.path.join(output_dir, "audio.m3u8")
-                if not os.path.exists(local_playlist_path):
-                    logger.warning(f"Creating minimal playlist after finalize error: {local_playlist_path}")
-                    writer._create_minimal_playlist(local_playlist_path)
-            except Exception as inner_e:
-                logger.error(f"Error creating minimal playlist after finalize error: {str(inner_e)}")
+            # Check if the playlist file exists after finalize error
+            local_playlist_path = os.path.join(output_dir, "audio.m3u8")
+            if not os.path.exists(local_playlist_path):
+                logger.warning(f"Playlist file not found after finalize error: {local_playlist_path}, which is unexpected with FFmpeg temp_file flag")
 
             return {"error": str(e), "playlist_path": os.path.join(output_dir, "audio.m3u8")}
 

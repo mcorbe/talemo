@@ -56,22 +56,33 @@ class StreamingHLSWriter:
         Start a single long-lived ffmpeg process for HLS streaming.
         """
         logger.info("Starting ffmpeg process for HLS streaming")
-        
+
+        # FFmpeg will create the playlist with the temp_file flag
+        playlist_path = os.path.join(self.hls_dir, "audio.m3u8")
+        logger.info(f"FFmpeg will create/update playlist at {playlist_path}")
+
         ffmpeg_cmd = [
             "ffmpeg", "-hide_banner", "-loglevel", "info",
             "-f", "mp3", "-i", "pipe:0",
             "-c:a", "aac", "-b:a", "128k",
             "-f", "hls",
-            "-hls_time", "2",
+            # Shorter segments for lower latency
+            "-hls_time", "1",
             "-hls_list_size", "10",
+            # The *temp_file* flag forces ffmpeg to write to a temporary
+            # playlist, then atomically rename it – this guarantees that
+            # the file is **always present on disk** and never half-written.
+            # We also remove *delete_segments* so that old segments stay
+            # available for a short period; this is important for players
+            # that start late.
             "-hls_flags", 
-              "delete_segments+append_list+independent_segments+program_date_time",
+              "append_list+independent_segments+program_date_time+temp_file",
             "-hls_segment_type", "fmp4",
             "-hls_init_time", "0.5",
             "-hls_allow_cache", "1",
             "-hls_playlist_type", "event",
             "-hls_segment_filename", os.path.join(self.hls_dir, "segment_%03d.m4s"),
-            os.path.join(self.hls_dir, "audio.m3u8"),  # Removed master playlist
+            playlist_path,  # Use the playlist we just created
         ]
 
         # Ensure the output directory exists
@@ -81,8 +92,6 @@ class StreamingHLSWriter:
         if not os.access(self.hls_dir, os.W_OK):
             logger.error(f"Output directory {self.hls_dir} is not writable")
             raise RuntimeError(f"Output directory {self.hls_dir} is not writable")
-
-        
 
         # Start the ffmpeg process and capture stderr
         logger.info(f"Running ffmpeg command: {' '.join(ffmpeg_cmd)}")
@@ -101,6 +110,9 @@ class StreamingHLSWriter:
             stderr = self.ffmpeg_process.stderr.read().decode()
             logger.error(f"ffmpeg process failed to start: {stderr}")
             raise RuntimeError(f"ffmpeg process failed: {stderr}")
+
+        # Log the FFmpeg PID so it can be killed from the outside if needed
+        logger.info(f"FFmpeg process started with PID: {self.ffmpeg_process.pid}")
 
     def process_chunk(self, audio_data):
         """
@@ -127,20 +139,20 @@ class StreamingHLSWriter:
         if self.ffmpeg_process is None or self.ffmpeg_process.poll() is not None:
             logger.warning("ffmpeg process is not running, restarting it")
 
-            # Check if we need to create a minimal playlist before restarting
+            # The playlist should be created by FFmpeg with the temp_file flag,
+            # but check if it exists and log a warning if it doesn't
             playlist_path = os.path.join(self.hls_dir, "audio.m3u8")
             if not os.path.exists(playlist_path) and self.chunk_count > 0:
-                logger.warning(f"Playlist file not found at {playlist_path} before restart, creating a minimal valid playlist")
-                self._create_minimal_playlist(playlist_path)
+                logger.warning(f"Playlist file not found at {playlist_path} before restart, which is unexpected")
 
             self._start_ffmpeg_process()
 
             # Verify that the process started successfully
             if self.ffmpeg_process is None or self.ffmpeg_process.poll() is not None:
                 logger.error("Failed to restart ffmpeg process")
-                # Create a minimal playlist as a fallback
+                # Log a warning if the playlist file is missing
                 if not os.path.exists(playlist_path):
-                    self._create_minimal_playlist(playlist_path)
+                    logger.warning(f"Playlist file not found at {playlist_path} after restart attempt, which is unexpected")
                 return None
 
         # Check if stdin is still open
@@ -162,10 +174,10 @@ class StreamingHLSWriter:
             # Try to restart the ffmpeg process
             self._start_ffmpeg_process()
 
-            # Create a minimal playlist if needed
+            # Check if the playlist file exists after restart
             playlist_path = os.path.join(self.hls_dir, "audio.m3u8")
             if not os.path.exists(playlist_path) and self.chunk_count > 0:
-                self._create_minimal_playlist(playlist_path)
+                logger.warning(f"Playlist file not found at {playlist_path} after BrokenPipeError, which is unexpected")
 
             return None
         except Exception as e:
@@ -200,11 +212,11 @@ class StreamingHLSWriter:
             self.ffmpeg_process.wait()
             self.ffmpeg_process = None
 
-        # Check if the playlist file exists
+        # The playlist file should already exist since FFmpeg creates it immediately
+        # with the temp_file flag, but we'll log if it's missing for debugging
         playlist_path = os.path.join(self.hls_dir, "audio.m3u8")
         if not os.path.exists(playlist_path):
-            logger.warning(f"Playlist file not found at {playlist_path}, creating a minimal valid playlist")
-            self._create_minimal_playlist(playlist_path)
+            logger.warning(f"Playlist file not found at {playlist_path} after finalization, which is unexpected")
 
         # Check for segment files and log them
         segment_files = [f for f in os.listdir(self.hls_dir) if f.endswith('.m4s') or f.startswith('segment_')]
@@ -227,8 +239,8 @@ class StreamingHLSWriter:
         """
         Create a minimal valid HLS playlist file.
 
-        This is a fallback for when ffmpeg fails to create a playlist file.
-        It creates a minimal valid playlist that can be used by the client.
+        This creates an empty but syntactically valid playlist that can be served immediately.
+        The client will keep polling until new lines appear as segments are generated.
 
         Args:
             playlist_path (str): Path to the playlist file to create
@@ -237,178 +249,16 @@ class StreamingHLSWriter:
             # Ensure the directory exists
             os.makedirs(os.path.dirname(playlist_path), exist_ok=True)
 
-            # Create a minimal valid HLS playlist
+            # Create a minimal valid HLS playlist with just the header lines
             with open(playlist_path, 'w') as f:
                 f.write("#EXTM3U\n")
                 f.write("#EXT-X-VERSION:7\n")
-                f.write("#EXT-X-TARGETDURATION:2\n")
+                f.write("#EXT-X-TARGETDURATION:1\n")
                 f.write("#EXT-X-MEDIA-SEQUENCE:0\n")
                 f.write("#EXT-X-PLAYLIST-TYPE:EVENT\n")
 
-                # Check if we have any segment files
-                try:
-                    segment_files = [f for f in os.listdir(self.hls_dir) if f.endswith('.m4s') or f.startswith('segment_')]
-                except Exception as e:
-                    logger.error(f"Error listing directory {self.hls_dir}: {str(e)}")
-                    segment_files = []
-
-                # If we have segment files, add them to the playlist
-                if segment_files:
-                    # Sort segment files by name to ensure correct order
-                    segment_files.sort()
-
-                    # Add initialization segment if it exists
-                    init_file = "init.mp4"
-                    if os.path.exists(os.path.join(self.hls_dir, init_file)):
-                        f.write(f"#EXT-X-MAP:URI=\"{init_file}\"\n")
-
-                    # Add each segment to the playlist
-                    for segment in segment_files:
-                        f.write(f"#EXTINF:1.0,\n")
-                        f.write(f"{segment}\n")
-                else:
-                    # If we don't have any segment files, create a dummy segment
-                    # This ensures the playlist is valid even without actual segments
-                    logger.warning("No segment files found, creating a dummy segment in the playlist")
-                    f.write("#EXT-X-MAP:URI=\"dummy.mp4\"\n")
-                    f.write("#EXTINF:1.0,\n")
-                    f.write("dummy.m4s\n")
-
-                    # Try to create valid dummy files with minimal but valid MP4/fMP4 headers
-                    try:
-                        # Instead of trying to create valid MP4 files manually with binary data,
-                        # use ffmpeg to generate valid dummy files with silent audio
-                        import tempfile
-                        import subprocess
-
-                        # Create a temporary directory for ffmpeg output
-                        temp_dir = tempfile.mkdtemp()
-                        try:
-                            # Generate a 1-second silent audio file
-                            silent_wav = os.path.join(temp_dir, "silent.wav")
-                            ffmpeg_cmd = [
-                                "ffmpeg", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", 
-                                "-t", "1", "-q:a", "9", "-acodec", "pcm_s16le", silent_wav
-                            ]
-                            subprocess.run(ffmpeg_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-
-                            # Convert the silent audio to fMP4 format
-                            init_segment = os.path.join(self.hls_dir, "dummy.mp4")
-                            media_segment = os.path.join(self.hls_dir, "dummy.m4s")
-                            ffmpeg_cmd = [
-                                "ffmpeg", "-i", silent_wav, "-c:a", "aac", "-b:a", "48k",
-                                "-f", "mp4", "-movflags", "frag_keyframe+empty_moov+default_base_moof",
-                                "-frag_duration", "1000000", init_segment
-                            ]
-                            subprocess.run(ffmpeg_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-
-                            # Create the media segment with actual audio content
-                            ffmpeg_cmd = [
-                                "ffmpeg", "-i", silent_wav, "-c:a", "aac", "-b:a", "48k",
-                                "-f", "mp4", "-movflags", "frag_keyframe+empty_moov+default_base_moof+separate_moof",
-                                "-frag_size", "1000", 
-                                media_segment
-                            ]
-                            subprocess.run(ffmpeg_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-
-                            # Verify the files exist and have content
-                            if (os.path.exists(init_segment) and os.path.getsize(init_segment) > 0 and
-                                os.path.exists(media_segment) and os.path.getsize(media_segment) > 0):
-                                logger.info("Created valid dummy segment files using ffmpeg")
-                            else:
-                                raise Exception("Created files are empty or don't exist")
-                        except Exception as ffmpeg_e:
-                            logger.error(f"Error using ffmpeg to create dummy files: {str(ffmpeg_e)}")
-
-                            # Fallback to pre-generated binary data if ffmpeg fails
-                            logger.info("Falling back to pre-generated binary data for dummy files")
-
-                            # Instead of trying to create binary data manually, use a simpler approach:
-                            # Create a new ffmpeg process with different parameters that's more likely to succeed
-                            logger.info("Trying alternative ffmpeg approach for dummy files")
-
-                            try:
-                                # Create a 1-second silent AAC file directly
-                                init_segment = os.path.join(self.hls_dir, "dummy.mp4")
-                                media_segment = os.path.join(self.hls_dir, "dummy.m4s")
-
-                                # Create initialization segment
-                                ffmpeg_cmd = [
-                                    "ffmpeg", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", 
-                                    "-t", "1", "-c:a", "aac", "-b:a", "48k",
-                                    "-f", "mp4", "-movflags", "ftyp+moov+empty_moov",
-                                    init_segment
-                                ]
-                                subprocess.run(ffmpeg_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-
-                                # Create media segment
-                                ffmpeg_cmd = [
-                                    "ffmpeg", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", 
-                                    "-t", "1", "-c:a", "aac", "-b:a", "48k",
-                                    "-f", "mp4", "-movflags", "ftyp+moof+mdat",
-                                    media_segment
-                                ]
-                                subprocess.run(ffmpeg_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-
-                                logger.info("Created valid dummy files using alternative ffmpeg approach")
-                                return
-                            except Exception as alt_ffmpeg_e:
-                                logger.error(f"Alternative ffmpeg approach failed: {str(alt_ffmpeg_e)}")
-
-                            # If all ffmpeg approaches fail, use pre-generated binary data as last resort
-                            logger.info("Using pre-generated binary data as last resort")
-
-                            # These are more complete MP4 headers with valid AAC audio configuration
-                            init_mp4_data = bytes.fromhex(
-                                "00000020667479706d703432000000016d7034326d7034310000000c6d6f6f76" +
-                                "0000006c7472616b000000646d646961000000206d686c7200000000000000" +
-                                "00736f756e00000000000000000000000000000000246d696e6600000010" +
-                                "736d686400000000000000000000001073746626000000000000000c7374" +
-                                "747300000000000000147374736300000000000000047374737a00000000"
-                            )
-
-                            # Media segment with actual AAC silent audio frames
-                            segment_data = bytes.fromhex(
-                                "0000001c7374797000000000667261670000000066726167646173680000" +
-                                "0024636d6672000000000000000100000000000000010000000000000000" +
-                                "0000000000000000006d6f6f66000000106d6668640000000000000001" +
-                                "0000002c74726166000000146d66686400000000000000010000000000" +
-                                "0000010000000c7466686400000000000000010000006c7466647400000000" +
-                                "000000000000000000000001000000000000000100000000000000000000" +
-                                "0000000000010000000000000000000000000000000100000000000000" +
-                                "00000000000000000000000000000000000000000000000000000000000" +
-                                "0000000000000000000000000000000000000000006d6461740000000" +
-                                "1210fff0000000000000000000000000000000000000000000000000000" +
-                                "00000000000000000000000000000000000000000000000000000000000" +
-                                "00000000000000000000000000000000000000000000000000000000000"
-                            )
-
-                            # Write the binary data to files
-                            init_path = os.path.join(self.hls_dir, "dummy.mp4")
-                            segment_path = os.path.join(self.hls_dir, "dummy.m4s")
-
-                            with open(init_path, 'wb') as dummy_file:
-                                dummy_file.write(init_mp4_data)
-                            with open(segment_path, 'wb') as dummy_file:
-                                dummy_file.write(segment_data)
-
-                            # Verify the files exist and have the expected content
-                            if (os.path.exists(init_path) and os.path.getsize(init_path) > 0 and
-                                os.path.exists(segment_path) and os.path.getsize(segment_path) > 0):
-                                logger.info("Created valid dummy files using pre-generated binary data")
-                            else:
-                                logger.error("Failed to create valid dummy files using pre-generated binary data")
-                        finally:
-                            # Clean up the temporary directory
-                            try:
-                                shutil.rmtree(temp_dir)
-                            except Exception as e:
-                                logger.error(f"Error cleaning up temporary directory: {str(e)}")
-                    except Exception as e:
-                        logger.error(f"Error creating dummy segment files: {str(e)}")
-
-                # End the playlist
-                f.write("#EXT-X-ENDLIST\n")
+                # Note: We intentionally don't add any segments or #EXT-X-ENDLIST
+                # This allows ffmpeg to append segments as they're generated
 
             logger.info(f"Created minimal valid HLS playlist at {playlist_path}")
 
@@ -424,10 +274,9 @@ class StreamingHLSWriter:
                 with open(alt_playlist_path, 'w') as f:
                     f.write("#EXTM3U\n")
                     f.write("#EXT-X-VERSION:7\n")
-                    f.write("#EXT-X-TARGETDURATION:2\n")
+                    f.write("#EXT-X-TARGETDURATION:1\n")
                     f.write("#EXT-X-MEDIA-SEQUENCE:0\n")
                     f.write("#EXT-X-PLAYLIST-TYPE:EVENT\n")
-                    f.write("#EXT-X-ENDLIST\n")
 
                 logger.warning(f"Created minimal playlist in alternative location: {alt_playlist_path}")
 

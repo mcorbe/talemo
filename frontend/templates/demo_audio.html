@@ -156,20 +156,23 @@ function initializePlayer(playlistUrl) {
     const hls = new Hls({
       debug: false,
       enableWorker: true,
-      lowLatencyMode: false,         // Disable low latency mode for better buffering
-      maxBufferLength: 30,           // Maximum buffer length in seconds
-      maxMaxBufferLength: 600,       // Maximum buffer length limit
-      maxBufferSize: 60 * 1000000,  // Maximum buffer size in bytes
-      maxBufferHole: 0.5,           // Maximum buffer holes to jump
-      highBufferWatchdogPeriod: 2,  // Increased watchdog period
-      nudgeOffset: 0.2,             // Reduced nudge offset
-      startFragPrefetch: true,      // Enable fragment prefetching
+      lowLatencyMode: true,          // Enable low latency mode for faster startup
+      liveSyncDurationCount: 3,      // Live sync duration count for low latency
+      liveMaxLatencyDurationCount: 5, // Max latency duration count for low latency
+      maxBufferLength: 10,           // Reduced buffer length for lower latency
+      maxMaxBufferLength: 30,        // Reduced max buffer length for lower latency
+      maxBufferSize: 30 * 1000000,   // Reduced buffer size for lower latency
+      maxBufferHole: 0.3,            // Reduced buffer holes to jump for lower latency
+      highBufferWatchdogPeriod: 1,   // Reduced watchdog period for lower latency
+      nudgeOffset: 0.1,              // Reduced nudge offset for lower latency
+      startFragPrefetch: true,       // Enable fragment prefetching
       manifestLoadingTimeOut: 10000, // Increased timeout for manifest loading
-      manifestLoadingMaxRetry: 4,    // Increased retry attempts
+      manifestLoadingMaxRetry: 8,    // Increased retry attempts for streaming scenario
       manifestLoadingRetryDelay: 500, // Initial retry delay
-      levelLoadingTimeOut: 10000,    // Increased timeout for level loading
-      fragLoadingTimeOut: 20000,     // Increased timeout for fragment loading
-      backBufferLength: 90,          // Length of back buffer in seconds
+      manifestLoadingMaxRetryTimeout: 5000, // Maximum retry timeout for low latency
+      levelLoadingTimeOut: 5000,     // Reduced timeout for level loading for lower latency
+      fragLoadingTimeOut: 10000,     // Reduced timeout for fragment loading for lower latency
+      backBufferLength: 30,          // Reduced back buffer length for lower latency
       abrEwmaDefaultEstimate: 500000 // Default bandwidth estimate
     });
 
@@ -179,13 +182,71 @@ function initializePlayer(playlistUrl) {
     // Track when playback actually starts
     let playbackStarted = false;
 
-    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+    // Track empty playlist retries separately from error retries
+    let emptyPlaylistRetryCount = 0;
+    const maxEmptyPlaylistRetries = 15;
+    let emptyPlaylistRetryTimeout = null;
+
+    // Track manifest loading retries
+    let manifestRetryCount = 0;
+    const maxManifestRetries = 15;
+    let manifestRetryTimeout = null;
+
+    hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
       const manifestTime = performance.now();
-      updateStatus(`Manifest loaded. Starting playback...`, 'loading');
-      video.play().catch(error => {
-        console.warn('Playback failed to start:', error);
-        updateStatus(`Playback failed to start: ${error.message}`, 'error');
-      });
+      console.log('Manifest parsed:', data);
+
+      // Check if the playlist has any segments
+      if (data && data.levels && data.levels.length > 0) {
+        const level = data.levels[0];
+
+        // If the playlist is empty or has no segments yet
+        if (!level.details || !level.details.fragments || level.details.fragments.length === 0) {
+          console.log('Playlist parsed but contains no segments yet');
+
+          if (emptyPlaylistRetryCount < maxEmptyPlaylistRetries) {
+            emptyPlaylistRetryCount++;
+
+            // Exponential backoff for retries, but keep it short for low latency
+            const retryDelay = Math.min(300 * Math.pow(1.5, emptyPlaylistRetryCount - 1), 3000);
+
+            updateStatus(`Playlist found, waiting for audio segments (retry ${emptyPlaylistRetryCount}/${maxEmptyPlaylistRetries})...`, 'loading');
+            console.log(`Retrying empty playlist in ${retryDelay}ms (attempt ${emptyPlaylistRetryCount}/${maxEmptyPlaylistRetries})`);
+
+            // Clear any existing timeout
+            if (emptyPlaylistRetryTimeout) {
+              clearTimeout(emptyPlaylistRetryTimeout);
+            }
+
+            // Set a timeout to retry loading the source
+            emptyPlaylistRetryTimeout = setTimeout(() => {
+              hls.loadSource(absolutePlaylistUrl);
+              hls.startLoad();
+            }, retryDelay);
+
+            return;
+          } else {
+            updateStatus(`Playlist remains empty after ${maxEmptyPlaylistRetries} retries. Audio generation may have failed.`, 'error');
+          }
+        } else {
+          // Playlist has segments, attempt playback
+          console.log(`Playlist has ${level.details.fragments.length} segments, starting playback`);
+          updateStatus(`Manifest loaded with ${level.details.fragments.length} segments. Starting playback...`, 'loading');
+
+          // Reset retry counters on successful segment loading
+          emptyPlaylistRetryCount = 0;
+          manifestRetryCount = 0;
+
+          video.play().catch(error => {
+            console.warn('Playback failed to start:', error);
+            updateStatus(`Playback failed to start: ${error.message}`, 'error');
+          });
+        }
+      } else {
+        // This shouldn't happen, but handle it just in case
+        updateStatus(`Manifest parsed but no levels found. This is unexpected.`, 'error');
+        console.error('Manifest parsed but no levels found:', data);
+      }
     });
 
     hls.on(Hls.Events.FRAG_LOADED, function() {
@@ -201,31 +262,141 @@ function initializePlayer(playlistUrl) {
       }
     });
 
-    // Handle errors
+    // Handle errors with robust retry logic
     hls.on(Hls.Events.ERROR, function(event, data) {
       console.error('HLS error:', data);
-      // Only update status for fatal errors or after multiple non-fatal errors
-      if (data.fatal || data.type === 'mediaError') {
-        updateStatus(`HLS error: ${data.details}`, 'error');
+
+      // Handle different types of errors
+      if (data.fatal) {
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            // For network errors, we can try to recover
+            console.log('Fatal network error encountered, trying to recover');
+
+            // Special handling for manifest loading errors (empty playlist)
+            if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR || 
+                data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
+                data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR) {
+
+              if (manifestRetryCount < maxManifestRetries) {
+                manifestRetryCount++;
+
+                // Exponential backoff for retries, but keep it short for low latency
+                const retryDelay = Math.min(300 * Math.pow(1.5, manifestRetryCount - 1), 3000);
+
+                updateStatus(`Waiting for audio segments (retry ${manifestRetryCount}/${maxManifestRetries})...`, 'loading');
+                console.log(`Retrying manifest load in ${retryDelay}ms (attempt ${manifestRetryCount}/${maxManifestRetries})`);
+
+                // Clear any existing timeout
+                if (manifestRetryTimeout) {
+                  clearTimeout(manifestRetryTimeout);
+                }
+
+                // Set a timeout to retry loading the source
+                manifestRetryTimeout = setTimeout(() => {
+                  hls.loadSource(absolutePlaylistUrl);
+                  hls.startLoad();
+                }, retryDelay);
+
+                return;
+              }
+            }
+
+            // For other network errors or if we've exceeded retries
+            hls.startLoad();
+            break;
+
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            console.log('Fatal media error encountered, trying to recover');
+            hls.recoverMediaError();
+            break;
+
+          default:
+            // For other fatal errors, we can't recover
+            updateStatus(`Playback error: ${data.details}`, 'error');
+            console.error('Fatal error, cannot recover:', data);
+            break;
+        }
+      } else {
+        // Non-fatal errors don't need immediate user feedback unless they persist
+        console.log('Non-fatal error:', data.details);
       }
     });
   }
   // Fallback to native HLS support if available
   else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = absolutePlaylistUrl;
+    // For native HLS support, we need to implement our own retry logic
+    let nativeRetryCount = 0;
+    const maxNativeRetries = 10;
+    let nativeRetryTimeout = null;
+
+    function loadNativeHLS() {
+      video.src = absolutePlaylistUrl;
+      video.load();
+    }
+
+    // Initial load
+    loadNativeHLS();
 
     video.addEventListener('loadedmetadata', function() {
       updateStatus(`Metadata loaded. Starting playback...`, 'loading');
-      video.play();
+      video.play().catch(error => {
+        console.warn('Native playback failed to start:', error);
+        retryNativePlayback();
+      });
     });
 
     video.addEventListener('playing', function() {
       updateStatus(`Audio playing`, 'playing');
+      // Reset retry counter on successful playback
+      nativeRetryCount = 0;
     });
 
     video.addEventListener('error', function() {
-      updateStatus(`Error: ${video.error.message || 'Unknown error'}`, 'error');
+      const errorMessage = video.error ? (video.error.message || 'Unknown error') : 'Unknown error';
+      console.error(`Native HLS error: ${errorMessage}`);
+      retryNativePlayback();
     });
+
+    // Add stalled and waiting event handlers for better feedback
+    video.addEventListener('stalled', function() {
+      console.warn('Playback stalled');
+      if (!video.paused) {
+        updateStatus(`Playback stalled, waiting for more segments...`, 'loading');
+      }
+    });
+
+    video.addEventListener('waiting', function() {
+      console.warn('Playback waiting');
+      if (!video.paused) {
+        updateStatus(`Waiting for more segments...`, 'loading');
+      }
+    });
+
+    // Function to retry native HLS playback with exponential backoff
+    function retryNativePlayback() {
+      if (nativeRetryCount < maxNativeRetries) {
+        nativeRetryCount++;
+
+        // Exponential backoff for retries, but keep it short for low latency
+        const retryDelay = Math.min(300 * Math.pow(1.5, nativeRetryCount - 1), 3000);
+
+        updateStatus(`Waiting for audio segments (retry ${nativeRetryCount}/${maxNativeRetries})...`, 'loading');
+        console.log(`Retrying native HLS in ${retryDelay}ms (attempt ${nativeRetryCount}/${maxNativeRetries})`);
+
+        // Clear any existing timeout
+        if (nativeRetryTimeout) {
+          clearTimeout(nativeRetryTimeout);
+        }
+
+        // Set a timeout to retry loading
+        nativeRetryTimeout = setTimeout(() => {
+          loadNativeHLS();
+        }, retryDelay);
+      } else {
+        updateStatus(`Playback failed after ${maxNativeRetries} retries. Audio generation may have failed.`, 'error');
+      }
+    }
   }
 }
 
@@ -256,6 +427,19 @@ document.getElementById('go').onclick = async () => {
     // Show initial progress
     updateProgress(5, 'Starting audio generation...');
 
+    // Get the playlist URL from the initial response if available
+    let playlistUrl;
+    if (response.playlist) {
+      playlistUrl = response.playlist;
+      console.log('Got playlist URL from initial response:', playlistUrl);
+
+      // Initialize the player immediately with the playlist URL
+      updateStatus('Initializing player with playlist URL...', 'loading');
+      initializePlayer(playlistUrl);
+    } else {
+      console.warn('No playlist URL in initial response, waiting for task completion');
+    }
+
     // Poll for task status every second
     const taskId = response.task_id;
     const pollInterval = setInterval(async () => {
@@ -265,25 +449,27 @@ document.getElementById('go').onclick = async () => {
       if (taskResult && taskResult.state === 'SUCCESS') {
         clearInterval(pollInterval);
 
-        // Get the playlist URL from the task result
-        let playlistUrl;
-        if (taskResult.playlist) {
-          playlistUrl = taskResult.playlist;
-        } else if (taskResult.result && taskResult.result.playlist) {
-          playlistUrl = taskResult.result.playlist;
-        } else if (response.playlist) {
-          // Fallback to the playlist URL from the initial response
-          playlistUrl = response.playlist;
-        }
-
+        // If we haven't initialized the player yet, do it now
         if (!playlistUrl) {
-          updateStatus('Error: No playlist URL available', 'error');
-          console.error('No playlist URL in task result or initial response:', taskResult, response);
-          return;
-        }
+          // Get the playlist URL from the task result
+          if (taskResult.playlist) {
+            playlistUrl = taskResult.playlist;
+          } else if (taskResult.result && taskResult.result.playlist) {
+            playlistUrl = taskResult.result.playlist;
+          }
 
-        // Initialize the player with the playlist URL
-        initializePlayer(playlistUrl);
+          if (!playlistUrl) {
+            updateStatus('Error: No playlist URL available', 'error');
+            console.error('No playlist URL in task result:', taskResult);
+            return;
+          }
+
+          // Initialize the player with the playlist URL
+          updateStatus('Task completed. Initializing player...', 'loading');
+          initializePlayer(playlistUrl);
+        } else {
+          updateStatus('Task completed successfully!', 'playing');
+        }
       } 
       // If task failed
       else if (taskResult && taskResult.state === 'FAILURE') {
