@@ -80,9 +80,11 @@ def generate_audio_stream(self, prompt, lang="en", session_id=None,
         thread celery.current_task is not set.
         """
         merged_meta = {"event": evt, **(meta or {})}
+        # Set state to SUCCESS when event is "done", otherwise PROGRESS
+        state = "SUCCESS" if evt == "done" else "PROGRESS"
         safe_update_state(
             task_id=self.request.id,   # <-- critical!
-            state="PROGRESS",
+            state=state,
             meta=merged_meta,
         )
 
