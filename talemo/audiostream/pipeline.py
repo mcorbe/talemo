@@ -14,6 +14,21 @@ def run_audio_session(prompt, playlist_path, lang="en", chunk_words=40,
         writer = StreamingHLSWriter(output_dir)
         buf = []
         first_chunk = True
+        chunk_count = 0
+        
+        # Create a text log file to store all text chunks
+        text_log_path = os.path.join(output_dir, "text_chunks.log")
+        
+        # Write the initial prompt to the log file
+        with open(text_log_path, 'w', encoding='utf-8') as f:
+            f.write(f"=== Audio Generation Session ===\n")
+            f.write(f"Timestamp: {os.popen('date').read().strip()}\n")
+            f.write(f"Original prompt: {prompt}\n")
+            f.write(f"Language: {lang}\n")
+            f.write(f"Chunk words: {chunk_words}\n")
+            f.write(f"Output directory: {output_dir}\n")
+            f.write(f"\n=== Text Chunks ===\n\n")
+        
         try:
             async for tok in llm.stream_tokens(prompt):
                 buf.append(tok)
@@ -38,9 +53,20 @@ def run_audio_session(prompt, playlist_path, lang="en", chunk_words=40,
 
                         # Process the text chunk
                         try:
-                            tts.speak_chunk_to_ffmpeg(' '.join(buf), lang, writer.ffmpeg_stdin)
+                            text_chunk = ' '.join(buf)
+                            chunk_count += 1
+                            
+                            # Log to console
+                            logger.info(f"Sending text chunk #{chunk_count} to TTS: '{text_chunk}'")
+                            
+                            # Write to file
+                            with open(text_log_path, 'a', encoding='utf-8') as f:
+                                f.write(f"=== Chunk #{chunk_count} ===\n")
+                                f.write(f"{text_chunk}\n\n")
+                            
+                            tts.speak_chunk_to_ffmpeg(text_chunk, lang, writer.ffmpeg_stdin)
                             buf.clear()
-                            progress_cb("chunk")
+                            progress_cb("chunk", {"chunk_count": chunk_count})
                             first_chunk = False
                         except Exception as e:
                             logger.error(f"Error in speak_chunk_to_ffmpeg: {str(e)}")
@@ -72,7 +98,18 @@ def run_audio_session(prompt, playlist_path, lang="en", chunk_words=40,
 
                     # Process the remaining text
                     try:
-                        tts.speak_chunk_to_ffmpeg(' '.join(buf), lang, writer.ffmpeg_stdin)
+                        text_chunk = ' '.join(buf)
+                        chunk_count += 1
+                        
+                        # Log to console
+                        logger.info(f"Sending final text chunk #{chunk_count} to TTS: '{text_chunk}'")
+                        
+                        # Write to file
+                        with open(text_log_path, 'a', encoding='utf-8') as f:
+                            f.write(f"=== Final Chunk #{chunk_count} ===\n")
+                            f.write(f"{text_chunk}\n\n")
+                        
+                        tts.speak_chunk_to_ffmpeg(text_chunk, lang, writer.ffmpeg_stdin)
                         buf.clear()
                     except Exception as e:
                         logger.error(f"Error in speak_chunk_to_ffmpeg for final chunk: {str(e)}")
@@ -92,6 +129,13 @@ def run_audio_session(prompt, playlist_path, lang="en", chunk_words=40,
             local_playlist_path = os.path.join(output_dir, "audio.m3u8")
             if not os.path.exists(local_playlist_path):
                 logger.warning(f"Playlist file still not created after finalize: {local_playlist_path}, which is unexpected with FFmpeg temp_file flag")
+
+            # Write summary to the log file
+            with open(text_log_path, 'a', encoding='utf-8') as f:
+                f.write(f"\n=== Summary ===\n")
+                f.write(f"Total chunks processed: {chunk_count}\n")
+                f.write(f"Session completed at: {os.popen('date').read().strip()}\n")
+                f.write(f"Playlist path: {playlist_path}\n")
 
             return info
         except Exception as e:
