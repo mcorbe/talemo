@@ -66,7 +66,6 @@ def start_audio_session(request):
         logger.warning("Running task synchronously")
 
         # Generate a session ID
-        import uuid
         session_id = uuid.uuid4().hex
 
         # Run the task synchronously
